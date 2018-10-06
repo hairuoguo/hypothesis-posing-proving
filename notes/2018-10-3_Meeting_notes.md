@@ -33,6 +33,7 @@ We can split this project into two parts: hypothesis posing and hypothesis provi
 * is it possible to pose this as a RL problem?
 * lower boundary (if can't find good metric for good hypothesis -- using crowdsourcing to find good metric could be an interesting project in itself)
 * do we need to have an agent be able to solve hypotheses in order to determine if a hypothesis is good or not?
+* what format should hypothesis be in -- should it be natural language or formal logic?
 
 ### Hypothesis Proving
 
