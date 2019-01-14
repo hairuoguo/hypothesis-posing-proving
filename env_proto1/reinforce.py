@@ -30,7 +30,7 @@ class Policy(nn.Module):
     def __init__(self):
         super(Policy, self).__init__()
         self.affine1 = nn.Linear(30, 128)
-        self.affine2 = nn.Linear(128, len(env.actions_list))
+        self.affine2 = nn.Linear(128, len(env.func_list))
 
         self.saved_log_probs = []
         self.rewards = []
@@ -63,7 +63,7 @@ def finish_episode():
         R = r + args.gamma * R
         rewards.insert(0, R)
     rewards = torch.tensor(rewards)
-    rewards = (rewards - rewards.mean()) / (rewards.std() + eps)
+    #rewards = (rewards - rewards.mean()) / (rewards.std() + eps)
     for log_prob, reward in zip(policy.saved_log_probs, rewards):
         policy_loss.append(-log_prob * reward)
     optimizer.zero_grad()
@@ -81,7 +81,7 @@ def main():
         ep = env.start_ep()
         obs = ep.get_obs()
         for t in range(num_actions):
-            obs_input = np.array([int(s) for s in obs + ep.key + ep.encrypted])
+            obs_input = np.array([int(s) for s in obs + ep.get_key() + ep.get_encrypted()])
             action = select_action(obs_input)
             obs, reward, is_end = ep.make_action(action)
             policy.rewards.append(reward)
@@ -90,7 +90,10 @@ def main():
         finish_episode()
         avg_num_actions += t
         if i_episode % 100 == 0:
-            print(avg_num_actions/100.0)   
+            print(avg_num_actions/100.)
+            state = torch.from_numpy(obs_input).float().unsqueeze(0)
+            probs = policy(state)
+            print(probs) 
             avg_num_actions = 0 
 
 '''

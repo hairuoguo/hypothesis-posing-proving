@@ -23,20 +23,8 @@ class BitStrEnv:
 
                 #3 XOR
 
-                lambda x, y: x ^ y,
-
-                #4 ADD
-
-                lambda x, y: x + y,
-
-                #5 SUBTRACT_FROM
-
-                lambda x, y: x - y,
-
-                #6 FROM_SUBTRACT
-            
-                lambda x, y: y - x
-            
+                lambda x, y: x ^ y
+                
             ]
    
      
