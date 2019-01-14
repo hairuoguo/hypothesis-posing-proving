@@ -63,7 +63,8 @@ class BitStrEpisode:
     #return tuple (observation, reward) that is result of action
     def make_action(self, action_index):
         self.state = self.actions_list[action_index](self.state, self.key)
-        return (self.get_obs(), self.get_reward())
+        isEnd = self.state == self.encrypted
+        return (self.get_obs(), self.get_reward(), isEnd)
 
     def get_reward(self):
         return float(self.state == self.encrypted)
