@@ -23,7 +23,8 @@ class SimpleEp(BitStrEpisode):
     def generate_strings(self):
         self.plain = random.getrandbits(self.str_len)
         self.key = random.getrandbits(self.str_len)
-        self.encrypted = self.actions_list[2](self.actions_list[1](self.plain, self.key), self.key)
+        self.encrypted, _ = self.actions_list[1](self.plain, self.key, [])
+        self.encrypted, _ = self.actions_list[2](self.encrypted, self.key, [])
         self.state = self.plain
 
            
