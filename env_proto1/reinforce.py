@@ -3,6 +3,9 @@ import identity_env as ie
 import simple_env as se
 import numpy as np
 from itertools import count
+import random
+
+import matplotlib.pyplot as plt
 
 import torch
 import torch.nn as nn
@@ -12,8 +15,8 @@ from torch.distributions import Categorical
 
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
-parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
-                    help='discount factor (default: 0.99)')
+parser.add_argument('--gamma', type=float, default=0.5, metavar='G',
+                    help='discount factor (default: 0.5)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
 parser.add_argument('--render', action='store_true',
@@ -52,6 +55,9 @@ def select_action(state):
     probs = policy(state)
     m = Categorical(probs)
     action = m.sample()
+    if not policy.saved_log_probs and action.item() == 4:
+        while action.item() == 4:
+            action = m.sample()
     policy.saved_log_probs.append(m.log_prob(action))
     return action.item()
 
@@ -76,26 +82,33 @@ def finish_episode():
 
 def main():
     num_eps = 10000
-    num_actions = 10000
+    num_actions = 501
     avg_num_actions = 0
-    for i_episode in count(num_eps):
+    list_t = []
+    for i_episode in range(num_eps):
         ep = env.start_ep()
         obs = ep.get_obs()
-        for t in range(num_actions):
+        for t in range(1, num_actions):
             obs_input = np.array([int(s) for s in obs + ep.get_key() + ep.get_encrypted()])
             action = select_action(obs_input)
             obs, reward, is_end = ep.make_action(action)
             policy.rewards.append(reward)
             if is_end:
                 break
+        if t == num_actions - 1 and random.random() > 0.5:
+            print(ep.actions_taken)
         finish_episode()
         avg_num_actions += t
+        list_t.append(t)
         if i_episode % 100 == 0:
             print(avg_num_actions/100.)
             state = torch.from_numpy(obs_input).float().unsqueeze(0)
             probs = policy(state)
             print(probs) 
             avg_num_actions = 0 
+    fig, ax = plt.subplots()
+    ax.plot([i for i in range(num_eps)], list_t)
+    plt.show()
 
 '''
 def main():
