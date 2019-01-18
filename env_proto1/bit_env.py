@@ -11,19 +11,23 @@ class BitStrEnv:
                 
                 #0 IDENTITY
             
-                lambda x, y: x, 
+                lambda x, y, z: (x, z.append("Id")),
                 
                 #1 AND
 
-                lambda x, y: x & y, 
+                lambda x, y, z: (x & y, z.append("And")),
 
                 #2 OR
                 
-                lambda x, y: x | y,
+                lambda x, y, z: (x | y, z.append("Or")),
 
                 #3 XOR
 
-                lambda x, y: x ^ y
+                lambda x, y, z: (x ^ y, z.append("XOr")),
+
+                #4 Backtrack
+
+                lambda x, y, z: (x, z.pop())
                 
             ]
    
@@ -43,16 +47,36 @@ class BitStrEpisode:
         self.key = None
         self.encrypted = None
         self.state = None #current modified version of plain
+        self.previous_state = None #Store previous state for backtracking
         self.str_len = str_len
         self.actions_list = actions_list
+        self.actions_taken = []
         self.generate_strings()
+        self.backtrack_flag = 0
 
     
     #return tuple (observation, reward) that is result of action
     def make_action(self, action_index):
-        self.state = self.actions_list[action_index](self.state, self.key)
+        self.previous_state = self.state
+        last_action = None
+        if not (action_index == 4 and not self.actions_taken):
+            #Update state and get last action if backtracking
+            self.state, last_action = self.actions_list[action_index](self.state, self.key, self.actions_taken)
+        if last_action is not None:
+            if not self.backtrack_flag:
+                self.backtrack(last_action)
+            else:
+                #Just backtracked, add the action back in
+                self.actions_taken.append(last_action)
+        else:
+            self.backtrack_flag = 0
         isEnd = self.state == self.encrypted
         return (self.get_obs(), self.get_reward(), isEnd)
+
+    def backtrack(self, action):
+        self.state = self.previous_state
+        self.previous_state = None
+        self.backtrack_flag = 1
 
     def get_reward(self):
         return float(self.state == self.encrypted)
