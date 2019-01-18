@@ -33,6 +33,7 @@ class BitStrEnv:
    
      
     def start_ep(self):
+        raise NotImplementedError
         return
          
 
@@ -98,4 +99,5 @@ class BitStrEpisode:
         return self.get_state()
 
     def generate_strings(self):
+        raise NotImplementedError
         return

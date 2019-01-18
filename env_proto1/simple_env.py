@@ -7,7 +7,7 @@ class SimpleEnv(BitStrEnv):
 
     def __init__(self, str_len):
         super().__init__(str_len)
-        
+       
     
     def start_ep(self):
         self.ep = SimpleEp(self.func_list, self.str_len)
