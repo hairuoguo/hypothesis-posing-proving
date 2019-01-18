@@ -1,5 +1,6 @@
 import argparse
 import identity_env as ie
+import simple_env as se
 import numpy as np
 from itertools import count
 
@@ -22,7 +23,7 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
 args = parser.parse_args()
 
 
-env = ie.IdentityEnv(10)
+env = se.SimpleEnv(10)
 torch.manual_seed(args.seed)
 
 
