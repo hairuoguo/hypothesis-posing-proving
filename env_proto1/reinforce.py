@@ -2,6 +2,7 @@ import argparse
 import identity_env as ie
 import simple_env as se
 import numpy as np
+from scipy import stats
 from itertools import count
 import random
 
@@ -15,7 +16,7 @@ from torch.distributions import Categorical
 
 
 parser = argparse.ArgumentParser(description='PyTorch REINFORCE example')
-parser.add_argument('--gamma', type=float, default=0.5, metavar='G',
+parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
                     help='discount factor (default: 0.5)')
 parser.add_argument('--seed', type=int, default=543, metavar='N',
                     help='random seed (default: 543)')
@@ -48,11 +49,14 @@ class Policy(nn.Module):
 policy = Policy()
 optimizer = optim.Adam(policy.parameters(), lr=1e-2)
 eps = np.finfo(np.float32).eps.item()
-
+entropy_list = []
 
 def select_action(state):
     state = torch.from_numpy(state).float().unsqueeze(0)
     probs = policy(state)
+    entropy = stats.entropy(probs.data.numpy()[0])
+    #print(entropy)
+    entropy_list.append(entropy)
     m = Categorical(probs)
     action = m.sample()
     if not policy.saved_log_probs and action.item() == 4:
@@ -81,33 +85,103 @@ def finish_episode():
     del policy.saved_log_probs[:]
 
 def main():
-    num_eps = 10000
-    num_actions = 501
+    num_eps = 100000
+    num_actions = 500
     avg_num_actions = 0
     list_t = []
     for i_episode in range(num_eps):
         ep = env.start_ep()
         obs = ep.get_obs()
-        for t in range(1, num_actions):
+        for t in range(1, num_actions + 1):
             obs_input = np.array([int(s) for s in obs + ep.get_key() + ep.get_encrypted()])
             action = select_action(obs_input)
             obs, reward, is_end = ep.make_action(action)
             policy.rewards.append(reward)
             if is_end:
                 break
-        if t == num_actions - 1 and random.random() > 0.5:
-            print(ep.actions_taken)
+            if t == num_actions - 1:
+                policy.rewards.append(-1)
+        #if t == num_actions - 1 and random.random() > 0.5:
+            #print(ep.actions_taken)
         finish_episode()
         avg_num_actions += t
         list_t.append(t)
         if i_episode % 100 == 0:
+            print(i_episode)
             print(avg_num_actions/100.)
             state = torch.from_numpy(obs_input).float().unsqueeze(0)
             probs = policy(state)
-            print(probs) 
+            print(probs)
+            print(entropy_list[-20:-1])
             avg_num_actions = 0 
     fig, ax = plt.subplots()
     ax.plot([i for i in range(num_eps)], list_t)
+    #ax.plot([i for i in range(len(entropy_list))], entropy_list)
+    plt.show()
+
+def train_on_env():
+    num_eps = 100000
+    num_actions = 500
+    avg_num_actions = 0
+    list_t = []
+    for i_episode in range(num_eps):
+        ep = env.start_ep()
+        obs = ep.get_obs()
+        for t in range(1, num_actions + 1):
+            obs_input = np.array([int(s) for s in obs + ep.get_key() + ep.get_encrypted()])
+            action = select_action(obs_input)
+            obs, reward, is_end = ep.make_action(action)
+            policy.rewards.append(reward)
+            if is_end:
+                break
+        #if t == num_actions - 1 and random.random() > 0.5:
+            #print(ep.actions_taken)
+        finish_episode()
+        avg_num_actions += t
+        list_t.append(t)
+        if i_episode % 100 == 0:
+            print(i_episode)
+            print(avg_num_actions/100.)
+            state = torch.from_numpy(obs_input).float().unsqueeze(0)
+            probs = policy(state)
+            print(probs)
+            print(entropy_list[-20:-1])
+            avg_num_actions = 0 
+    fig, ax = plt.subplots()
+    ax.plot([i for i in range(num_eps)], list_t)
+    #ax.plot([i for i in range(len(entropy_list))], entropy_list)
+    plt.show()
+
+def test_on_env():
+    num_eps = 10000
+    num_actions = 100
+    avg_num_actions = 0
+    list_t = []
+    successes = 0
+    for i_episode in range(num_eps):
+        ep = env.start_ep()
+        obs = ep.get_obs()
+        for t in range(1, num_actions + 1):
+            obs_input = np.array([int(s) for s in obs + ep.get_key() + ep.get_encrypted()])
+            action = select_action(obs_input)
+            obs, reward, is_end = ep.make_action(action)
+            if is_end:
+                successes += 1
+                break
+        avg_num_actions += t
+        list_t.append(t)
+        if i_episode % 100 == 0:
+            print(i_episode)
+            print(avg_num_actions/100.)
+            state = torch.from_numpy(obs_input).float().unsqueeze(0)
+            probs = policy(state)
+            print(probs)
+            print(entropy_list[-20:-1])
+            avg_num_actions = 0
+    print(float(successes)/num_eps)
+    fig, ax = plt.subplots()
+    ax.plot([i for i in range(num_eps)], list_t)
+    #ax.plot([i for i in range(len(entropy_list))], entropy_list)
     plt.show()
 
 '''
@@ -136,4 +210,9 @@ def main():
 '''
 
 if __name__ == '__main__':
-    main()
+    
+    env = se.AndOrEnv(10, 0.5)
+    torch.manual_seed(args.seed)
+    train_on_env()
+    env = se.SimpleEnv(10, 0.9)
+    test_on_env() 
