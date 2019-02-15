@@ -1,0 +1,27 @@
+
+
+
+* Important:
+    * get reward at the end just like TP (Theorem Proving)
+* Andy: debugging code
+    * its easy to see if ur getting closer to the solution
+* Hairuo: bit string
+    * actions section bit string
+    * reveal partial info
+    * progression more clear
+* Brando: picture proof outline
+    * outline proof from picture library or drawing agent
+    * fill small tactics with Synthesizer
+    * at the end, get reward, full system
+* gamepad
+    * supervised data of S = { (X=proof_state,Y=distance_to_end)}
+* why we introduce the progress forward
+* Verification
+    * Dafny
+        * https://rise4fun.com/Dafny/tutorial
+    * SMT, Z3
+* think about several bit string environment to test
+    * TODO: Brando write down all aspects of theorem proving
+        * send document to team
+        * then they can start thinking about different bit string environments that test different aspects of this problem
+¸
