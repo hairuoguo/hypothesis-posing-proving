@@ -1,8 +1,8 @@
-##Bitstring reversal environment
+## Bitstring reversal environment
 
 Description of the mechanics of bitstring environment involving reversals of substrings within the bitstring.
 
-#Parameters:
+# Parameters:
 
 Bistring length: length of bitstring (bitstring is represented as an array of bits)
 
@@ -12,7 +12,7 @@ Substring length: fixed length of each substring area that is reversed
 
 Offset: number of bits between each reversal area.
 
-#Actions
+# Actions
 
 The index of each action corresponds to the reversal area, starting with 0 on the left and ending on the right.
 
@@ -30,7 +30,7 @@ Each action a_i therefore corresponds to a reversal of the ith range. For exampl
 
 [0, 1, 5, 4, 3, 2, 6, 7, 8, 9, 10, 11]
 
-#Occluded bits
+# Occluded bits
 
 Suppose we had the same array as above, with some elements occluded:
 
