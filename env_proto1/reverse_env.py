@@ -194,7 +194,7 @@ class ReverseEpisode:
             self.state = a_trial_state
             hidden_states.add(a_trial_state.bitarray_to_int(a_trial_state.hidden_state))
         self.state = copy.deepcopy(path[0])
-        self.state.target = np.copy(self.state.hidden_state)
+        self.state.target = np.copy(a_trial_state.hidden_state) 
         self.state.hidden_indices = [i for i in self.state.hidden_mask if i != 0]
         self.state.make_hidden_mask()
         path[0].target = np.copy(self.state.target)
@@ -215,14 +215,12 @@ class ReverseEpisode:
                 trial_q_state.make_action(self.actions_list[q])
                 trial_q_state.update_info()
                 question_entropy_decrease = path[question_index].entropy - trial_q_state.entropy
-                #print(question_entropy_decrease, action_entropy_decrease)
                 if question_entropy_decrease - action_entropy_decrease > 1: 
                     constraint_satisfied = True
                     break
             if not constraint_satisfied:
-                print(question_index, question_indices)
                 self.state = copy.deepcopy(path[0])
-                self.__generate_hypothesis_ep(path_len, num_questions)
+                return self.__generate_hypothesis_ep(path_len, num_questions)
         return (self.state.target, path, question_indices)
 
 
