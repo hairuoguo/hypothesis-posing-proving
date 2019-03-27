@@ -15,7 +15,8 @@ class EpState:
         self.num_obscured = None
         self.__dict__.update(kwargs)
         self.str_len = len(self.hidden_state)
-        self.hidden_mask = np.array([i if i in self.hidden_indices else 0 for i in range(self.str_len)])
+        self.hidden_mask = None
+        self.make_hidden_mask()
         self.obs_state = None
         self.entropy = None
         self.occluded_bit_counts = None
@@ -27,12 +28,17 @@ class EpState:
         self.possible_occluded_values = [self.bitarray_to_int(bitarray) for bitarray in self.possible_occluded_values]
         self.update_entropy()
 
+    def make_hidden_mask(self):
+        self.hidden_mask = np.array([i if i in self.hidden_indices else 0 for i in range(self.str_len)])
+
+
     def update_entropy(self):
         self.entropy = math.log(len(self.possible_occluded_values), 2)
         self.occluded_bit_counts = np.zeros(self.num_obscured)
         for n in range(self.num_obscured):
-            self.occluded_bit_counts = sum([m & 2**n for m in self.possible_occluded_values])
+            self.occluded_bit_counts[n] = sum([bool(m & (1 << n)) for m in self.possible_occluded_values])
         
+
     def get_occluded_bit_ev(self, occluded_index):
         #occluded index is original index of occluded bit
         return self.occluded_bit_counts[self.hidden_indices.indexOf(occluded_index)]/len(self.possible_occluded_values)*self.num_ones_in_occluded
@@ -77,18 +83,18 @@ class EpState:
         return strings
         
     def __update_poss_occluded_values(self):
-        #TODO: fix how indices are being calculated (should be from target)
         #get hamming distance from occluded bits only
         h_d = sum([self.target[i] ^ self.hidden_state[i] for i in range(self.str_len) if self.hidden_mask[i] != 0])
-        print(self.hidden_mask, self.target, self.hidden_state)
-        print([self.target[i] ^ self.hidden_state[i] for i in range(self.str_len) if self.hidden_mask[i] != 0])
+        #print(self.hidden_mask, self.target, self.hidden_state)
+        #print([self.target[i] ^ self.hidden_state[i] for i in range(self.str_len) if self.hidden_mask[i] != 0])
         target_bits = [(self.hidden_mask[i], self.target[i]) for i in range(self.str_len) if self.hidden_mask[i] != 0]
         target_bits = np.array([x[1] for x in sorted(target_bits, key=lambda x: x[0])])
         poss_strings = self.__get_strings_d_away(target_bits, h_d)
-        print(target_bits, h_d, [self.target[i] for i in self.hidden_indices])
-        print(poss_strings)
+        #print(target_bits, h_d, [self.target[i] for i in self.hidden_indices])
         poss_strings = [self.bitarray_to_int(bitarray) for bitarray in poss_strings]
+        #print(poss_strings)
         self.possible_occluded_values = [x for x in self.possible_occluded_values if x in poss_strings]
+        #print(self.possible_occluded_values)
 
     def isEnd(self):
         return self.hidden_state == self.target
@@ -160,7 +166,7 @@ class ReverseEpisode:
    
 
     def __generate_hypothesis_ep(self, path_len, num_questions):
-        question_indices = np.random.choice(range(path_len), num_questions)
+        question_indices = np.random.choice(range(path_len), num_questions, replace=False)
         path = []
         actions = []
         hidden_states = set()
@@ -187,8 +193,11 @@ class ReverseEpisode:
             actions.append(a)
             self.state = a_trial_state
             hidden_states.add(a_trial_state.bitarray_to_int(a_trial_state.hidden_state))
-        self.state = path[0]
+        self.state = copy.deepcopy(path[0])
         self.state.target = np.copy(self.state.hidden_state)
+        self.state.hidden_indices = [i for i in self.state.hidden_mask if i != 0]
+        self.state.make_hidden_mask()
+        path[0].target = np.copy(self.state.target)
         for action in actions:
             self.state.make_action(self.actions_list[action])
             self.state.update_info()
@@ -206,11 +215,13 @@ class ReverseEpisode:
                 trial_q_state.make_action(self.actions_list[q])
                 trial_q_state.update_info()
                 question_entropy_decrease = path[question_index].entropy - trial_q_state.entropy
+                #print(question_entropy_decrease, action_entropy_decrease)
                 if question_entropy_decrease - action_entropy_decrease > 1: 
                     constraint_satisfied = True
                     break
             if not constraint_satisfied:
-                #print('here', question_entropy_decrease, action_entropy_decrease)
+                print(question_index, question_indices)
+                self.state = copy.deepcopy(path[0])
                 self.__generate_hypothesis_ep(path_len, num_questions)
         return (self.state.target, path, question_indices)
 
@@ -225,10 +236,10 @@ class ReverseEpisode:
         orig_state = copy.deepcopy(self.state)
         target, path, question_indices = self.__generate_hypothesis_ep(path_len, num_qs) #target/goal array that we're tryin to arrive at
         self.state = orig_state
+        if np.array_equal(self.state.hidden_state, target): #if same, do over
+            self.generate_strings(path_len_m, path_len_std, num_qs_m, num_qs_std)
         self.state.target = target
         self.state.update_info()
-        if np.array_equal(self.state.hidden_state, self.state.target): #if same, do over
-            self.generate_strings(path_len_m, path_len_std, num_qs_m, num_qs_std)
     
     ''' 
     def __generate_hypothesis_ep(self, path_len, num_questions):
