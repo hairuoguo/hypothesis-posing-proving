@@ -1,4 +1,5 @@
 import numpy as np
+import types
 from functools import reduce
 import functools
 import math
@@ -58,8 +59,6 @@ class EpState:
          
     def __update_obs_state(self):
         self.obs_state = np.copy(self.hidden_state)
-        #print(self.hidden_mask)
-        #print(np.argwhere(self.hidden_mask==1))
         self.obs_state[np.argwhere(self.hidden_mask!=0)] = -1 #obscured bits represented by -1
 
     def __concat_all_combinations(self, first_halves, second_halves):
@@ -85,16 +84,11 @@ class EpState:
     def __update_poss_occluded_values(self):
         #get hamming distance from occluded bits only
         h_d = sum([self.target[i] ^ self.hidden_state[i] for i in range(self.str_len) if self.hidden_mask[i] != 0])
-        #print(self.hidden_mask, self.target, self.hidden_state)
-        #print([self.target[i] ^ self.hidden_state[i] for i in range(self.str_len) if self.hidden_mask[i] != 0])
         target_bits = [(self.hidden_mask[i], self.target[i]) for i in range(self.str_len) if self.hidden_mask[i] != 0]
         target_bits = np.array([x[1] for x in sorted(target_bits, key=lambda x: x[0])])
         poss_strings = self.__get_strings_d_away(target_bits, h_d)
-        #print(target_bits, h_d, [self.target[i] for i in self.hidden_indices])
         poss_strings = [self.bitarray_to_int(bitarray) for bitarray in poss_strings]
-        #print(poss_strings)
         self.possible_occluded_values = [x for x in self.possible_occluded_values if x in poss_strings]
-        #print(self.possible_occluded_values)
 
     def isEnd(self):
         return self.hidden_state == self.target
@@ -126,15 +120,35 @@ class ReverseEnv:
 
     def __reverse_substring(self, bitarray, reverse_len, start_index): #function for reversing substrings
         bitarray[start_index:start_index+reverse_len] = bitarray[start_index:start_index+reverse_len][::-1]
+
+    def hypothesis_enable_ep(self, ep):
+        ep.hypothesis_on = False
+        ep.actions_list.append((lambda: None)) #empty function to represent hypothesis-posing
+        ep.branch_state = copy.deepcopy(ep.state)
+        def make_action_wrapper(make_action_function):
+            def new_make_action(self, action_index):
+                if action_index == len(self.actions_list) - 1: 
+                    if self.hypothesis_on:
+                        self.hypothesis_on = False
+                        self.state = copy.deepcopy(self.branch_state)
+                    else:
+                        self.hypothesis_on = True
+                        self.branch_state = copy.deepcopy(self.state)
+                else: 
+                    make_action_function(action_index)
+            return new_make_action
+        ep.make_action = types.MethodType(make_action_wrapper(ep.make_action), ep)
         
 
     def start_ep(self):
         self.ep = ReverseEpisode(self.actions_list, self.str_len, self.num_obscured, self.action_indices, self.reverse_len, self.reverse_offset)
+        self.hypothesis_enable_ep(self.ep) 
          
 
 
 class ReverseEpisode:
     #should hold information about episode (str_len, reverse_len, etc)
+
     
     def __init__(self, actions_list, str_len, num_obscured, action_indices, reverse_len, reverse_offset):
         
@@ -145,7 +159,7 @@ class ReverseEpisode:
         self.actions_list = actions_list 
         self.str_len = str_len
         self.state = None
-        self.generate_strings(5, 0.5, 2, 0)
+        self.generate_strings(5, 0.5, 2, 0) 
 
 
     def make_action(self, action_index):
@@ -170,8 +184,6 @@ class ReverseEpisode:
         path = []
         actions = []
         hidden_states = set()
-        #print(self.state.hidden_state)
-        #print("path_len is: %s" % (path_len,))
         hidden_states.add(self.state.bitarray_to_int(self.state.hidden_state))
         path.append(copy.deepcopy(self.state))
         for n in range(path_len):
@@ -180,16 +192,11 @@ class ReverseEpisode:
             a_trial_state = copy.deepcopy(self.state)
             while (a_trial_state.bitarray_to_int(a_trial_state.hidden_state)) in hidden_states:
                 a_trial_state = copy.deepcopy(self.state)
-                #print(a_trial_state.bitarray_to_int(a_trial_state.hidden_state), a_trial_state.hidden_state)
-                #print(hidden_states)
                 if tried_actions == set(range(len(self.actions_list))):
-                    #print(tried_actions, set(range(len(self.actions_list))))
                     return (path[0].hidden_state, path, question_indices)
                 a = np.random.choice(range(len(self.actions_list)))
-                #print(a)
                 tried_actions.add(a)
                 a_trial_state.make_action(self.actions_list[a])
-                #print(a_trial_state.hidden_state, self.state.hidden_state)
             actions.append(a)
             self.state = a_trial_state
             hidden_states.add(a_trial_state.bitarray_to_int(a_trial_state.hidden_state))
