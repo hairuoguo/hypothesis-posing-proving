@@ -122,6 +122,7 @@ class ReverseEnv:
         bitarray[start_index:start_index+reverse_len] = bitarray[start_index:start_index+reverse_len][::-1]
 
     def hypothesis_enable_ep(self, ep):
+        #takes episode and modifies it to allow for hypothesis-posing
         ep.hypothesis_on = False
         ep.actions_list.append((lambda: None)) #empty function to represent hypothesis-posing
         ep.branch_state = copy.deepcopy(ep.state)
@@ -180,19 +181,22 @@ class ReverseEpisode:
    
 
     def __generate_hypothesis_ep(self, path_len, num_questions):
-        question_indices = np.random.choice(range(path_len), num_questions, replace=False)
-        path = []
-        actions = []
-        hidden_states = set()
+        #method generates target from self.state with initial hidden string
+        question_indices = np.random.choice(range(path_len), num_questions, replace=False)#indices in path where we want to promote question-asking
+        path = [] #list of states representing path that will be answer
+        actions = [] #list of actions associated with path
+        hidden_states = set() #states that algorithm has reached before
         hidden_states.add(self.state.bitarray_to_int(self.state.hidden_state))
         path.append(copy.deepcopy(self.state))
+        
         for n in range(path_len):
-            #print("n is: %s" % (n,))
-            tried_actions = set()
-            a_trial_state = copy.deepcopy(self.state)
+            #try random action, until we get an action that doesn't lead to path seen before
+            tried_actions = set() #actions we've already tried for this index
+            a_trial_state = copy.deepcopy(self.state) #copy that we will test actions on
             while (a_trial_state.bitarray_to_int(a_trial_state.hidden_state)) in hidden_states:
                 a_trial_state = copy.deepcopy(self.state)
                 if tried_actions == set(range(len(self.actions_list))):
+                    #if we've already tried all actions, return values that will make generate_strings call itself again.
                     return (path[0].hidden_state, path, question_indices)
                 a = np.random.choice(range(len(self.actions_list)))
                 tried_actions.add(a)
@@ -201,19 +205,20 @@ class ReverseEpisode:
             self.state = a_trial_state
             hidden_states.add(a_trial_state.bitarray_to_int(a_trial_state.hidden_state))
         self.state = copy.deepcopy(path[0])
-        self.state.target = np.copy(a_trial_state.hidden_state) 
-        self.state.hidden_indices = [i for i in self.state.hidden_mask if i != 0]
+        self.state.target = np.copy(a_trial_state.hidden_state) #provisional target 
+        self.state.hidden_indices = [i for i in self.state.hidden_mask if i != 0] #reset hidden inidices to be relative to target (were originally relative to initial hidden state)
         self.state.make_hidden_mask()
-        path[0].target = np.copy(self.state.target)
+        path[0].target = np.copy(self.state.target) 
         for action in actions:
+            #generate path since we now have target and can properly generate entropy info for each step in path (since entropy calculation depends on target)
             self.state.make_action(self.actions_list[action])
             self.state.update_info()
             path.append(copy.deepcopy(self.state))
-            #print(self.state.possible_occluded_values)
-            #print(self.state.entropy)
         for question_index in question_indices:
+            #if action is where we want to incentivize question-asking
             action_taken = actions[question_index]
             action_entropy_decrease = path[question_index].entropy - path[question_index+1].entropy
+            #entropy decrease from action taken
             constraint_satisfied = False
             for q in range(len(self.actions_list)):
                 trial_q_state = copy.deepcopy(path[question_index])
@@ -222,20 +227,22 @@ class ReverseEpisode:
                 trial_q_state.make_action(self.actions_list[q])
                 trial_q_state.update_info()
                 question_entropy_decrease = path[question_index].entropy - trial_q_state.entropy
-                if question_entropy_decrease - action_entropy_decrease > 1: 
+                #entropy decrease from each question
+                if question_entropy_decrease - action_entropy_decrease > 1:
+                    #if there exists a question that satisfies this constraint 
                     constraint_satisfied = True
                     break
             if not constraint_satisfied:
+                #if not satisfied, reset initial state of episode try to generate different path
                 self.state = copy.deepcopy(path[0])
                 return self.__generate_hypothesis_ep(path_len, num_questions)
         return (self.state.target, path, question_indices)
-
 
     def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std):
         path_len = math.ceil(np.random.normal(path_len_m, path_len_std))
         num_qs = math.floor(np.random.normal(num_qs_m, num_qs_std))
         hidden_state = np.random.choice([1, 0], size=self.str_len) #actual state
-        hidden_indices = random.sample(range(self.str_len), self.num_obscured)
+        hidden_indices = random.sample(range(self.str_len), self.num_obscured) #indicies of hidden states
         hidden_mask = np.array([i if i in hidden_indices else 0 for i in range(self.str_len)])
         self.state = EpState(hidden_state=hidden_state, hidden_indices=hidden_indices, hidden_mask=hidden_mask, num_obscured=self.num_obscured)
         orig_state = copy.deepcopy(self.state)
