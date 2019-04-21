@@ -160,20 +160,25 @@ class ReverseEpisode:
         self.actions_list = actions_list 
         self.str_len = str_len
         self.state = None
-        self.generate_strings(5, 0.5, 2, 0) 
+        self.generate_strings(5, 0.5, 2, 0)
+        self.path = [] 
 
 
     def make_action(self, action_index):
         self.state.make_action(self.actions_list[action_index])
         self.state.update_info()
         isEnd = self.state.isEnd()
-        return (self.get_obs()[0], self.get_obs()[1], self.target_reached(), isEnd)
+        if self.path:
+            self.path.append(copy.deepcopy(self.state))
+        return (self.get_obs()[0], self.get_obs()[1], isEnd)
 
     def get_reward(self):
         return float(self.state.hidden_state == self.state.target)
 
+    '''
     def target_reached(self):
         return self.state.hidden_state.tolist() == self.state.target.tolist()
+    '''
 
     def get_obs(self):
         l1 = np.sum(np.abs(self.state.target - self.state.hidden_state)) 
@@ -235,7 +240,8 @@ class ReverseEpisode:
             if not constraint_satisfied:
                 #if not satisfied, reset initial state of episode try to generate different path
                 self.state = copy.deepcopy(path[0])
-                return self.__generate_hypothesis_ep(path_len, num_questions)
+                return (path[0].hidden_state, path, question_indices)
+                #return self.__generate_hypothesis_ep(path_len, num_questions)
         return (self.state.target, path, question_indices)
 
     def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std):
