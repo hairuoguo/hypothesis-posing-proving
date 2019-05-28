@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=reinforce
+#SBATCH --output reinforce.out
+#SBATCH --ntasks=1
+#SBATCH --gres=gpu:1
+
+python reinforce.py

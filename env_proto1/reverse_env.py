@@ -182,7 +182,7 @@ class ReverseEpisode:
         if self.stats.path:
             self.stats.path.append(copy.deepcopy(self.state))
         self.stats.entropy_decrease.append(curr_entropy - self.state.entropy)
-        return (self.get_obs()[0], self.get_obs()[1], isEnd)
+        return (self.get_obs()[0], self.get_obs()[1], self.get_reward(), isEnd)
 
     def get_reward(self):
         return float(self.state.hidden_state == self.state.target)
@@ -268,10 +268,11 @@ class ReverseEpisode:
                 #return self.__generate_hypothesis_ep(path_len, num_questions)
         return (self.state.target, path, question_indices)
 
-    def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std):
+    def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std, hidden_state=None):
         path_len = math.ceil(np.random.normal(path_len_m, path_len_std))
         num_qs = math.floor(np.random.normal(num_qs_m, num_qs_std))
-        hidden_state = np.random.choice([1, 0], size=self.str_len) #actual state
+        if hidden_state == None:
+            hidden_state = np.random.choice([1, 0], size=self.str_len) #actual state
         hidden_indices = random.sample(range(self.str_len), self.num_obscured) #indicies of hidden states
         hidden_mask = np.array([i if i in hidden_indices else 0 for i in range(self.str_len)])
         self.state = EpState(hidden_state=hidden_state, hidden_indices=hidden_indices, hidden_mask=hidden_mask, num_obscured=self.num_obscured)
