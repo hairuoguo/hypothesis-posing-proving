@@ -1,4 +1,5 @@
 import random
+from types import MethodType
 from reverse_env import *
 
 class UncoverBitsEnv(ReverseEnv):
@@ -17,8 +18,7 @@ class UncoverBitsEpisode(ReverseEpisode):
         super().__init__(actions_list, str_len, num_obscured, action_indices, reverse_len, reverse_offset)
         def isEnd(self):
             return (self.entropy == 0.0)
-        self.state.isEnd = isEnd
-        #TODO: how to track agent's learning progress?
+        self.state.isEnd = MethodType(isEnd, self.state)
 
 
     def get_reward(self):

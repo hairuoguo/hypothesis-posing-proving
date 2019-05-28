@@ -6,6 +6,15 @@ import math
 import random
 import copy
 
+class EpStats:
+    #holds information about episode, to be returned after episode terminated
+    
+    def __init__(self, *args, **kwargs):
+        self.path = []
+        self.entropy_decrease = []
+        self.max_poss_entropy_decrease = []
+        self.__dict__.update(kwargs)
+
 class EpState:
     #should hold information about state of episode
     
@@ -161,15 +170,18 @@ class ReverseEpisode:
         self.str_len = str_len
         self.state = None
         self.generate_strings(5, 0.5, 2, 0)
-        self.path = [] 
+        self.stats = EpStats() 
 
 
     def make_action(self, action_index):
+        curr_entropy = self.state.entropy
+        self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
         self.state.make_action(self.actions_list[action_index])
         self.state.update_info()
         isEnd = self.state.isEnd()
-        if self.path:
-            self.path.append(copy.deepcopy(self.state))
+        if self.stats.path:
+            self.stats.path.append(copy.deepcopy(self.state))
+        self.stats.entropy_decrease.append(curr_entropy - self.state.entropy)
         return (self.get_obs()[0], self.get_obs()[1], isEnd)
 
     def get_reward(self):
@@ -182,7 +194,19 @@ class ReverseEpisode:
 
     def get_obs(self):
         l1 = np.sum(np.abs(self.state.target - self.state.hidden_state)) 
-        return self.obs_state, l1
+        return self.state.obs_state, l1
+
+    def get_max_poss_entropy_decrease(self):
+        curr_entropy = self.state.entropy
+        max_decrease = 0
+        for action_func in self.actions_list:
+            copy_state = copy.deepcopy(self.state)
+            copy_state.make_action(action_func)
+            copy_state.update_info()
+            max_decrease = max(max_decrease, curr_entropy - copy_state.entropy)
+            del copy_state
+        return max_decrease
+            
    
 
     def __generate_hypothesis_ep(self, path_len, num_questions):
