@@ -25,7 +25,7 @@ class EpState:
         
         self.__update_obs_state() #generate initial observation
         self.num_ones_in_occluded = np.sum(np.logical_and(self.hidden_state, self.hidden_mask))
-        self.possible_occluded_values = self.__get_strings_d_away(np.zeros(self.str_len), self.num_ones_in_occluded)
+        self.possible_occluded_values = self.__get_strings_d_away(np.zeros(self.num_obscured), self.num_ones_in_occluded)
         self.possible_occluded_values = [self.bitarray_to_int(bitarray) for bitarray in self.possible_occluded_values]
         self.update_entropy()
 
@@ -256,8 +256,9 @@ class ReverseEpisode:
         self.state = orig_state
         if np.array_equal(self.state.hidden_state, target): #if same, do over
             self.generate_strings(path_len_m, path_len_std, num_qs_m, num_qs_std)
-        self.state.target = target
-        self.state.update_info()
+        else:
+            self.state.target = target
+            self.state.update_info()
     
     ''' 
     def __generate_hypothesis_ep(self, path_len, num_questions):
