@@ -100,7 +100,7 @@ class EpState:
         self.possible_occluded_values = [x for x in self.possible_occluded_values if x in poss_strings]
 
     def isEnd(self):
-        return self.hidden_state == self.target
+        return np.array_equal(self.hidden_state, self.target)
     
     def __array_to_bitstring(bitarray):
         return "".join(bitarray.tolist())
@@ -152,7 +152,9 @@ class ReverseEnv:
 
     def start_ep(self):
         self.ep = ReverseEpisode(self.actions_list, self.str_len, self.num_obscured, self.action_indices, self.reverse_len, self.reverse_offset)
-        self.hypothesis_enable_ep(self.ep) 
+        if self.num_obscured > 0:
+            self.hypothesis_enable_ep(self.ep)
+        return self.ep 
          
 
 
@@ -185,7 +187,10 @@ class ReverseEpisode:
         return (self.get_obs()[0], self.get_obs()[1], self.get_reward(), isEnd)
 
     def get_reward(self):
-        return float(self.state.hidden_state == self.state.target)
+        if np.array_equal(self.state.hidden_state, self.state.target):
+            return 1.
+        else:
+            return 0.
 
     '''
     def target_reached(self):
@@ -248,7 +253,10 @@ class ReverseEpisode:
             action_taken = actions[question_index]
             action_entropy_decrease = path[question_index].entropy - path[question_index+1].entropy
             #entropy decrease from action taken
-            constraint_satisfied = False
+            if self.num_obscured > 0:
+                constraint_satisfied = False
+            else:
+                constraint_satisfied = True
             for q in range(len(self.actions_list)):
                 trial_q_state = copy.deepcopy(path[question_index])
                 if q == action_taken:

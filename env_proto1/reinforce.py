@@ -1,4 +1,5 @@
 import uncover_bits_env as ube
+import reverse_env as re
 import argparse
 import identity_env as ie
 import simple_env as se
@@ -28,7 +29,8 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
 args = parser.parse_args()
 
 
-env = ube.UncoverBitsEnv(10, 3, 1, 4)
+#env = ube.UncoverBitsEnv(10, 3, 1, 4)
+env = re.ReverseEnv(10, 3, 1, 0)
 ep = env.start_ep()
 
 
@@ -36,19 +38,27 @@ class Policy(nn.Module):
     def __init__(self):
         super(Policy, self).__init__()
         self.affine1 = nn.Linear(env.str_len+1, 128)
-        self.affine2 = nn.Linear(128, len(ep.actions_list))
+        self.affine2 = nn.Linear(128, 256)
+        self.affine3 = nn.Linear(256, len(ep.actions_list))
+        
+        #self.affine2 = nn.Linear(128, len(ep.actions_list))
 
         self.saved_log_probs = []
         self.rewards = []
 
     def forward(self, x):
-        x = F.relu(self.affine1(x))
-        action_scores = self.affine2(x)
+        x1 = F.relu(self.affine1(x))
+        x2 = F.relu(self.affine2(x1))
+        action_scores = self.affine3(x2)
+        
+        #x = F.relu(self.affine1(x))
+        #action_scores = self.affine2(x)
+        
         return F.softmax(action_scores, dim=1)
 
-
+lr=1e-1
 policy = Policy()
-optimizer = optim.Adam(policy.parameters(), lr=1e-2)
+optimizer = optim.Adam(policy.parameters(), lr=lr)
 eps = np.finfo(np.float32).eps.item()
 
 def select_action(obs_input):
@@ -80,7 +90,8 @@ def finish_episode():
     del policy.saved_log_probs[:]
 
 
-def run_on_env(num_eps=100000, max_num_actions=500, test=False, plot=False):
+def run_on_env(num_eps=10000, max_num_actions=500, test=False, plot=False):
+    print("lr: %s, num_eps: %s, max_num_actions: %s" % (lr, num_eps, max_num_actions))
     avg_num_actions = 0
     list_t = []
     for i_episode in range(num_eps):
