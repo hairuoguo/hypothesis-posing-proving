@@ -1,6 +1,6 @@
 import random
 from types import MethodType
-from reverse_env import *
+from bitenvs.reverse_env import *
 
 class UncoverBitsEnv(ReverseEnv):
 

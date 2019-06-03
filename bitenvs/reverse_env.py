@@ -154,7 +154,10 @@ class ReverseEnv:
         self.ep = ReverseEpisode(self.actions_list, self.str_len, self.num_obscured, self.action_indices, self.reverse_len, self.reverse_offset)
         if self.num_obscured > 0:
             self.hypothesis_enable_ep(self.ep)
-        return self.ep 
+        return self.ep
+
+    def seed(self, seed):
+        np.random.seed(seed)
          
 
 
@@ -199,7 +202,7 @@ class ReverseEpisode:
 
     def get_obs(self):
         l1 = np.sum(np.abs(self.state.target - self.state.hidden_state)) 
-        return self.state.obs_state, l1
+        return (np.concatenate((self.state.obs_state, self.state.target)), l1)
 
     def get_max_poss_entropy_decrease(self):
         curr_entropy = self.state.entropy

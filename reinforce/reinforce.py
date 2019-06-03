@@ -1,8 +1,8 @@
 import sys
 sys.path.append('../')
 
-import envs.uncover_bits_env as ube
-import envs.reverse_env as re
+import bitenvs.uncover_bits_env as ube
+import bitenvs.reverse_env as re
 import argparse
 import numpy as np
 from scipy import stats
@@ -38,27 +38,27 @@ ep = env.start_ep()
 class Policy(nn.Module):
     def __init__(self):
         super(Policy, self).__init__()
-        self.affine1 = nn.Linear(env.str_len+1, 128)
+        self.affine1 = nn.Linear(env.str_len*2+1, 128)
         
-        #self.affine2 = nn.Linear(128, 256)
-        #self.affine3 = nn.Linear(256, len(ep.actions_list))
+        self.affine2 = nn.Linear(128, 256)
+        self.affine3 = nn.Linear(256, len(ep.actions_list))
         
-        self.affine2 = nn.Linear(128, len(ep.actions_list))
+        #self.affine2 = nn.Linear(128, len(ep.actions_list))
 
         self.saved_log_probs = []
         self.rewards = []
 
     def forward(self, x):
-        #x1 = F.relu(self.affine1(x))
-        #x2 = F.relu(self.affine2(x1))
-        #action_scores = self.affine3(x2)
+        x1 = F.relu(self.affine1(x))
+        x2 = F.relu(self.affine2(x1))
+        action_scores = self.affine3(x2)
         
-        x = F.relu(self.affine1(x))
-        action_scores = self.affine2(x)
+        #x = F.relu(self.affine1(x))
+        #action_scores = self.affine2(x)
         
         return F.softmax(action_scores, dim=1)
 
-lr=1e-2
+lr=1e-1
 policy = Policy()
 optimizer = optim.Adam(policy.parameters(), lr=lr)
 eps = np.finfo(np.float32).eps.item()
