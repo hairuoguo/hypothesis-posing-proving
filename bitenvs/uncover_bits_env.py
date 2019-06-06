@@ -9,6 +9,8 @@ class UncoverBitsEnv(ReverseEnv):
 
     def start_ep(self):
         self.ep = UncoverBitsEpisode(self.actions_list, self.str_len, self.num_obscured, self.action_indices, self.reverse_len, self.reverse_offset)
+        if self.ep.state.entropy == 0.0:
+            self.ep = self.start_ep()
         return self.ep
 
 

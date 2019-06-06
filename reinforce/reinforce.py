@@ -30,7 +30,7 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
 args = parser.parse_args()
 
 
-env = ube.UncoverBitsEnv(10, 3, 1, 4)
+env = ube.UncoverBitsEnv(10, 3, 1, 6)
 #env = re.ReverseEnv(10, 3, 1, 0)
 ep = env.start_ep()
 
