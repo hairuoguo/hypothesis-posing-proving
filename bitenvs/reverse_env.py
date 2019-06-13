@@ -11,6 +11,7 @@ class EpStats:
     
     def __init__(self, *args, **kwargs):
         self.path = []
+        self.obs_action_reward = []
         self.entropy_decrease = []
         self.max_poss_entropy_decrease = []
         self.__dict__.update(kwargs)
@@ -99,6 +100,11 @@ class EpState:
         poss_strings = [self.bitarray_to_int(bitarray) for bitarray in poss_strings]
         self.possible_occluded_values = [x for x in self.possible_occluded_values if x in poss_strings]
 
+
+    def get_h_d(str1, str2):
+        assert len(str1) == len(str2)
+        return sum([str1[i] ^ str2[i] for i in range(len(str1))])
+
     def isEnd(self):
         return np.array_equal(self.hidden_state, self.target)
     
@@ -180,12 +186,14 @@ class ReverseEpisode:
 
     def make_action(self, action_index):
         curr_entropy = self.state.entropy
+        obs = self.get_obs()
         self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
         self.state.make_action(self.actions_list[action_index])
         self.state.update_info()
         isEnd = self.state.isEnd()
-        if self.stats.path:
+        if self.stats.path != None:
             self.stats.path.append(copy.deepcopy(self.state))
+            self.stats.obs_action_reward.append((obs, action_index, self.get_reward()))
         self.stats.entropy_decrease.append(curr_entropy - self.state.entropy)
         return (self.get_obs()[0], self.get_obs()[1], self.get_reward(), isEnd)
 

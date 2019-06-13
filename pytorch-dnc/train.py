@@ -162,12 +162,15 @@ if __name__ == '__main__':
     obs1, obs2 = ep.get_obs()
 
     obs = np.concatenate((obs1, np.array([obs2]))).reshape((1, 1, -1))     
+    
+    num_actions = 0
 
     while i < num_eps:
 
         i+=1
 
         for step in range(max_steps):
+            num_actions += 1
         
             optimizer.zero_grad()
             if rnn.debug:
@@ -191,12 +194,19 @@ if __name__ == '__main__':
 
         take_checkpoint = (i != 0) and (i % args.iterations == 0)
 
+        '''
         if take_checkpoint:
             print("\nSaving Checkpoint ... "),
             check_ptr = os.path.join(ckpts_dir, 'step_{}.pth'.format(epoch))
             cur_weights = rnn.state_dict()
             T.save(cur_weights, check_ptr)
             print("Done!\n")
+        '''
+
+        if i % 100 == 0:
+            print("Episode: %s, avg num actions: %s" % (i, num_actions/100))
+            num_actions = 0 
+        
 
 
      
