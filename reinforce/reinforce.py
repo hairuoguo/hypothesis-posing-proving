@@ -29,10 +29,12 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='interval between training status logs (default: 10)')
 args = parser.parse_args()
 
-
-env = ube.UncoverBitsEnv(10, 3, 1, 6)
-#env = re.ReverseEnv(10, 3, 1, 0)
+bitstring_len = 10
+#env = ube.UncoverBitsEnv(bitstring_len, 3, 1, 6)
+env = re.ReverseEnv(10, 3, 1, 0)
 ep = env.start_ep()
+num_subgoals = 1
+her_sample = True
 
 
 class Policy(nn.Module):
@@ -40,25 +42,25 @@ class Policy(nn.Module):
         super(Policy, self).__init__()
         self.affine1 = nn.Linear(env.str_len*2+1, 128)
         
-        self.affine2 = nn.Linear(128, 256)
-        self.affine3 = nn.Linear(256, len(ep.actions_list))
+        #self.affine2 = nn.Linear(128, 256)
+        #self.affine3 = nn.Linear(256, len(ep.actions_list))
         
-        #self.affine2 = nn.Linear(128, len(ep.actions_list))
+        self.affine2 = nn.Linear(128, len(ep.actions_list))
 
         self.saved_log_probs = []
         self.rewards = []
 
     def forward(self, x):
-        x1 = F.relu(self.affine1(x))
-        x2 = F.relu(self.affine2(x1))
-        action_scores = self.affine3(x2)
+        #x1 = F.relu(self.affine1(x))
+        #x2 = F.relu(self.affine2(x1))
+        #action_scores = self.affine3(x2)
         
-        #x = F.relu(self.affine1(x))
-        #action_scores = self.affine2(x)
+        x = F.relu(self.affine1(x))
+        action_scores = self.affine2(x)
         
         return F.softmax(action_scores, dim=1)
 
-lr=1e-1
+lr=1e-2
 policy = Policy()
 optimizer = optim.Adam(policy.parameters(), lr=lr)
 eps = np.finfo(np.float32).eps.item()
@@ -72,14 +74,37 @@ def select_action(obs_input):
     policy.saved_log_probs.append(m.log_prob(action))
     return action.item()
 
+def sample_subgoals(path_index, policy_loss):
+    path_state = env.ep.stats.path[path_index]
+    if len(env.ep.stats.path) - path_index > num_subgoals:
+        subgoal_state_indices = np.random.choice(range(path_index+1, len(env.ep.stats.path)), size=num_subgoals, replace=False)
+        subgoal_states = [env.ep.stats.path[index] for index in subgoal_state_indices]
+    else:
+        return
+    subgoals = [state.hidden_state for state in subgoal_states]
+    dist_to_subgoals = [(subgoal_index - (path_index + 1)) for subgoal_index in subgoal_state_indices]
+    for i in range(len(subgoals)):
+        obs, action, reward = env.ep.stats.obs_action_reward[i]
+        h_d = re.EpState.get_h_d(obs[0][:bitstring_len], subgoals[i])
+        obs_input = np.concatenate((obs[0][:bitstring_len], subgoals[i], np.array([h_d])))
+        obs_input = torch.from_numpy(obs_input).float().unsqueeze(0)
+        probs = policy(obs_input)
+        m = Categorical(probs)
+        action = torch.Tensor([action])
+        log_prob = m.log_prob(action)
+        reward = reward + args.gamma**dist_to_subgoals[i]
+        policy_loss.append(-log_prob * reward)
+
 
 def finish_episode():
     R = 0
     policy_loss = []
     rewards = []
-    for r in policy.rewards[::-1]:
+    policy_rewards = policy.rewards[::-1]
+    for r in policy_rewards:
         R = r + args.gamma * R
         rewards.insert(0, R)
+        sample_subgoals(policy_rewards.index(r), policy_loss)
     rewards = torch.tensor(rewards)
     #rewards = (rewards - rewards.mean()) / (rewards.std() + eps)
     for log_prob, reward in zip(policy.saved_log_probs, rewards):
