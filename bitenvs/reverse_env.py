@@ -111,6 +111,7 @@ class ReverseEnv:
     #should hold general information about environment
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured):
+        assert str_len > 0 and reverse_len > 0
         self.str_len = str_len #length of bitstring/bitarray
         self.reverse_len = reverse_len #length of each subsection that is reverse
         self.reverse_offset = reverse_offset #distance between start of each reversed section
@@ -179,6 +180,7 @@ class ReverseEpisode:
 
 
     def make_action(self, action_index):
+        ''' input an action index, outputs (state, L1-distance, reward, isEnd '''
         curr_entropy = self.state.entropy
         self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
         self.state.make_action(self.actions_list[action_index])
@@ -201,6 +203,7 @@ class ReverseEpisode:
     '''
 
     def get_obs(self):
+        ''' (observed state.concat(target state), L1-distance between the two) '''
         l1 = np.sum(np.abs(self.state.target - self.state.hidden_state)) 
         return (np.concatenate((self.state.obs_state, self.state.target)), l1)
 
