@@ -5,7 +5,9 @@ import numpy as np
 from gym import spaces
 from gym.utils import seeding
 import sys
-from reverse_env import ReverseEnv
+import random as rand
+sys.path.append('/Users/alfordsimon/Python/hypothesis-posing-proving')
+from bitenvs.reverse_env import ReverseEnv
  
 # a wrapper over ReverseEnv that extends gym.Env to allow running DQN_HER 
 # easily on it. Based off
@@ -18,13 +20,12 @@ class ReverseGymEnv(gym.Env):
 
         self.env = ReverseEnv(str_len, reverse_len, reverse_offset,
                 num_obscured)
-        self.ep = None
-        self.environment_dimension = str_len
+        self.str_len = str_len
         self.action_space = spaces.Discrete(len(self.env.actions_list))
         self.observation_space = spaces.Dict(dict(
-            desired_goal=spaces.Box(0, 1, shape=(self.environment_dimension,), dtype='float32'),
-            achieved_goal=spaces.Box(0, 1, shape=(self.environment_dimension,), dtype='float32'),
-            observation=spaces.Box(0, 1, shape=(2*self.environment_dimension+1,), dtype='float32'),
+            desired_goal=spaces.Box(0, 1, shape=(self.str_len,), dtype='float32'),
+            achieved_goal=spaces.Box(0, 1, shape=(self.str_len,), dtype='float32'),
+            observation=spaces.Box(0, 1, shape=(self.str_len,), dtype='float32'),
         ))
 
         self.seed()
@@ -34,8 +35,8 @@ class ReverseGymEnv(gym.Env):
         # usually seems to be possible in half of this
         self.reward_threshold = str_len
         self.trials = 50 # num of trials to avg over
-        self.max_episode_steps = 500 # max episode steps
-        self.id = "Reverse Bit Hairuo"
+        self.max_episode_steps = str_len # max episode steps
+        self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
         self.reward_for_achieving_goal = 1
         self.step_reward_for_not_achieving_goal = 0
 
@@ -53,34 +54,28 @@ class ReverseGymEnv(gym.Env):
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1
         # distance)
-#        observation: ([current_state, target_state], l1)
-#        desired_goal: [target_state]
-#        achieved_goal: [current_state]
         obs1, l1 = self.ep.get_obs()
-        self.state = list(obs1) + [l1]
-        self.desired_goal = self.state[self.environment_dimension:-1]
-        self.achieved_goal = self.state[0:self.environment_dimension]
-        # unwrap obs into one tensor
-        observation = np.array(self.state)
-        desired_goal = np.array(self.state[self.environment_dimension:-1])
-        achieved_goal = np.array(self.state[:self.environment_dimension])
+        self.state = obs1
+        self.desired_goal = obs1[self.str_len:]
+        self.achieved_goal = obs1[:self.str_len]
 
-        return {"observation": observation, "desired_goal": desired_goal,
-                "achieved_goal": achieved_goal}
+
+        return {"observation": np.array(obs1[:self.str_len]), "desired_goal":
+                np.array(self.desired_goal),
+                "achieved_goal": np.array(self.achieved_goal)}
 
     def step(self, action):
         obs1, l1, reward, isEnd = self.ep.make_action(action)
         self.step_count += 1
 
-        self.next_state = list(obs1) + [l1]
-        self.reward = reward
+        self.next_state =  obs1
         self.done = isEnd or self.step_count >= self.max_episode_steps
-        self.achieved_goal = self.next_state[:self.environment_dimension]
+        self.achieved_goal = obs1[:self.str_len]
         self.state = self.next_state
 
-        return ({"observation": np.array(self.next_state),
+        return ({"observation": np.array(obs1[:self.str_len]),
                 "desired_goal": np.array(self.desired_goal),
-                "achieved_goal": np.array(self.achieved_goal)}, self.reward,
+                "achieved_goal": np.array(self.achieved_goal)}, reward,
             self.done, {})
 
     def compute_reward(self, achieved_goal, desired_goal, info):
