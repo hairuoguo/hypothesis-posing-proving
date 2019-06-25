@@ -1,0 +1,28 @@
+language:
+  python
+
+python: 3.7
+dist: xenial
+sudo: true
+
+install:
+  - pip install -r requirements.txt -q
+  - pip install sklearn
+  - pip install torchvision
+
+script:
+  - export PYTHONPATH="$PYTHONPATH:$PWD"
+  - export PYTHONPATH="${PYTHONPATH}:/home/travis/build/p-christ/nn_builder/tests"
+  - export PYTHONPATH="${PYTHONPATH}:/home/travis/build/p-christ/nn_builder"
+  - python -m pytest /home/travis/build/p-christ/nn_builder/tests/
+
+
+
+
+
+
+
+
+
+
+

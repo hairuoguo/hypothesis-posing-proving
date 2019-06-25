@@ -30,15 +30,16 @@ class ReverseGymEnv(gym.Env):
 
         self.seed()
         # avg score required to trigger a 'win'. I
-        # think this only gets triggered when posting scores, but doesn't affect
-        # when an episode ends. see 'gnw -rnw './' -e 'reward_threshold'
-        # usually seems to be possible in half of this
+        # this only affects the learning rate which Base Agent.py adjusts if
+        # you're getting closer to the reward threshold.
         self.reward_threshold = str_len
         self.trials = 50 # num of trials to avg over
         self.max_episode_steps = str_len # max episode steps
         self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
-        self.reward_for_achieving_goal = 1
-        self.step_reward_for_not_achieving_goal = 0
+#        self.reward_for_achieving_goal = 1
+#        self.step_reward_for_not_achieving_goal = 0
+        self.reward_for_achieving_goal = str_len
+        self.step_reward_for_not_achieving_goal = -1
 
 
     def seed(self, seed=None):
