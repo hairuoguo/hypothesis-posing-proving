@@ -5,7 +5,7 @@ warnings.filterwarnings('ignore')
 import sys
 sys.path.append('../')
 
-from bitenvs import reverse_env as re
+from bitenvs import reverse_env as rev
 from bitenvs import uncover_bits_env as ube
 
 import numpy as np
@@ -41,7 +41,7 @@ parser.add_argument('-memory_type', type=str, default='dnc', help='dense or spar
 
 parser.add_argument('-nlayer', type=int, default=1, help='number of layers')
 parser.add_argument('-nhlayer', type=int, default=2, help='number of hidden layers')
-parser.add_argument('-lr', type=float, default=1e-4, help='initial learning rate')
+parser.add_argument('-lr', type=float, default=1e-7, help='initial learning rate')
 parser.add_argument('-optim', type=str, default='adam', help='learning rule, supports adam|rmsprop')
 parser.add_argument('-clip', type=float, default=50, help='gradient clipping')
 
@@ -59,7 +59,7 @@ parser.add_argument('-iterations', type=int, default=1000, metavar='N', help='to
 parser.add_argument('-summarize_freq', type=int, default=100, metavar='N', help='summarize frequency')
 parser.add_argument('-check_freq', type=int, default=100, metavar='N', help='check point frequency')
 parser.add_argument('-visdom', action='store_true', help='plot memory content on visdom per -summarize_freq steps')
-parser.add_argument('-gamma', type=float, default=0.99, help='gamma value for reward decay')
+parser.add_argument('-gamma', type=float, default=0.9, help='gamma value for reward decay')
 
 args = parser.parse_args()
 print(args)
@@ -69,9 +69,12 @@ dnc_saved_log_probs = []
 
 bit_str_len = 10
 
-env = ube.UncoverBitsEnv(bit_str_len, 3, 1, 4)
+env = rev.ReverseEnv(bit_str_len, 3, 1, 0, hypothesis_enabled=True)
 ep = env.start_ep()
-
+num_subgoals = 3
+her_sample = False
+her_coeff = 1.
+ab = True
 rnn = DNC(
     input_size=bit_str_len*2+1,
     hidden_size=len(env.ep.actions_list),
@@ -115,30 +118,104 @@ else:
     print('Using CPU.')
 
 def finish_episode():
+    #print('here')
     R = 0
     policy_loss = []
     rewards = []
     T.nn.utils.clip_grad_norm_(rnn.parameters(), args.clip)
-    for r in dnc_rewards[::-1]:
+    rev_dnc_rewards = dnc_rewards[::-1]
+    for i in range(len(rev_dnc_rewards)):
+        r = rev_dnc_rewards[i]
         R = r + args.gamma * R
         rewards.insert(0, R)
+        if her_sample:
+            sample_subgoals(i, policy_loss)
+        if ab:
+            action_bootstrap(i, policy_loss)
     rewards = torch.tensor(rewards)
     for log_prob, reward in zip(dnc_saved_log_probs, rewards):
-        policy_loss.append(-log_prob * reward)
+        loss = -log_prob*reward
+        #if not T.eq(loss, T.zeros([1, 1])):
+        policy_loss.append(loss)
     optimizer.zero_grad()
     policy_loss = torch.cat(policy_loss).sum()
-    policy_loss.backward()
+    #print(policy_loss)
+    policy_loss.backward(retain_graph=True)
     optimizer.step()
     del dnc_rewards[:]
     del dnc_saved_log_probs[:]
 
 def select_action(probs):
+    #print(probs)
     m = Categorical(probs)
     action = m.sample()
     dnc_saved_log_probs.append(m.log_prob(action))
     return action.item()
 
 
+def sample_subgoals(path_index, policy_loss):
+    path_state = env.ep.stats.path[path_index]
+    if len(env.ep.stats.path) - path_index > num_subgoals:
+        subgoal_state_indices = np.random.choice(range(path_index+1, len(env.ep.stats.path)), size=num_subgoals, replace=False)
+        subgoal_states = [env.ep.stats.path[index] for index in subgoal_state_indices]
+    else:
+        return
+    subgoals = [state.hidden_state for state in subgoal_states]
+    dist_to_subgoals = [(subgoal_index - (path_index)) for subgoal_index in subgoal_state_indices]
+    for i in range(len(subgoals)):
+        obs, action, reward = env.ep.stats.obs_action_reward[subgoal_state_indices[i]]
+        state_obs = obs[0][:bit_str_len]
+        subgoal = subgoals[i]
+        if np.array_equal(state_obs, subgoal):
+            continue
+        h_d = rev.EpState.get_h_d(state_obs, subgoal)
+        obs_input = np.concatenate((state_obs, subgoal, np.array([h_d]))).reshape((1, 1, -1))
+        #obs_input = torch.from_numpy(obs_input).float().unsqueeze(0)
+        probs, (chx, m, rv) = rnn(Variable(torch.FloatTensor(obs_input)), (None, mhx, None), reset_experience=True, pass_through_memory=True)
+        m = Categorical(probs)
+        action = torch.Tensor([action])
+        log_prob = m.log_prob(action)
+        reward = reward + her_coeff*args.gamma**dist_to_subgoals[i]
+        policy_loss.append(-log_prob*reward)         
+    
+
+def action_bootstrap(path_index, policy_loss):
+    path_state = env.ep.stats.path[path_index]
+    if len(env.ep.stats.path) - path_index > num_subgoals:
+        #subgoal_state_indices = [path_index + 1]
+        subgoal_state_indices = np.random.choice(range(path_index+1, len(env.ep.stats.path)), size=num_subgoals, replace=False)
+        subgoal_states = [env.ep.stats.path[index] for index in subgoal_state_indices]
+    else:
+        return
+    subgoals = [state.hidden_state for state in subgoal_states]
+    dist_to_subgoals = [(subgoal_index - (path_index)) for subgoal_index in subgoal_state_indices]
+    for i in range(len(subgoals)):
+        obs, action, reward = env.ep.stats.obs_action_reward[subgoal_state_indices[i]]
+        state_obs = obs[0][:bit_str_len]
+        subgoal = subgoals[i]
+        if np.array_equal(state_obs, subgoal):
+            continue
+        h_d = rev.EpState.get_h_d(state_obs, subgoal)
+        obs_input = np.concatenate((state_obs, subgoal, np.array([h_d]))).reshape((1, 1, -1))
+        #obs_input = torch.from_numpy(obs_input).float().unsqueeze(0)
+        probs, (chx, m, rv) = rnn(Variable(torch.FloatTensor(obs_input)), (None, mhx, None), reset_experience=True, pass_through_memory=False)
+        m = Categorical(probs)
+        '''
+        criterion = T.nn.CrossEntropyLoss()
+        loss = criterion(probs.reshape((1, len(env.ep.actions_list))), T.Tensor([action]).long()).reshape((1, 1))
+        policy_loss.append(-1*loss)
+        '''       
+        
+        sampled_action = m.sample()
+        if action == sampled_action:
+            action = torch.Tensor([action])
+            log_prob = m.log_prob(action)
+            reward = dist_to_subgoals[i]*10
+            policy_loss.append(-log_prob * reward)
+        else:
+            log_prob = m.log_prob(sampled_action)
+            reward = -1*dist_to_subgoals[i]
+            policy_loss.append(-log_prob*reward)
 
 if __name__ == '__main__':
 
@@ -147,7 +224,6 @@ if __name__ == '__main__':
 
     viz = Visdom()
 
-    (chx, mhx, rv) = (None, None, None)
 
     isEnd = False
     
@@ -155,7 +231,7 @@ if __name__ == '__main__':
 
     num_eps = 100000
 
-    max_steps = 500
+    max_steps = 10
     
     ep = env.start_ep()
 
@@ -169,14 +245,16 @@ if __name__ == '__main__':
 
         i+=1
 
+        (chx, mhx, rv) = (None, None, None)
+
         for step in range(max_steps):
             num_actions += 1
         
             optimizer.zero_grad()
             if rnn.debug:
-                output, (chx, mhx, rv), v = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=True, pass_through_memory=True)
+                output, (chx, mhx, rv), v = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
             else:
-                output, (chx, mhx, rv) = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=True, pass_through_memory=True)
+                output, (chx, mhx, rv) = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
 
             action = select_action(output)
             obs1, obs2, reward, isEnd = ep.make_action(action)
@@ -187,8 +265,8 @@ if __name__ == '__main__':
             mhx = { k : (v.detach() if isinstance(v, var) else v) for k, v in mhx.items() }
             
             if isEnd or step == (max_steps - 1):
-                ep = env.start_ep()
                 finish_episode()
+                ep = env.start_ep()
                 obs = np.concatenate((obs1, np.array([obs2]))).reshape((1, 1, -1))
                 break
 

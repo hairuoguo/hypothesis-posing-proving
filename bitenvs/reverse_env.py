@@ -116,13 +116,14 @@ class EpState:
 class ReverseEnv:
     #should hold general information about environment
 
-    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured):
+    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False):
         self.str_len = str_len #length of bitstring/bitarray
         self.reverse_len = reverse_len #length of each subsection that is reverse
         self.reverse_offset = reverse_offset #distance between start of each reversed section
         self.num_obscured = num_obscured #number of bits that are obscured
         self.actions_list = None
         self.action_indices = None
+        self.hypothesis_enabled = hypothesis_enabled
         self.__generate_func_list()
         self.__generate_indices()
         self.ep = None
@@ -139,7 +140,7 @@ class ReverseEnv:
     def hypothesis_enable_ep(self, ep):
         #takes episode and modifies it to allow for hypothesis-posing
         ep.hypothesis_on = False
-        ep.actions_list.append((lambda: None)) #empty function to represent hypothesis-posing
+        ep.actions_list.append((lambda x: None)) #empty function to represent hypothesis-posing
         ep.branch_state = copy.deepcopy(ep.state)
         def make_action_wrapper(make_action_function):
             def new_make_action(self, action_index):
@@ -150,15 +151,16 @@ class ReverseEnv:
                     else:
                         self.hypothesis_on = True
                         self.branch_state = copy.deepcopy(self.state)
+                    return make_action_function(len(self.actions_list)-1)
                 else: 
-                    make_action_function(action_index)
+                    return make_action_function(action_index)
             return new_make_action
         ep.make_action = types.MethodType(make_action_wrapper(ep.make_action), ep)
         
 
     def start_ep(self):
-        self.ep = ReverseEpisode(self.actions_list, self.str_len, self.num_obscured, self.action_indices, self.reverse_len, self.reverse_offset)
-        if self.num_obscured > 0:
+        self.ep = ReverseEpisode(copy.copy(self.actions_list), self.str_len, self.num_obscured, copy.copy(self.action_indices), self.reverse_len, self.reverse_offset)
+        if self.hypothesis_enabled:
             self.hypothesis_enable_ep(self.ep)
         return self.ep
 
@@ -181,6 +183,7 @@ class ReverseEpisode:
         self.str_len = str_len
         self.state = None
         self.generate_strings(5, 0.5, 2, 0)
+        #self.generate_strings(3, 0, 0, 0)
         self.stats = EpStats() 
 
 
@@ -190,6 +193,7 @@ class ReverseEpisode:
         self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
         self.state.make_action(self.actions_list[action_index])
         self.state.update_info()
+        #print(obs[0][:10], self.get_obs()[0][:10], action_index)
         isEnd = self.state.isEnd()
         if self.stats.path != None:
             self.stats.path.append(copy.deepcopy(self.state))
@@ -199,9 +203,9 @@ class ReverseEpisode:
 
     def get_reward(self):
         if np.array_equal(self.state.hidden_state, self.state.target):
-            return 1.
+            return self.str_len
         else:
-            return 0.
+            return -1.
 
     '''
     def target_reached(self):
