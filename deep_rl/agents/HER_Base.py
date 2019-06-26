@@ -57,6 +57,7 @@ class HER_Base(object):
         self.episode_next_achieved_goals.append(self.next_state_dict["achieved_goal"])
         self.episode_next_observations.append(self.next_state_dict["observation"])
 
+
     def conduct_action_in_changeable_goal_envs(self, action):
         """Adapts conduct_action from base agent so that can handle changeable goal environments"""
         self.next_state_dict, self.reward, self.done, _ = self.environment.step(action)
@@ -76,10 +77,17 @@ class HER_Base(object):
     def save_alternative_experience(self):
         """Saves the experiences as if the final state visited in the episode was the goal state"""
         new_goal = self.achieved_goal
+        print('observations:\n' + '\n'.join(map(str, self.episode_observations)))
+        print(str(self.episode_desired_goals[0]) + ' < goal')
+        print('actions: ' + str(self.episode_actions))
+        print('new_goal: \t' + str(new_goal))
         new_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in self.episode_observations]
+        print('new_states: \t' + str(new_states))
         new_next_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in
                       self.episode_next_observations]
+        print('new_next_states: \t' + str(new_next_states))
         new_rewards = [self.environment.compute_reward(next_achieved_goal, new_goal, None) for next_achieved_goal in  self.episode_next_achieved_goals]
+        print('new_rewards: \t' + str(new_rewards))
 
         if self.hyperparameters["clip_rewards"]:
             new_rewards = [max(min(reward, 1.0), -1.0) for reward in new_rewards]
@@ -88,6 +96,8 @@ class HER_Base(object):
 
     def sample_from_HER_and_Ordinary_Buffer(self):
         """Samples from the ordinary replay buffer and HER replay buffer according to a proportion specified in config"""
+        # can train on a batch of both simultaneously since the format is the
+        # same into the network.
         states, actions, rewards, next_states, dones = self.memory.sample(self.ordinary_buffer_batch_size)
         HER_states, HER_actions, HER_rewards, HER_next_states, HER_dones = self.HER_memory.sample(self.HER_buffer_batch_size)
 

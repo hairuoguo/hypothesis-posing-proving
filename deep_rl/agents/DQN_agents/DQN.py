@@ -30,7 +30,7 @@ class DQN(Base_Agent):
         self.update_learning_rate(self.hyperparameters["learning_rate"], self.q_network_optimizer)
 
     def step(self):
-        """Runs a step within a game including a learning step if required"""
+        """Runs one episode of the game, including learning steps if required"""
         while not self.done:
             self.action = self.pick_action()
             self.conduct_action(self.action)
@@ -66,6 +66,7 @@ class DQN(Base_Agent):
         else: states, actions, rewards, next_states, dones = experiences
         loss = self.compute_loss(states, next_states, rewards, actions, dones)
 
+        # .item() returns python number of a 0-dim tensor
         actions_list = [action_X.item() for action_X in actions ]
 
         self.logger.info("Action counts {}".format(Counter(actions_list)))

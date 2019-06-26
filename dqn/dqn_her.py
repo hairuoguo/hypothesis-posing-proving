@@ -3,6 +3,7 @@ sys.path.append('../')
 import os
 from gym.wrappers import FlattenDictWrapper
 from deep_rl.agents.DQN_agents.DQN_HER import DQN_HER
+from deep_rl.agents.DQN_agents.DQN_HER_alt import DQN_HER_alt
 from deep_rl.agents.Trainer import Trainer
 from deep_rl.utilities.data_structures.Config import Config
 from deep_rl.agents.DQN_agents.DQN import DQN
@@ -30,7 +31,7 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
          model_name)
 
 config.seed = 1
-config.num_episodes_to_run = 1000
+config.num_episodes_to_run = 2
 config.starting_episode_number=1000
 config.show_solution_score = False
 config.visualise_individual_results = False
@@ -40,11 +41,12 @@ config.runs_per_agent = 1
 config.use_GPU = False
 config.overwrite_existing_results_file = True
 config.randomise_random_seed = True
-config.save_model = True
+config.save_model = False
 config.seed = 1
 
 config.load_model = True
 config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
+config.save_at_all = False
 
 
 
@@ -70,7 +72,7 @@ config.hyperparameters = {
 }
 
 if __name__== '__main__':
-    AGENTS = [DQN_HER]
+    AGENTS = [DQN_HER_alt]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
 

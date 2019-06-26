@@ -21,5 +21,7 @@ class Config(object):
         self.debug_mode = False
         self.load_model = False
         self.file_to_load_model = None
+        self.starting_episode_number = None
+        self.save_at_all = True
 
 

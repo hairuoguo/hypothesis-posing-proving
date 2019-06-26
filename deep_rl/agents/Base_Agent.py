@@ -48,7 +48,7 @@ class Base_Agent(object):
         self.log_game_info()
 
     def step(self):
-        """Takes a step in the game. This method must be overriden by any agent"""
+        """Runs one episode of the game, including learning steps if required"""
         raise ValueError("Step needs to be implemented by the agent")
 
     def get_environment_title(self):
@@ -63,6 +63,7 @@ class Base_Agent(object):
                 elif str(self.environment.unwrapped)[1:9] == "Walker2d": return "Walker2d"
                 else:
                     name = self.environment.spec.id.split("-")[0]
+
             except AttributeError:
                 name = str(self.environment.env)
                 if name[0:10] == "TimeLimit<": name = name[10:]
@@ -181,7 +182,7 @@ class Base_Agent(object):
             if save_and_print_results: self.save_and_print_result()
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_model: self.locally_save_policy()
+        if self.config.save_at_all and self.config.save_model: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
     def conduct_action(self, action):

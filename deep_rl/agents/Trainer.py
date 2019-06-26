@@ -22,7 +22,8 @@ class Trainer(object):
         """Creates a dictionary that maps an agent to their wider agent group"""
         agent_to_agent_group_dictionary = {
             "DQN": "DQN_Agents",
-            "DQN-HER": "DQN_Agents",
+            "DQN_HER": "DQN_Agents",
+            "DQN_HER_alt":"DQN_Agents",
             "DDQN": "DQN_Agents",
             "DDQN with Prioritised Replay": "DQN_Agents",
             "DQN with Fixed Q Targets": "DQN_Agents",
@@ -58,7 +59,8 @@ class Trainer(object):
             "Dueling DDQN": "#22DAF3",
             "PPO": "#5B2C6F",
             "DDPG": "#800000",
-            "DQN-HER": "#008000",
+            "DQN_HER": "#008000",
+            "DQN_HER_alt": "#008000",
             "DDPG-HER": "#008000",
             "TD3": "#E74C3C",
             "h-DQN": "#D35400",
@@ -80,13 +82,13 @@ class Trainer(object):
             if self.config.visualise_overall_agent_results:
                 agent_rolling_score_results = [results[1] for results in  self.results[agent_name]]
                 self.visualise_overall_agent_results(agent_rolling_score_results, agent_name, show_mean_and_std_range=True)
-        if self.config.file_to_save_data_results:
+        if self.config.save_at_all and self.config.file_to_save_data_results:
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
-        if self.config.file_to_save_results_graph:
+        if self.config.save_at_all and self.config.file_to_save_results_graph:
             plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
             print('saved figure at ' + self.config.file_to_save_results_graph)
-        if self.config.file_to_save_session_info:
+        if self.config.save_at_all and self.config.file_to_save_session_info:
             print(('Please enter a short description of the training session' 
                 + 'for future reference in info file.'))
             desc = input('')
