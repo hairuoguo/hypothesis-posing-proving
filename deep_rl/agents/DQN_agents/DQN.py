@@ -16,9 +16,14 @@ class DQN(Base_Agent):
         Base_Agent.__init__(self, config)
         self.memory = Replay_Buffer(self.hyperparameters["buffer_size"], self.hyperparameters["batch_size"], config.seed)
         self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size)
+        if config.load_model:
+            self.q_network_local.load_state_dict(torch.load(config.file_to_load_model))
+            print('loaded model from: ' + config.file_to_load_model)
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(),
                                               lr=self.hyperparameters["learning_rate"])
         self.exploration_strategy = Epsilon_Greedy_Exploration(config)
+        self.file_to_save_model = config.file_to_save_model
+
 
     def reset_game(self):
         super(DQN, self).reset_game()
@@ -97,7 +102,8 @@ class DQN(Base_Agent):
 
     def locally_save_policy(self):
         """Saves the policy"""
-        torch.save(self.q_network_local.state_dict(), "Models/{}_local_network.pt".format(self.agent_name))
+        torch.save(self.q_network_local.state_dict(), self.file_to_save_model)
+        print('saved model parameters at ' + self.file_to_save_model)
 
     def time_for_q_network_to_learn(self):
         """Returns boolean indicating whether enough steps have been taken for learning to begin and there are

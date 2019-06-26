@@ -23,8 +23,10 @@ class Bit_Flipping_Environment(gym.Env):
         self.max_episode_steps = environment_dimension
         self.id = "Bit Flipping"
         self.environment_dimension = environment_dimension
-        self.reward_for_achieving_goal = self.environment_dimension
-        self.step_reward_for_not_achieving_goal = -1
+        self.reward_for_achieving_goal = 1
+        self.step_reward_for_not_achieving_goal = 0
+#        self.reward_for_achieving_goal = self.environment_dimension
+#        self.step_reward_for_not_achieving_goal = -1
 
         self.deterministic = deterministic
 

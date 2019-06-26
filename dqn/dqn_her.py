@@ -11,7 +11,7 @@ from bitenvs.reverse_gym_env import ReverseGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
 
 config = Config()
-#config.seed = 1
+
 str_len = 10
 reverse_len = 3
 reverse_offset = 1
@@ -19,15 +19,19 @@ num_obscured = 0
 
 config.environment = ReverseGymEnv(str_len, reverse_len, reverse_offset,
         num_obscured)
-filepath = str.format(
-        '/data/reverse_env/plots/ReverseEnv_DQN_HER_{0}_{1}_{2}_{3}',
-        str_len, reverse_len, reverse_offset, num_obscured)
-filepath = file_numberer.get_unused_filepath(filepath, '.png',
-        format_str='_({})')
-config.file_to_save_data_results = filepath
-config.file_to_save_results_graph = filepath[:filepath.index('plots')] + 'data' + filepath[(filepath.index('plots') + 5):]
+data_dir = '/Users/alfordsimon/Python/hypothesis-posing-proving/dqn/data/reverse_env'
+model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
+        reverse_len, reverse_offset, num_obscured)
 
-config.num_episodes_to_run = 5000
+(config.file_to_save_data_results,
+ config.file_to_save_model,
+ config.file_to_save_results_graph,
+ config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
+         model_name)
+
+config.seed = 1
+config.num_episodes_to_run = 1000
+config.starting_episode_number=1000
 config.show_solution_score = False
 config.visualise_individual_results = False
 config.visualise_overall_agent_results = True
@@ -36,7 +40,12 @@ config.runs_per_agent = 1
 config.use_GPU = False
 config.overwrite_existing_results_file = True
 config.randomise_random_seed = True
-config.save_model = False
+config.save_model = True
+config.seed = 1
+
+config.load_model = True
+config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
+
 
 
 config.hyperparameters = {

@@ -86,6 +86,15 @@ class Trainer(object):
         if self.config.file_to_save_results_graph:
             plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
             print('saved figure at ' + self.config.file_to_save_results_graph)
+        if self.config.file_to_save_session_info:
+            print(('Please enter a short description of the training session' 
+                + 'for future reference in info file.'))
+            desc = input('')
+            with open(self.config.file_to_save_session_info, 'w+') as f:
+                f.write(desc + '\n' + '\n'.join(
+                    str.format('{0}: {1}',k,v) for k, v in vars(self.config).items()))
+            print('saved info at ' + self.config.file_to_save_session_info)
+            
         plt.show()
         return self.results
 
