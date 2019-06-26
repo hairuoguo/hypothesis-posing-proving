@@ -117,9 +117,10 @@ class ReverseEnv:
     #should hold general information about environment
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False):
+        assert str_len > 0 and reverse_len > 0
         self.str_len = str_len #length of bitstring/bitarray
         self.reverse_len = reverse_len #length of each subsection that is reverse
-        self.reverse_offset = reverse_offset #distance between start of each reversed section
+        self.reverse_offset = reverse_offset # distance between start of each reversed section
         self.num_obscured = num_obscured #number of bits that are obscured
         self.actions_list = None
         self.action_indices = None
@@ -188,6 +189,7 @@ class ReverseEpisode:
 
 
     def make_action(self, action_index):
+        ''' input an action index, outputs (state, L1-distance, reward, isEnd '''
         curr_entropy = self.state.entropy
         obs = self.get_obs()
         self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
@@ -203,9 +205,11 @@ class ReverseEpisode:
 
     def get_reward(self):
         if np.array_equal(self.state.hidden_state, self.state.target):
+#            return 1.
             return self.str_len
         else:
-            return -1.
+#            return 0.
+            return -1
 
     '''
     def target_reached(self):
@@ -213,6 +217,7 @@ class ReverseEpisode:
     '''
 
     def get_obs(self):
+        ''' (observed state.concat(target state), L1-distance between the two) '''
         l1 = np.sum(np.abs(self.state.target - self.state.hidden_state)) 
         return (np.concatenate((self.state.obs_state, self.state.target)), l1)
 

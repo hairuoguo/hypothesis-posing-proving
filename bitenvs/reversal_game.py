@@ -1,5 +1,5 @@
 import argparse
-import simple_reverse_env as se
+import simple_env as se
 
 parser = argparse.ArgumentParser(description='Bit reversal game')
 parser.add_argument('-l', '--length', type=int, default=10,

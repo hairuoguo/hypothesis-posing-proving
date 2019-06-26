@@ -1,0 +1,11 @@
+*.pyc
+*cache
+*.idea
+*__pycache__
+*venv
+*nn_builder.egg-info
+*build
+*dist
+.DS_Store
+*to_do_list
+*.ipynb_checkpoints
