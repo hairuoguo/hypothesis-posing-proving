@@ -58,22 +58,24 @@ class DQN_HER_alt(HER_Base, DQN):
                 # the goal achieved by the current action is next_achieved_goal
                 zip(self.episode_observations, self.episode_next_achieved_goals)]
         print('new_states: \n' + '\n'.join(map(str,new_states)))
-#        new_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in self.episode_observations]
         new_next_states = [self.create_state_from_observation_and_desired_goal(
                 obs, next_achieved_goal)
                 for obs, next_achieved_goal in 
                 zip(self.episode_next_observations, self.episode_next_achieved_goals)]
         print('new_next_states: \n' + '\n'.join(map(str,new_next_states)))
-#        new_next_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in
-#                      self.episode_next_observations]
-#        new_rewards = [self.environment.compute_reward(next_achieved_goal,
-#            next_achieved_goal, None)
         new_rewards = [self.environment.reward_for_achieving_goal]*len(
                 self.episode_next_achieved_goals)
-#            for next_achieved_goal in
-#            self.episode_next_achieved_goals]
+        # subtract from the reward 9
+        criterion = nn.CrossEntropyLoss()
+        probs = 
+        # given current state/goal, probability of choosing different actions.
+        # Current state goals are new_states list.
+
+        # given states, gives q values for all the actions
+        self.compute_q_values_for_next_states(next_states)
+        loss = criterion(probs, torch.Tensor([action]).long()).reshape([1])
+        policy_loss.append(-1*loss)
         print('new_rewards: ' + str(new_rewards))
-#        new_rewards = [self.environment.compute_reward(next_achieved_goal, new_goal, None) for next_achieved_goal in  self.episode_next_achieved_goals]
 
         if self.hyperparameters["clip_rewards"]:
             new_rewards = [max(min(reward, 1.0), -1.0) for reward in new_rewards]

@@ -4,3 +4,5 @@
 *.sw*
 .DS_STORE 
 __pycache__/
+session.vim
+
