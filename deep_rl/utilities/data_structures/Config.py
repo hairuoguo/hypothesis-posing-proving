@@ -23,5 +23,6 @@ class Config(object):
         self.file_to_load_model = None
         self.starting_episode_number = None
         self.save_at_all = True
+        self.info = None
 
 

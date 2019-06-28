@@ -1,0 +1,37 @@
+AGENT NAME: DQN_HER
+[1m1.1: DQN_HER[0m
+TITLE  ReverseEnv: (10, 3, 1, 0)
+{'learning_rate': 0.001, 'batch_size': 128, 'buffer_size': 100000, 'epsilon_decay_rate_denominator': 150, 'discount_rate': 0.999, 'incremental_td_error': 1e-08, 'update_every_n_steps': 1, 'linear_hidden_units': [128, 128], 'final_layer_activation': None, 'y_range': (-1, 10), 'batch_norm': False, 'gradient_clipping_norm': 5, 'HER_sample_proportion': 0.8, 'learning_iterations': 1, 'clip_rewards': False, 'output_activation': None, 'hidden_activations': 'relu', 'dropout': 0.0, 'initialiser': 'default', 'columns_of_data_to_be_embedded': [], 'embedding_dimensions': []}
+RANDOM SEED  2532768842
+" Episode 1, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 2, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 3, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 4, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 5, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 6, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 7, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 8, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 9, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 10, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  inf" Episode 11, Score:  10.00, Max score seen:  10.00, Rolling score:  10.00, Max rolling score seen:  infTraceback (most recent call last):
+  File "dqn_her.py", line 82, in <module>
+    trainer.run_games_for_agents()
+  File "../deep_rl/agents/Trainer.py", line 81, in run_games_for_agents
+    self.run_games_for_agent(agent_number + 1, agent_class)
+  File "../deep_rl/agents/Trainer.py", line 129, in run_games_for_agent
+    game_scores, rolling_scores, time_taken = agent.run_n_episodes()
+  File "../deep_rl/agents/Base_Agent.py", line 181, in run_n_episodes
+    self.step()
+  File "../deep_rl/agents/DQN_agents/DQN_HER.py", line 24, in step
+    self.learn(experiences=self.sample_from_HER_and_Ordinary_Buffer())
+  File "../deep_rl/agents/DQN_agents/DQN.py", line 67, in learn
+    loss = self.compute_loss(states, next_states, rewards, actions, dones)
+  File "../deep_rl/agents/DQN_agents/DQN.py", line 78, in compute_loss
+    Q_targets = self.compute_q_targets(next_states, rewards, dones)
+  File "../deep_rl/agents/DQN_agents/DQN.py", line 85, in compute_q_targets
+    Q_targets_next = self.compute_q_values_for_next_states(next_states)
+  File "../deep_rl/agents/DQN_agents/DQN.py", line 91, in compute_q_values_for_next_states
+    Q_targets_next = self.q_network_local(next_states).detach().max(1)[0].unsqueeze(1)
+  File "/home/salford/.conda/envs/pytorch/lib/python3.6/site-packages/torch/nn/modules/module.py", line 493, in __call__
+    result = self.forward(*input, **kwargs)
+  File "../deep_rl/nn_builder/pytorch/NN.py", line 84, in forward
+    x = self.process_hidden_layers(x)
+  File "../deep_rl/nn_builder/pytorch/NN.py", line 119, in process_hidden_layers
+    x = self.get_activation(self.hidden_activations, layer_ix)(linear_layer(x))
+  File "/home/salford/.conda/envs/pytorch/lib/python3.6/site-packages/torch/nn/modules/module.py", line 493, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/salford/.conda/envs/pytorch/lib/python3.6/site-packages/torch/nn/modules/linear.py", line 92, in forward
+    return F.linear(input, self.weight, self.bias)
+  File "/home/salford/.conda/envs/pytorch/lib/python3.6/site-packages/torch/nn/functional.py", line 1406, in linear
+    ret = torch.addmm(bias, input, weight.t())
+RuntimeError: Expected object of backend CPU but got backend CUDA for argument #4 'mat1'

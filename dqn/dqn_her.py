@@ -13,14 +13,17 @@ import deep_rl.utilities.file_numberer as file_numberer
 
 config = Config()
 
-str_len = 10
-reverse_len = 3
+#str_len = sys.argv[2]
+#reverse_len = sys.argv[3]
+#reverse_offset = sys.argv[4]
+str_len = 20
+reverse_len = 5
 reverse_offset = 1
 num_obscured = 0
 
 config.environment = ReverseGymEnv(str_len, reverse_len, reverse_offset,
         num_obscured)
-data_dir = '/Users/alfordsimon/Python/hypothesis-posing-proving/dqn/data/reverse_env'
+data_dir = 'data/reverse_env'
 model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
         reverse_len, reverse_offset, num_obscured)
 
@@ -30,9 +33,11 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
          model_name)
 
+if len(sys.argv) > 1:
+    config.info = sys.argv[1]
 config.seed = 1
-config.num_episodes_to_run = 2
-config.starting_episode_number=1000
+config.num_episodes_to_run = 2500
+#config.starting_episode_number=1
 config.show_solution_score = False
 config.visualise_individual_results = False
 config.visualise_overall_agent_results = True
@@ -41,12 +46,12 @@ config.runs_per_agent = 1
 config.use_GPU = False
 config.overwrite_existing_results_file = True
 config.randomise_random_seed = True
-config.save_model = False
+config.save_model = True
 config.seed = 1
 
-config.load_model = True
-config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
-config.save_at_all = False
+config.load_model = False
+#config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
+config.save_at_all = True
 
 
 
@@ -59,7 +64,7 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [64, 64],
+        'linear_hidden_units': [128, 128],
         'final_layer_activation': None,
 #        'y_range': (0, 1),
         'y_range': (-1, str_len),
@@ -72,7 +77,7 @@ config.hyperparameters = {
 }
 
 if __name__== '__main__':
-    AGENTS = [DQN_HER_alt]
+    AGENTS = [DQN_HER]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
 

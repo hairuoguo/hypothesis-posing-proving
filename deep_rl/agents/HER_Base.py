@@ -77,17 +77,17 @@ class HER_Base(object):
     def save_alternative_experience(self):
         """Saves the experiences as if the final state visited in the episode was the goal state"""
         new_goal = self.achieved_goal
-        print('observations:\n' + '\n'.join(map(str, self.episode_observations)))
-        print(str(self.episode_desired_goals[0]) + ' < goal')
-        print('actions: ' + str(self.episode_actions))
-        print('new_goal: \t' + str(new_goal))
+#        print('observations:\n' + '\n'.join(map(str, self.episode_observations)))
+#        print(str(self.episode_desired_goals[0]) + ' < goal')
+#        print('actions: ' + str(self.episode_actions))
+#        print('new_goal: \t' + str(new_goal))
         new_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in self.episode_observations]
-        print('new_states: \t' + str(new_states))
+#        print('new_states: \t' + str(new_states))
         new_next_states = [self.create_state_from_observation_and_desired_goal(observation, new_goal) for observation in
                       self.episode_next_observations]
-        print('new_next_states: \t' + str(new_next_states))
+#        print('new_next_states: \t' + str(new_next_states))
         new_rewards = [self.environment.compute_reward(next_achieved_goal, new_goal, None) for next_achieved_goal in  self.episode_next_achieved_goals]
-        print('new_rewards: \t' + str(new_rewards))
+#        print('new_rewards: \t' + str(new_rewards))
 
         if self.hyperparameters["clip_rewards"]:
             new_rewards = [max(min(reward, 1.0), -1.0) for reward in new_rewards]

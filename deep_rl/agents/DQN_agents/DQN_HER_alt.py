@@ -45,10 +45,6 @@ class DQN_HER_alt(HER_Base, DQN):
 
 
     def save_alternative_experience(self):
-        print('observations:\n' + '\n'.join(map(str, self.episode_observations)))
-        print(str(self.episode_desired_goals[0]) + ' < goal')
-        print('actions: ' + str(self.episode_actions))
-
         """Saves the experiences as if the next state visited in the episode was the goal state"""
         # need to be careful to store goals as g(state) and not just assume
         # g(state) = state. used achieved_goal
@@ -57,24 +53,32 @@ class DQN_HER_alt(HER_Base, DQN):
                 for ep_obs, ep_achieved_goal in 
                 # the goal achieved by the current action is next_achieved_goal
                 zip(self.episode_observations, self.episode_next_achieved_goals)]
-        print('new_states: \n' + '\n'.join(map(str,new_states)))
         new_next_states = [self.create_state_from_observation_and_desired_goal(
                 obs, next_achieved_goal)
                 for obs, next_achieved_goal in 
                 zip(self.episode_next_observations, self.episode_next_achieved_goals)]
-        print('new_next_states: \n' + '\n'.join(map(str,new_next_states)))
         new_rewards = [self.environment.reward_for_achieving_goal]*len(
                 self.episode_next_achieved_goals)
         # subtract from the reward 9
-        criterion = nn.CrossEntropyLoss()
-        probs = 
+        losses = []
+        for state in new_states:
+            probs = self.compute_q_values_for_next_states(state)
+          
+        torch_states = torch.from_numpy(np.vstack(new_states)).float().to(
+                self.device)
+        probs = self.compute_q_valeus_for_next_states(torch_states)
+
+
+
+#        criterion = nn.CrossEntropyLoss()
+#        probs = 
         # given current state/goal, probability of choosing different actions.
         # Current state goals are new_states list.
 
         # given states, gives q values for all the actions
-        self.compute_q_values_for_next_states(next_states)
-        loss = criterion(probs, torch.Tensor([action]).long()).reshape([1])
-        policy_loss.append(-1*loss)
+#        self.compute_q_values_for_next_states(next_states)
+#        loss = criterion(probs, torch.Tensor([action]).long()).reshape([1])
+#        policy_loss.append(-1*loss)
         print('new_rewards: ' + str(new_rewards))
 
         if self.hyperparameters["clip_rewards"]:
