@@ -7,8 +7,9 @@ sbatch <<EOT
 #SBATCH --ntasks=1
 #SBATCH --time 12:00:00
 
-python dqn_her.py
-
+python test.py
+python test.py
+python test.py
 exit 0
 EOT
 

@@ -13,11 +13,11 @@ import deep_rl.utilities.file_numberer as file_numberer
 
 config = Config()
 
-#str_len = sys.argv[2]
+str_len = 10
 #reverse_len = sys.argv[3]
 #reverse_offset = sys.argv[4]
-str_len = 20
-reverse_len = 5
+#str_len = 20
+reverse_len = 4
 reverse_offset = 1
 num_obscured = 0
 
@@ -35,6 +35,9 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
 
 if len(sys.argv) > 1:
     config.info = sys.argv[1]
+
+config.info = 'first run 10-4-1'
+
 config.seed = 1
 config.num_episodes_to_run = 2500
 #config.starting_episode_number=1
@@ -64,7 +67,7 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [128, 128],
+        'linear_hidden_units': [64, 64],
         'final_layer_activation': None,
 #        'y_range': (0, 1),
         'y_range': (-1, str_len),
