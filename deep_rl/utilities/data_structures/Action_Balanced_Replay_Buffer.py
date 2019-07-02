@@ -6,7 +6,7 @@ from Replay_Buffer import Replay_Buffer
 
 class Action_Balanced_Replay_Buffer(Replay_Buffer):
     """Replay buffer that provides sample of experiences that have an equal number of each action being conducted"""
-    def __init__(self, buffer_size, batch_size, seed, num_actions):
+    def __init__(self, buffer_size, batch_size, seed, num_actions, use_GPU=True):
         self.num_actions = num_actions
         self.buffer_size_per_memory = int(buffer_size / self.num_actions)
 
@@ -15,7 +15,7 @@ class Action_Balanced_Replay_Buffer(Replay_Buffer):
         self.batch_size = batch_size
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         self.seed = random.seed(seed)
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if use_GPU else "cpu")
 
     def add_experience(self, states, actions, rewards, next_states, dones):
         """Adds experience or list of experiences into the replay buffer"""

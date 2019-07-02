@@ -222,7 +222,10 @@ class Base_Agent(object):
         text = """"\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}"""
         sys.stdout.write(text.format(self.episode_number, self.rolling_results[-1], self.max_rolling_score_seen,
                                      self.game_full_episode_scores[-1], self.max_episode_score_seen))
-        sys.stdout.flush()
+        if not self.config.cluster:
+            sys.stdout.flush()
+        else: sys.stdout.write('\n')
+
 
     def show_whether_achieved_goal(self):
         """Prints out whether the agent achieved the environment target goal"""

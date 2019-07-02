@@ -7,13 +7,15 @@ import random
 class Memory_Shaper(object):
     """Takes in the experience of full episodes and reshapes it according to macro-actions you define. Then it provides
     a replay buffer with this reshaped data to learn from"""
-    def __init__(self, buffer_size, batch_size, seed, new_reward_fn, action_balanced_replay_buffer=True):
+    def __init__(self, buffer_size, batch_size, seed, new_reward_fn,
+            action_balanced_replay_buffer=True, use_GPU=True):
         self.reset()
         self.buffer_size = buffer_size
         self.batch_size = batch_size
         self.seed = seed
         self.new_reward_fn = new_reward_fn
         self.action_balanced_replay_buffer = action_balanced_replay_buffer
+        self.use_GPU = use_GPU
 
     def put_adapted_experiences_in_a_replay_buffer(self, action_id_to_actions):
         """Adds experiences to the replay buffer after re-imagining that the actions taken were macro-actions according to
@@ -41,7 +43,9 @@ class Memory_Shaper(object):
 
         if self.action_balanced_replay_buffer:
             print("Using action balanced replay buffer")
-            replay_buffer = Action_Balanced_Replay_Buffer(self.buffer_size, self.batch_size, self.seed, num_actions=self.num_actions)
+            replay_buffer = Action_Balanced_Replay_Buffer(self.buffer_size,
+                    self.batch_size, self.seed, num_actions=self.num_actions,
+                    self.use_GPU)
         else:
             print("Using ordinary replay buffer")
             replay_buffer = Replay_Buffer(self.buffer_size, self.batch_size, self.seed)

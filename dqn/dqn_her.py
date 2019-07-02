@@ -10,14 +10,22 @@ from deep_rl.agents.DQN_agents.DQN import DQN
 # to get the Deep RL modules accessible
 from bitenvs.reverse_gym_env import ReverseGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
+import argparse
+import torch
 
+
+parser = argparse.ArgumentParser(description='DQN-HER parameters')
+parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int, 
+        help='string length of Reverse Environment')
+parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
+        help='length of reversal operation')
+
+
+args = parser.parse_args()
 config = Config()
 
-str_len = 10
-#reverse_len = sys.argv[3]
-#reverse_offset = sys.argv[4]
-#str_len = 20
-reverse_len = 4
+str_len = args.str_len
+reverse_len = args.reverse_len
 reverse_offset = 1
 num_obscured = 0
 
@@ -33,24 +41,20 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
          model_name)
 
-if len(sys.argv) > 1:
-    config.info = sys.argv[1]
-
-config.info = 'first run 10-4-1'
-
+config.info = 'comparing different sizes 7/2/19'
 config.seed = 1
-config.num_episodes_to_run = 2500
+config.num_episodes_to_run = 50000
 #config.starting_episode_number=1
 config.show_solution_score = False
 config.visualise_individual_results = False
-config.visualise_overall_agent_results = True
 config.standard_deviation_results = 1.0
 config.runs_per_agent = 1
-config.use_GPU = False
-config.overwrite_existing_results_file = True
+config.use_GPU = torch.cuda.is_available()
 config.randomise_random_seed = True
 config.save_model = True
 config.seed = 1
+config.cluster = True
+config.visualise_overall_agent_results = not config.cluster
 
 config.load_model = False
 #config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
@@ -67,7 +71,7 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [64, 64],
+        'linear_hidden_units': [128, 128],
         'final_layer_activation': None,
 #        'y_range': (0, 1),
         'y_range': (-1, str_len),

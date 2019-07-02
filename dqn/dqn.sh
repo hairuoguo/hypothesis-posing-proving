@@ -2,14 +2,12 @@
 sbatch <<EOT
 #!/usr/bin/env bash
 
-#SBATCH --job-name=$1
-#SBATCH --output $1.out
+#SBATCH --job-name=her_$1_$2
+#SBATCH --output her_$1_$2.out
 #SBATCH --ntasks=1
-#SBATCH --time 12:00:00
+#SBATCH --time 24:00:00
 
-python test.py
-python test.py
-python test.py
+python dqn_her.py -n $1 -r $2
 exit 0
 EOT
 

@@ -19,7 +19,7 @@ class Prioritised_Replay_Buffer(Max_Heap, Deque):
      Space Complexity: O(N)
      """
 
-    def __init__(self, hyperparameters, seed=0):
+    def __init__(self, hyperparameters, seed=0, use_GPU=True):
         Max_Heap.__init__(self, hyperparameters["buffer_size"], dimension_of_value_attribute=5, default_key_to_use=0)
         Deque.__init__(self, hyperparameters["buffer_size"], dimension_of_value_attribute=5)
         np.random.seed(seed)
@@ -45,7 +45,7 @@ class Prioritised_Replay_Buffer(Max_Heap, Deque):
             "done": 4
         }
 
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:0" if use_GPU else "cpu")
 
     def initialise_td_errors_array(self):
         """Initialises a deque of Nodes of length self.max_size"""
