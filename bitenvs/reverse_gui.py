@@ -22,11 +22,13 @@ def play_game(str_len, reverse_len, offset, num_obscured):
 
     def press(i):
         nonlocal n_steps
+        nonlocal str_len
         n_steps += 1
         lm = leftmost(i)
         action = int(lm / offset)
         nonlocal ep
         obs, _, reward, done = ep.make_action(action) # pivot is one left
+        done = done or n_steps == str_len
         if not done:
             for i, b in enumerate(current_buttons):
                 b.config(text=str(obs[i]))

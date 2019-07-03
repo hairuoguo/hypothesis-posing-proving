@@ -24,8 +24,8 @@ parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int,
 args = parser.parse_args()
 config = Config()
 
-str_len = args.str_len
-reverse_len = args.reverse_len
+str_len = 10
+reverse_len = 4
 reverse_offset = 1
 num_obscured = 0
 
@@ -41,25 +41,25 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
          model_name)
 
-config.info = 'comparing different sizes 7/2/19'
+config.info = 'viewing ai playing'
 config.seed = 1
-config.num_episodes_to_run = 50000
-#config.starting_episode_number=1
+config.num_episodes_to_run = 30
+config.starting_episode_number=50000
 config.show_solution_score = False
 config.visualise_individual_results = False
 config.standard_deviation_results = 1.0
 config.runs_per_agent = 1
-config.use_GPU = torch.cuda.is_available()
+#config.use_GPU = torch.cuda.is_available()
+config.use_GPU = False
 config.randomise_random_seed = True
-config.save_model = True
+config.save_model = False
 config.seed = 1
-config.cluster = True
+config.cluster = False
 config.visualise_overall_agent_results = not config.cluster
 
-config.load_model = False
-#config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
-config.save_at_all = True
-
+config.load_model = True
+config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
+config.save_at_all = False
 
 
 config.hyperparameters = {

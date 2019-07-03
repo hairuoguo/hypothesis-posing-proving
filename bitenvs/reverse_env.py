@@ -182,6 +182,7 @@ class ReverseEpisode:
     
     def __init__(self, actions_list, str_len, num_obscured, action_indices,
             reverse_len, reverse_offset, path_len_mean, path_len_std):
+        print('\n')
         
         self.reverse_len = None
         self.reverse_offset = None
@@ -193,6 +194,8 @@ class ReverseEpisode:
         self.generate_strings(path_len_mean, path_len_std, 2, 0)
         #self.generate_strings(3, 0, 0, 0)
         self.stats = EpStats() 
+        print(str(self.state.target) + ' = target')
+        print(str(self.state.hidden_state) + ' = starting')
 
 
     def make_action(self, action_index):
@@ -208,6 +211,7 @@ class ReverseEpisode:
             self.stats.path.append(copy.deepcopy(self.state))
             self.stats.obs_action_reward.append((obs, action_index, self.get_reward()))
         self.stats.entropy_decrease.append(curr_entropy - self.state.entropy)
+        print(self.get_obs()[0][:self.str_len])
         return (self.get_obs()[0], self.get_obs()[1], self.get_reward(), isEnd)
 
     def get_reward(self):

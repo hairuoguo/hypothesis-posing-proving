@@ -18,7 +18,8 @@ class DQN(Base_Agent):
                 self.hyperparameters["batch_size"], config.seed, config.use_GPU)
         self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size)
         if config.load_model:
-            self.q_network_local.load_state_dict(torch.load(config.file_to_load_model))
+            self.q_network_local.load_state_dict(torch.load(config.file_to_load_model,
+                map_location=self.device))
             print('loaded model from: ' + config.file_to_load_model)
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(),
                                               lr=self.hyperparameters["learning_rate"])

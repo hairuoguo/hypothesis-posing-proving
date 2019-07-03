@@ -85,7 +85,7 @@ class Trainer(object):
         if self.config.save_at_all and self.config.file_to_save_data_results:
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
-        if self.config.save_at_all and self.config.file_to_save_results_graph:
+        if not self.config.cluster and self.config.save_at_all and self.config.file_to_save_results_graph:
             plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
             print('saved figure at ' + self.config.file_to_save_results_graph)
         if self.config.save_at_all and self.config.file_to_save_session_info:
