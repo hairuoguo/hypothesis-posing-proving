@@ -131,7 +131,7 @@ class ReverseEnv:
         self.__generate_func_list()
         self.__generate_indices()
         self.ep = None
-    
+
     def __generate_func_list(self): #generates list of actions that reverse substrings
         self.actions_list = [functools.partial(self.__reverse_substring, reverse_len=self.reverse_len, start_index=i) for i in range(0, self.str_len-self.reverse_len + 1, self.reverse_offset)]
 

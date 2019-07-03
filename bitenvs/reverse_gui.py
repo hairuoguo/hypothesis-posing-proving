@@ -59,7 +59,6 @@ def play_game(str_len, reverse_len, offset, num_obscured):
             b.config(font=tahoma_small)
 
 
-
     root = tk.Tk()
     frame = tk.Frame(root)
     frame.winfo_toplevel().title("Reversal Game")
@@ -123,6 +122,8 @@ def play_game(str_len, reverse_len, offset, num_obscured):
     root.mainloop()
 
     print('Steps taken each game: ' + str(steps_taken))
+    print('reverse env config: ')
+    print('\n'.join(str.format('{0}: {1}',k,v) for k, v in vars(env).items()))
 
 
 if __name__ == '__main__':

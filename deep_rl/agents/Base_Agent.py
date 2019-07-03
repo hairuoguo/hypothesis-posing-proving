@@ -115,6 +115,8 @@ class Base_Agent(object):
 
     def setup_logger(self):
         """Sets up the logger"""
+        if not self.config.log_training:
+            return logging.getLogger('dummy')
         filename = "Training.log"
         if os.path.isfile(filename): os.remove(filename)
         logger = logging.getLogger(__name__)
@@ -182,7 +184,7 @@ class Base_Agent(object):
             if save_and_print_results: self.save_and_print_result()
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_at_all and self.config.save_model: self.locally_save_policy()
+        if self.config.save_results: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
 
     def conduct_action(self, action):
