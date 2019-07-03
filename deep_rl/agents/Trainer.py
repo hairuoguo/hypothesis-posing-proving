@@ -6,6 +6,7 @@ import gym
 from gym import wrappers
 import numpy as np
 import matplotlib.pyplot as plt
+plt.ioff()
 
 class Trainer(object):
     """Runs games for given agents. Optionally will visualise and save the results"""
@@ -82,13 +83,12 @@ class Trainer(object):
             if self.config.visualise_overall_agent_results:
                 agent_rolling_score_results = [results[1] for results in  self.results[agent_name]]
                 self.visualise_overall_agent_results(agent_rolling_score_results, agent_name, show_mean_and_std_range=True)
-        if self.config.save_at_all and self.config.file_to_save_data_results:
+                if self.config.save_results:
+                    plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
+                    print('saved figure at ' + self.config.file_to_save_results_graph)
+        if self.config.save_results:
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
-        if not self.config.cluster and self.config.save_at_all and self.config.file_to_save_results_graph:
-            plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
-            print('saved figure at ' + self.config.file_to_save_results_graph)
-        if self.config.save_at_all and self.config.file_to_save_session_info:
             with open(self.config.file_to_save_session_info, 'w+') as f:
                 f.write('\n'.join(str.format('{0}: {1}',k,v) 
                         for k, v in vars(self.config).items()))
