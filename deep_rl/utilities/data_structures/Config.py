@@ -15,8 +15,7 @@ class Config(object):
         self.use_GPU = None
         self.overwrite_existing_results_file = None
         self.standard_deviation_results = 1.0
-        # I don't think this is ever used... doesn't show up in grep
-#        self.randomise_random_seed = True
+        self.randomise_random_seed = True
         self.show_solution_score = False
         self.debug_mode = False
         self.log_training = False

@@ -17,10 +17,10 @@ parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int,
         help='string length of Reverse Environment')
 parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
         help='length of reversal operation')
-parser.add_argument('-a', '--num_layers', default=2, metavar='R', type=int, 
-        help='number of fc layers in network')
-parser.add_argument('-b', '--layer_size', default=128, metavar='R', type=int, 
+parser.add_argument('-a', '--layer_size', default=128, metavar='A', type=int, 
         help='layer size in network')
+parser.add_argument('-b', '--num_layers', default=2, metavar='B', type=int, 
+        help='number of fc layers in network')
 
 args = parser.parse_args()
 config = Config()
@@ -29,11 +29,12 @@ str_len = args.str_len
 reverse_len = args.reverse_len
 reverse_offset = 1
 num_obscured = 0
-path_len_mean = 1
+path_len_mean = 5
 path_len_std = 0
 
-config.environment = ReverseGymEnv(str_len, reverse_len, reverse_offset,
-        num_obscured, path_len_mean=path_len_mean, path_len_std=path_len_std)
+env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
+        hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std)
+config.environment = env
 data_dir = 'data/reverse_env'
 model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
         reverse_len, reverse_offset, num_obscured)
@@ -50,7 +51,7 @@ config.num_episodes_to_run = 30
 config.use_GPU = torch.cuda.is_available()
 config.cluster = False
 
-config.load_model = True
+config.load_model = False
 config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
 config.save_results = True
 

@@ -115,21 +115,21 @@ class Base_Agent(object):
 
     def setup_logger(self):
         """Sets up the logger"""
-        if not self.config.log_training:
-            return logging.getLogger('dummy')
-        filename = "Training.log"
-        if os.path.isfile(filename): os.remove(filename)
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
-        # create a file handler
-        handler = logging.FileHandler(filename)
-        handler.setLevel(logging.INFO)
-        # create a logging format
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        # add the handlers to the logger
-        logger.addHandler(handler)
-        return logger
+        return logging.getLogger('dummy')
+#        if not self.config.log_training:
+       # filename = "Training.log"
+       # if os.path.isfile(filename): os.remove(filename)
+       # logger = logging.getLogger(__name__)
+       # logger.setLevel(logging.INFO)
+       # # create a file handler
+       # handler = logging.FileHandler(filename)
+       # handler.setLevel(logging.INFO)
+       # # create a logging format
+       # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+       # handler.setFormatter(formatter)
+       # # add the handlers to the logger
+       # logger.addHandler(handler)
+       # return logger
 
     def log_game_info(self):
         """Logs info relating to the game"""
