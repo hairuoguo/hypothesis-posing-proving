@@ -13,10 +13,10 @@ from torch.optim import optimizer
 class Base_Agent(object):
 
     def __init__(self, config):
+        self.config = config
         self.logger = self.setup_logger()
         self.debug_mode = config.debug_mode
         # if self.debug_mode: self.tensorboard = SummaryWriter()
-        self.config = config
         self.set_random_seeds(config.seed)
         self.environment = config.environment
         self.environment_title = self.get_environment_title()
@@ -43,7 +43,7 @@ class Base_Agent(object):
         self.device = "cuda:0" if config.use_GPU else "cpu"
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
-        self.turn_off_exploration = False
+        self.turn_off_exploration = config.no_random
         gym.logger.set_level(40)  # stops it from printing an unnecessary warning
         self.log_game_info()
 
@@ -115,21 +115,21 @@ class Base_Agent(object):
 
     def setup_logger(self):
         """Sets up the logger"""
-        return logging.getLogger('dummy')
-#        if not self.config.log_training:
-       # filename = "Training.log"
-       # if os.path.isfile(filename): os.remove(filename)
-       # logger = logging.getLogger(__name__)
-       # logger.setLevel(logging.INFO)
-       # # create a file handler
-       # handler = logging.FileHandler(filename)
-       # handler.setLevel(logging.INFO)
-       # # create a logging format
-       # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-       # handler.setFormatter(formatter)
-       # # add the handlers to the logger
-       # logger.addHandler(handler)
-       # return logger
+        if not self.config.log_training:
+            return logging.getLogger('dummy')
+        filename = "Training.log"
+        if os.path.isfile(filename): os.remove(filename)
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.INFO)
+        # create a file handler
+        handler = logging.FileHandler(filename)
+        handler.setLevel(logging.INFO)
+        # create a logging format
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        # add the handlers to the logger
+        logger.addHandler(handler)
+        return logger
 
     def log_game_info(self):
         """Logs info relating to the game"""
@@ -174,7 +174,7 @@ class Base_Agent(object):
         self.episode_next_states.append(self.next_state)
         self.episode_dones.append(self.done)
 
-    def run_n_episodes(self, num_episodes=None, show_whether_achieved_goal=True, save_and_print_results=True):
+    def run_n_episodes(self, num_episodes=None, show_whether_achieved_goal=False, save_and_print_results=True):
         """Runs game to completion n times and then summarises results and saves model (if asked to)"""
         if num_episodes is None: num_episodes = self.config.num_episodes_to_run
         start = time.time()

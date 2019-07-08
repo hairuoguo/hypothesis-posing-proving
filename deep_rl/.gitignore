@@ -20,5 +20,6 @@ Random_Junkyard/
 Notebook.ipynb
 Results/Notebook.ipynb
 *.ipynb_checkpoints
-*.sw* # vim swap files
+# ignore swap files
+*.sw*
 

@@ -81,7 +81,7 @@ class Trainer(object):
             agent_name = agent_class.agent_name
             self.run_games_for_agent(agent_number + 1, agent_class)
             if self.config.visualise_overall_agent_results:
-                agent_rolling_score_results = [results[1] for results in  self.results[agent_name]]
+                agent_rolling_score_results = [results[1] for results in self.results[agent_name]]
                 self.visualise_overall_agent_results(agent_rolling_score_results, agent_name, show_mean_and_std_range=True)
                 if self.config.save_results:
                     plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")

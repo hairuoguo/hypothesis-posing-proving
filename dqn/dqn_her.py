@@ -17,9 +17,9 @@ parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int,
         help='string length of Reverse Environment')
 parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
         help='length of reversal operation')
-parser.add_argument('-a', '--layer_size', default=128, metavar='A', type=int, 
+parser.add_argument('-w', '--layer_size', default=128, metavar='W', type=int, 
         help='layer size in network')
-parser.add_argument('-b', '--num_layers', default=2, metavar='B', type=int, 
+parser.add_argument('-d', '--num_layers', default=2, metavar='D', type=int, 
         help='number of fc layers in network')
 
 args = parser.parse_args()
@@ -33,27 +33,31 @@ path_len_mean = 5
 path_len_std = 0
 
 env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
-        hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std)
+        hypothesis_enabled=False, path_len_mean=path_len_mean,
+        path_len_std=path_len_std, print_results=False)
 config.environment = env
 data_dir = 'data/reverse_env'
-model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
-        reverse_len, reverse_offset, num_obscured)
+model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
+        reverse_offset, num_obscured)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
  config.file_to_save_results_graph,
- config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
-         model_name)
+ config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
+         data_dir, model_name)
 
-config.info = 'comparing different network sizes'
-config.num_episodes_to_run = 30
-#config.starting_episode_number=5
+config.info = 'testing model knowledge'
+config.no_random = False # disables random actions but still trains
+config.num_episodes_to_run = 100
+# config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available()
-config.cluster = False
+config.cluster = True # affects printing
+config.visualise_overall_agent_results = False
+config.visualise_individual_results = True
 
 config.load_model = False
-config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
-config.save_results = True
+config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
+config.save_results = False
 
 config.hyperparameters = {
     'reverse_env': env,
@@ -65,9 +69,8 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [args.layer_size]*args.num_layers,
+        'linear_hidden_units': [args.layer_size] * args.num_layers,
         'final_layer_activation': None,
-#        'y_range': (0, 1),
         'y_range': (-1, str_len),
         'batch_norm': False,
         'gradient_clipping_norm': 5,
@@ -81,5 +84,3 @@ if __name__== '__main__':
     AGENTS = [DQN_HER]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
-
-

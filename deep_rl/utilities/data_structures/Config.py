@@ -9,7 +9,7 @@ class Config(object):
         self.file_to_save_results_graph = None
         self.file_to_save_model = None
         self.runs_per_agent = 1
-        self.visualise_overall_results = None
+        self.visualise_overall_agent_results = True
         self.visualise_individual_results = True
         self.hyperparameters = None
         self.use_GPU = None
@@ -22,6 +22,7 @@ class Config(object):
         self.load_model = False
         self.file_to_load_model = None
         self.starting_episode_number = None
+        self.no_random = False
         self.save_results = True
         self.info = None
         self.cluster = False

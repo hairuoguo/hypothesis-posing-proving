@@ -16,13 +16,14 @@ from bitenvs.reverse_env import ReverseEnv
 class ReverseGymEnv(gym.Env):
     environment_name = "Reverse Bit Game"
 
-    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5):
+    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
+            hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
+            print_results=False):
 
         self.env = ReverseEnv(str_len, reverse_len, reverse_offset,
-                num_obscured,
-                hypothesis_enabled=hypothesis_enabled,
-                path_len_mean=path_len_mean,
-                path_len_std=path_len_std)
+                num_obscured, hypothesis_enabled=hypothesis_enabled,
+                path_len_mean=path_len_mean, path_len_std=path_len_std,
+                print_results=print_results)
         self.str_len = str_len
         self.action_space = spaces.Discrete(len(self.env.actions_list))
         self.observation_space = spaces.Dict(dict(
