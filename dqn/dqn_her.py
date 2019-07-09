@@ -11,6 +11,7 @@ from bitenvs.reverse_gym_env import ReverseGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
 import argparse
 import torch
+import deep_rl.utilities.info_maker as info_maker
 
 parser = argparse.ArgumentParser(description='DQN-HER parameters')
 parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int, 
@@ -35,7 +36,6 @@ path_len_std = 0
 env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
         hypothesis_enabled=False, path_len_mean=path_len_mean,
         path_len_std=path_len_std, print_results=False)
-config.environment = env
 data_dir = 'data/reverse_env'
 model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
         reverse_offset, num_obscured)
@@ -44,20 +44,21 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
  config.file_to_save_model,
  config.file_to_save_results_graph,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
-         data_dir, model_name)
+        model_name)
 
+config.environment = env
 config.info = 'testing model knowledge'
 config.no_random = False # disables random actions but still trains
-config.num_episodes_to_run = 100
+config.num_episodes_to_run = 50
 # config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available()
 config.cluster = True # affects printing
 config.visualise_overall_agent_results = False
-config.visualise_individual_results = True
+config.visualise_individual_results = False
 
 config.load_model = False
 config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
-config.save_results = False
+config.save_results = True
 
 config.hyperparameters = {
     'reverse_env': env,
@@ -79,6 +80,9 @@ config.hyperparameters = {
         'clip_rewards': False
     }
 }
+
+config.info_string = info_maker.make_info_string(config, env.env)
+
 
 if __name__== '__main__':
     AGENTS = [DQN_HER]

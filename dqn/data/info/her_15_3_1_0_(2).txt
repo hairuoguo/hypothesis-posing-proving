@@ -1,0 +1,65 @@
+seed: 1
+environment: <ReverseGymEnv instance>
+requirements_to_solve_game: None
+num_episodes_to_run: 50
+file_to_save_data_results: data/reverse_env/data/her_15_3_1_0_(2).pkl
+file_to_save_results_graph: data/reverse_env/plots/her_15_3_1_0_(2).png
+file_to_save_model: data/reverse_env/models/her_15_3_1_0_(2).pt
+runs_per_agent: 1
+visualise_overall_agent_results: False
+visualise_individual_results: False
+hyperparameters: {'reverse_env': <bitenvs.reverse_gym_env.ReverseGymEnv object at 0x2aecc2e57ba8>, 'DQN_Agents': {'learning_rate': 0.001, 'batch_size': 128, 'buffer_size': 100000, 'epsilon_decay_rate_denominator': 150, 'discount_rate': 0.999, 'incremental_td_error': 1e-08, 'update_every_n_steps': 1, 'linear_hidden_units': [4096, 4096, 4096], 'final_layer_activation': None, 'y_range': (-1, 15), 'batch_norm': False, 'gradient_clipping_norm': 5, 'HER_sample_proportion': 0.8, 'learning_iterations': 1, 'clip_rewards': False}}
+use_GPU: True
+overwrite_existing_results_file: None
+standard_deviation_results: 1.0
+randomise_random_seed: True
+show_solution_score: False
+debug_mode: False
+log_training: False
+load_model: False
+file_to_load_model: data/reverse_env/models/her_15_3_1_0.pt
+starting_episode_number: None
+no_random: False
+save_results: True
+info: testing model knowledge
+info_string: seed: 1
+environment: <ReverseGymEnv instance>
+requirements_to_solve_game: None
+num_episodes_to_run: 50
+file_to_save_data_results: data/reverse_env/data/her_15_3_1_0_(2).pkl
+file_to_save_results_graph: data/reverse_env/plots/her_15_3_1_0_(2).png
+file_to_save_model: data/reverse_env/models/her_15_3_1_0_(2).pt
+runs_per_agent: 1
+visualise_overall_agent_results: False
+visualise_individual_results: False
+hyperparameters: {'reverse_env': <bitenvs.reverse_gym_env.ReverseGymEnv object at 0x2aecc2e57ba8>, 'DQN_Agents': {'learning_rate': 0.001, 'batch_size': 128, 'buffer_size': 100000, 'epsilon_decay_rate_denominator': 150, 'discount_rate': 0.999, 'incremental_td_error': 1e-08, 'update_every_n_steps': 1, 'linear_hidden_units': [4096, 4096, 4096], 'final_layer_activation': None, 'y_range': (-1, 15), 'batch_norm': False, 'gradient_clipping_norm': 5, 'HER_sample_proportion': 0.8, 'learning_iterations': 1, 'clip_rewards': False}}
+use_GPU: True
+overwrite_existing_results_file: None
+standard_deviation_results: 1.0
+randomise_random_seed: True
+show_solution_score: False
+debug_mode: False
+log_training: False
+load_model: False
+file_to_load_model: data/reverse_env/models/her_15_3_1_0.pt
+starting_episode_number: None
+no_random: False
+save_results: True
+info: testing model knowledge
+info_string: 
+cluster: True
+file_to_save_session_info: data/reverse_env/info/her_15_3_1_0_(2).txt
+print_results: False
+str_len: 15
+reverse_len: 3
+reverse_offset: 1
+num_obscured: 0
+actions_list: [functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=0), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=1), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=2), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=3), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=4), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=5), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=6), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=7), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=8), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=9), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=10), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=11), functools.partial(<bound method ReverseEnv.__reverse_substring of <bitenvs.reverse_env.ReverseEnv object at 0x2aecc2e57c88>>, reverse_len=3, start_index=12)]
+action_indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+hypothesis_enabled: False
+path_len_mean: 5
+path_len_std: 0
+ep: None
+2019-07-08 17:57:18.394224
+cluster: True
+file_to_save_session_info: data/reverse_env/info/her_15_3_1_0_(2).txt

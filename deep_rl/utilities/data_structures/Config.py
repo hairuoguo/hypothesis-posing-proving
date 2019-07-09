@@ -25,6 +25,7 @@ class Config(object):
         self.no_random = False
         self.save_results = True
         self.info = None
+        self.info_string = ""
         self.cluster = False
 
 
