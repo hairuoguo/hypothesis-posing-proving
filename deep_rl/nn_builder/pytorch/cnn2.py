@@ -1,37 +1,41 @@
-class OneCNN(torch.nn.Module):
-    # a conv-net on a one dimensional input
-    def __init__(self, input_dim) :
-        super(SimpleCNN, self).__init__()
-        
+import torch
+import torch.nn as nn
+import numpy as np
+from deep_rl.nn_builder.pytorch.Base_Network import Base_Network
+import torch.nn.functional as F
 
-        self.conv1 = torch.nn.Conv2d(3, 18, kernel_size=3, stride=1, padding=1)
-        self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
-        
-        #4608 input features, 64 output features (see sizing flow below)
-        self.fc1 = torch.nn.Linear(18 * 16 * 16, 64)
-        
-        #64 input features, 10 output features for our 10 defined classes
-        self.fc2 = torch.nn.Linear(64, 10)
-        
+class CNN(nn.Module):
+    ''' A 1D conv network for ReverseEnv '''
+    def __init__(self, input_dim, output_dim, config_dict):
+        super(CNN, self).__init__()
+        self.input_dim = input_dim
+
+        self.y_range = config_dict['y_range']
+        self.batch_norm = config_dict['batch_norm']
+        self.num_conv_layers = config_dict['num_conv_layers']
+        # conv weights shape = (out_channels, in_channels, kernel_size)
+
+        # for kernel_size = 3, should have one padding to keep things the same.
+        # do I want the dimension to increase? Can't just increase filters. I
+        # don't think Conv net is good to mapping to larger space
+
+        # L_out = L_in + 2*padding - kernel_size + 1
+        self.conv1 = torch.nn.Conv1d(1, 10, 3, stride=1,padding=1,bias=True)
+        self.conv_layers = [self.conv1] + [torch.nn.Conv1d(10, 10, 3, stride=1,
+            padding=1,bias=True) for _ in range(self.num_conv_layers)]
+        self.fc1 = torch.nn.Linear(10*input_dim, 1000)
+        self.fc2 = torch.nn.Linear(1000, output_dim)
+
     def forward(self, x):
-        
-        #Computes the activation of the first convolution
-        #Size changes from (3, 32, 32) to (18, 32, 32)
-        x = F.relu(self.conv1(x))
-        
-        #Size changes from (18, 32, 32) to (18, 16, 16)
-        x = self.pool(x)
-        
-        #Reshape data to input to the input layer of the neural net
-        #Size changes from (18, 16, 16) to (1, 4608)
-        #Recall that the -1 infers this dimension from the other given dimension
-        x = x.view(-1, 18 * 16 *16)
-        
-        #Computes the activation of the first fully connected layer
-        #Size changes from (1, 4608) to (1, 64)
+        # reshape to (batch_size, num_channels, length)
+        x = x.view(-1, 1, self.input_dim)
+        for layer in self.conv_layers:
+            x = F.relu(layer(x))
+
+        x = x.view(-1, 10*self.input_dim)
         x = F.relu(self.fc1(x))
-        
-        #Computes the second fully connected layer (activation applied later)
-        #Size changes from (1, 64) to (1, 10)
-        x = self.fc2(x)
-        return(x)
+        x = F.relu(self.fc2(x))
+        if self.y_range:
+            x = self.y_range[0] + (self.y_range[1] -
+                    self.y_range[0])*nn.Sigmoid()(x)
+        return x

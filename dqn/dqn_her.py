@@ -30,7 +30,7 @@ str_len = args.str_len
 reverse_len = args.reverse_len
 reverse_offset = 1
 num_obscured = 0
-path_len_mean = 5
+path_len_mean = 3
 path_len_std = 0
 
 env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
@@ -46,15 +46,16 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
         model_name)
 
+config.cnn = True
 config.environment = env
 config.info = 'testing model knowledge'
 config.no_random = False # disables random actions but still trains
 config.num_episodes_to_run = 50
 # config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available()
-config.cluster = True # affects printing
-config.visualise_overall_agent_results = False
-config.visualise_individual_results = False
+config.cluster = False # affects printing
+config.visualise_overall_agent_results = False # for ploting
+config.visualise_individual_results = False # for plotting
 
 config.load_model = False
 config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
@@ -77,7 +78,12 @@ config.hyperparameters = {
         'gradient_clipping_norm': 5,
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
-        'clip_rewards': False
+        'clip_rewards': False,
+        'CNN': {
+            'num_conv_layers': 3,
+            'y_range': (-1, str_len),
+            'batch_norm': False,
+        }
     }
 }
 

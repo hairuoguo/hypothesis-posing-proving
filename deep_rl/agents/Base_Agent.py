@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
-from deep_rl.nn_builder.pytorch.CNN import CNN
+from deep_rl.nn_builder.pytorch.cnn2 import CNN
 # from tensorboardX import SummaryWriter
 from torch.optim import optimizer
 
@@ -335,14 +335,7 @@ class Base_Agent(object):
                 hyperparameters[key] = default_hyperparameter_choices[key]
 
         if self.config.cnn:
-            return CNN(input_dim=(1, input_dim,1), 
-                    layers_info=hyperparameters['layers_info'] + [['linear',
-                        output_dim]],
-                    output_activation=hyperparameters['final_layer_activation'],
-                    batch_norm=hyperparameters['batch_norm'],
-                    hidden_activations=hyperparameters['hidden_activations'],
-                    dropout=hyperparameters['dropout'],
-                    random_seed=seed).to(self.device)
+            return CNN(input_dim, output_dim, self.config.hyperparameters['CNN'])
         else:
             return NN(input_dim=input_dim,
                     layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
