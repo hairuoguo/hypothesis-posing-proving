@@ -27,5 +27,6 @@ class Config(object):
         self.info = None
         self.info_string = ""
         self.cluster = False
+        self.cnn = False
 
 
