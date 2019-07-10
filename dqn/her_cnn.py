@@ -47,7 +47,7 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
         model_name)
 
 config.environment = env
-config.info = 'testing model knowledge'
+config.info = 'testing cnn'
 config.no_random = False # disables random actions but still trains
 config.num_episodes_to_run = 50
 # config.starting_episode_number = 5
@@ -56,10 +56,11 @@ config.cluster = True # affects printing
 config.visualise_overall_agent_results = False
 config.visualise_individual_results = False
 
-config.load_model = False
+config.load_model = True
 config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
-config.save_results = False
+config.save_results = True
 
+config.cnn = True
 config.hyperparameters = {
     'reverse_env': env,
     'DQN_Agents': {
@@ -70,7 +71,11 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [args.layer_size] * args.num_layers,
+        'hidden_activations': 'relu',
+        'layers_info': [['conv', 32, 3, 1, 0],
+                ['conv', 32, 3, 1, 0],
+                ['conv', 32, 3, 1, 0],
+                ['linear', 512]],
         'final_layer_activation': None,
         'y_range': (-1, str_len),
         'batch_norm': False,

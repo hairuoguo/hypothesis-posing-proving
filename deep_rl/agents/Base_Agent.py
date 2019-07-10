@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
+from deep_rl.nn_builder.pytorch.CNN import CNN
 # from tensorboardX import SummaryWriter
 from torch.optim import optimizer
 
@@ -319,22 +320,43 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        default_hyperparameter_choices = {"output_activation": None, "hidden_activations": "relu", "dropout": 0.0,
-                                          "initialiser": "default", "batch_norm": False,
-                                          "columns_of_data_to_be_embedded": [],
-                                          "embedding_dimensions": [], "y_range": ()}
+        default_hyperparameter_choices = {"output_activation": None,
+                "hidden_activations": "relu",
+                "dropout": 0.0,
+                "initialiser": "default",
+                "batch_norm": False,
+                "columns_of_data_to_be_embedded": [],
+                "embedding_dimensions": [],
+                "y_range": (),
+                }
 
         for key in default_hyperparameter_choices:
             if key not in hyperparameters.keys():
                 hyperparameters[key] = default_hyperparameter_choices[key]
 
-        return NN(input_dim=input_dim, layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
-                  output_activation=hyperparameters["final_layer_activation"],
-                  batch_norm=hyperparameters["batch_norm"], dropout=hyperparameters["dropout"],
-                  hidden_activations=hyperparameters["hidden_activations"], initialiser=hyperparameters["initialiser"],
-                  columns_of_data_to_be_embedded=hyperparameters["columns_of_data_to_be_embedded"],
-                  embedding_dimensions=hyperparameters["embedding_dimensions"], y_range=hyperparameters["y_range"],
-                  random_seed=seed).to(self.device)
+        if self.config.cnn:
+            return CNN(input_dim=(1, input_dim,1), 
+                    layers_info=hyperparameters['layers_info'] + [['linear',
+                        output_dim]],
+                    output_activation=hyperparameters['final_layer_activation'],
+                    batch_norm=hyperparameters['batch_norm'],
+                    hidden_activations=hyperparameters['hidden_activations'],
+                    dropout=hyperparameters['dropout'],
+                    random_seed=seed).to(self.device)
+        else:
+            return NN(input_dim=input_dim,
+                    layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
+                    output_activation=hyperparameters["final_layer_activation"],
+                    batch_norm=hyperparameters["batch_norm"],
+                    dropout=hyperparameters["dropout"],
+                    hidden_activations=hyperparameters["hidden_activations"],
+                    initialiser=hyperparameters["initialiser"],
+                    columns_of_data_to_be_embedded=hyperparameters[
+                        "columns_of_data_to_be_embedded"],
+                    embedding_dimensions=hyperparameters[
+                        "embedding_dimensions"],
+                    y_range=hyperparameters["y_range"],
+                    random_seed=seed).to(self.device)
 
     def turn_on_any_epsilon_greedy_exploration(self):
         """Turns off all exploration with respect to the epsilon greedy exploration strategy"""

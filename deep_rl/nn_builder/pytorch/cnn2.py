@@ -1,11 +1,9 @@
-class SimpleCNN(torch.nn.Module):
-    
-    #Our batch shape for input x is (3, 32, 32)
-    
-    def __init__(self):
+class OneCNN(torch.nn.Module):
+    # a conv-net on a one dimensional input
+    def __init__(self, input_dim) :
         super(SimpleCNN, self).__init__()
         
-        #Input channels = 3, output channels = 18
+
         self.conv1 = torch.nn.Conv2d(3, 18, kernel_size=3, stride=1, padding=1)
         self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         
@@ -37,4 +35,3 @@ class SimpleCNN(torch.nn.Module):
         #Size changes from (1, 64) to (1, 10)
         x = self.fc2(x)
         return(x)
-view raw
