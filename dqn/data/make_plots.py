@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 import pickle
 
 def save_plot(env_name, save_path):
+    print(env_name)
     with open('data/' + env_name + '.pkl','rb') as f:
         data = pickle.load(f)
         data = data['DQN_HER'] # only one agent 
