@@ -37,8 +37,8 @@ env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
         hypothesis_enabled=False, path_len_mean=path_len_mean,
         path_len_std=path_len_std, print_results=False)
 data_dir = 'data/reverse_env'
-model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
-        reverse_offset, num_obscured)
+model_name = str.format('cnn_{0}_{1}', str_len, reverse_len)
+#        reverse_offset, num_obscured)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
@@ -48,18 +48,22 @@ model_name = str.format('her_{0}_{1}_{2}_{3}', str_len, reverse_len,
 
 config.cnn = True
 config.environment = env
-config.info = 'testing model knowledge'
-config.no_random = False # disables random actions but still trains
-config.num_episodes_to_run = 50
+config.info = 'testing cnn'
+config.no_random = False # if True, disables random actions but still trains
+config.num_episodes_to_run = 50000
+config.save_every_n_episodes = 5000
 # config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available()
-config.cluster = False # affects printing
-config.visualise_overall_agent_results = False # for ploting
-config.visualise_individual_results = False # for plotting
+print('Using GPU? {}'.format(config.use_GPU))
+config.flush = True
+# for plotting
+config.visualise_overall_agent_results = True
+config.visualise_individual_results = False # otherwise does it twice
 
 config.load_model = False
 config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
-config.save_results = False
+config.save_results = True
+
 
 config.hyperparameters = {
     'reverse_env': env,
@@ -71,7 +75,7 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [args.layer_size] * args.num_layers,
+        'linear_hidden_units': [128],
         'final_layer_activation': None,
         'y_range': (-1, str_len),
         'batch_norm': False,
@@ -81,6 +85,7 @@ config.hyperparameters = {
         'clip_rewards': False,
         'CNN': {
             'num_conv_layers': 3,
+            'linear_hidden_units': [128, 128],
             'y_range': (-1, str_len),
             'batch_norm': False,
         }
@@ -88,7 +93,6 @@ config.hyperparameters = {
 }
 
 config.info_string = info_maker.make_info_string(config, env.env)
-
 
 if __name__== '__main__':
     AGENTS = [DQN_HER]

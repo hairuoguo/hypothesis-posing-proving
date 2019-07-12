@@ -90,12 +90,16 @@ class Trainer(object):
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
             with open(self.config.file_to_save_session_info, 'w+') as f:
-                f.write('\n'.join(str.format('{0}: {1}',k,v) 
-                        for k, v in vars(self.config).items()))
+                f.write('{} episodes, best rolling = {}, last rolling = {}\n'
+                        .format(self.config.num_episodes_to_run,
+                            min(agent_rolling_score_results[0][50:]),
+                            agent_rolling_score_results[0][-1]))
+                f.write(self.config.info_string)
             print('saved info at ' + self.config.file_to_save_session_info)
             
         plt.show()
         return self.results
+
 
     def create_object_to_store_results(self):
         """Creates a dictionary that we will store the results in if it doesn't exist, otherwise it loads it up"""
@@ -126,15 +130,19 @@ class Trainer(object):
             self.environment_name = agent.environment_title
             print(agent.hyperparameters)
             print("RANDOM SEED " , agent_config.seed)
-            game_scores, rolling_scores, time_taken = agent.run_n_episodes()
+            # workaround so that you can save every n episodes.
+            game_scores, rolling_scores, time_taken = agent.run_n_episodes(
+                   results_to_save=self.results, agent_results=agent_results)
             print("Time taken: {}".format(time_taken), flush=True)
             self.print_two_empty_lines()
-            agent_results.append([game_scores, rolling_scores, len(rolling_scores), -1 * max(rolling_scores), time_taken])
+            agent_results.append([game_scores, rolling_scores,
+                len(rolling_scores), -1 * max(rolling_scores), time_taken])
             if self.config.visualise_individual_results:
                 self.visualise_overall_agent_results([rolling_scores], agent_name, show_each_run=True)
                 plt.show()
             agent_round += 1
         self.results[agent_name] = agent_results
+
 
     def environment_has_changeable_goals(self, env):
         """Determines whether environment is such that for each episode there is a different goal or not"""
@@ -252,7 +260,7 @@ class Trainer(object):
         print("-----------------------------------------------------------------------------------")
         print(" ")
 
-    def save_obj(self, obj, name):
+    def save_obj(obj, name):
         """Saves given object as a pickle file"""
         if name[-4:] != ".pkl":
             name += ".pkl"

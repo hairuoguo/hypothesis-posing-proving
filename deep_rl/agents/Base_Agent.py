@@ -10,6 +10,7 @@ from deep_rl.nn_builder.pytorch.NN import NN
 from deep_rl.nn_builder.pytorch.cnn2 import CNN
 # from tensorboardX import SummaryWriter
 from torch.optim import optimizer
+import pickle
 
 class Base_Agent(object):
 
@@ -175,7 +176,9 @@ class Base_Agent(object):
         self.episode_next_states.append(self.next_state)
         self.episode_dones.append(self.done)
 
-    def run_n_episodes(self, num_episodes=None, show_whether_achieved_goal=False, save_and_print_results=True):
+    def run_n_episodes(self, num_episodes=None,
+           show_whether_achieved_goal=False, save_and_print_results=True,
+           results_to_save=None, agent_results=None):
         """Runs game to completion n times and then summarises results and saves model (if asked to)"""
         if num_episodes is None: num_episodes = self.config.num_episodes_to_run
         start = time.time()
@@ -183,10 +186,31 @@ class Base_Agent(object):
             self.reset_game()
             self.step()
             if save_and_print_results: self.save_and_print_result()
+            if self.config.save_every_n_episodes and (self.episode_number %
+                    self.config.save_every_n_episodes == 0):
+                self.locally_save_policy()
+                self.save_running_results(self.game_full_episode_scores,
+                        self.rolling_results, time.time() - start,
+                        results_to_save, agent_results)
+
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
         if self.config.save_results: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
+
+
+    def save_running_results(self, game_scores, rolling_scores, time_taken,
+            results_to_save, agent_results):
+        agent_running_result = [game_scores, rolling_scores,
+                len(rolling_scores), -1 * max(rolling_scores), time_taken]
+        results_to_save[self.agent_name] = (agent_results +
+                [agent_running_result])
+
+        with open(self.config.file_to_save_data_results, 'wb') as f:
+            pickle.dump(results_to_save, f, pickle.HIGHEST_PROTOCOL)
+
+        print('saved running data at ' + self.config.file_to_save_data_results)
+
 
     def conduct_action(self, action):
         """Conducts an action in the environment"""
@@ -225,7 +249,7 @@ class Base_Agent(object):
         text = """"\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}"""
         sys.stdout.write(text.format(self.episode_number, self.rolling_results[-1], self.max_rolling_score_seen,
                                      self.game_full_episode_scores[-1], self.max_episode_score_seen))
-        if not self.config.cluster:
+        if self.config.flush:
             sys.stdout.flush()
         else: sys.stdout.write('\n')
 
@@ -335,7 +359,8 @@ class Base_Agent(object):
                 hyperparameters[key] = default_hyperparameter_choices[key]
 
         if self.config.cnn:
-            return CNN(input_dim, output_dim, self.config.hyperparameters['CNN'])
+            return CNN(input_dim, output_dim,
+                    self.config.hyperparameters['CNN']).to(self.device)
         else:
             return NN(input_dim=input_dim,
                     layers_info=hyperparameters["linear_hidden_units"] + [output_dim],

@@ -26,7 +26,9 @@ class Config(object):
         self.save_results = True
         self.info = None
         self.info_string = ""
-        self.cluster = False
+        self.flush = False
         self.cnn = False
+        self.save_every_n_episodes = None
+
 
 
