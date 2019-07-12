@@ -76,6 +76,10 @@ class Trainer(object):
 
     def run_games_for_agents(self):
         """Run a set of games for each agent. Optionally visualising and/or saving the results"""
+        if self.config.save_results:
+            with open(self.config.file_to_save_session_info, 'w+') as f:
+                f.write(self.config.info_string)
+            print('saved info at ' + self.config.file_to_save_session_info)
         self.results = self.create_object_to_store_results()
         for agent_number, agent_class in enumerate(self.agents):
             agent_name = agent_class.agent_name
@@ -89,13 +93,6 @@ class Trainer(object):
         if self.config.save_results:
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
-            with open(self.config.file_to_save_session_info, 'w+') as f:
-                f.write('{} episodes, best rolling = {}, last rolling = {}\n'
-                        .format(self.config.num_episodes_to_run,
-                            min(agent_rolling_score_results[0][50:]),
-                            agent_rolling_score_results[0][-1]))
-                f.write(self.config.info_string)
-            print('saved info at ' + self.config.file_to_save_session_info)
             
         plt.show()
         return self.results
@@ -260,7 +257,7 @@ class Trainer(object):
         print("-----------------------------------------------------------------------------------")
         print(" ")
 
-    def save_obj(obj, name):
+    def save_obj(self, obj, name):
         """Saves given object as a pickle file"""
         if name[-4:] != ".pkl":
             name += ".pkl"

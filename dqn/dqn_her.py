@@ -22,6 +22,10 @@ parser.add_argument('-w', '--layer_size', default=128, metavar='W', type=int,
         help='layer size in network')
 parser.add_argument('-d', '--num_layers', default=2, metavar='D', type=int, 
         help='number of fc layers in network')
+parser.add_argument('-e', '--num_eps', default=10000, metavar='E', type=int, 
+        help='number of episodes to run')
+parser.add_argument('-s', '--save_every', default=10000, metavar='S', type=int, 
+        help='save data, model every _ episodes')
 
 args = parser.parse_args()
 config = Config()
@@ -50,14 +54,14 @@ config.cnn = True
 config.environment = env
 config.info = 'testing cnn'
 config.no_random = False # if True, disables random actions but still trains
-config.num_episodes_to_run = 50000
-config.save_every_n_episodes = 5000
+config.num_episodes_to_run = args.num_eps
+config.save_every_n_episodes = args.save_every
 # config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available()
 print('Using GPU? {}'.format(config.use_GPU))
 config.flush = True
 # for plotting
-config.visualise_overall_agent_results = True
+config.visualise_overall_agent_results = False
 config.visualise_individual_results = False # otherwise does it twice
 
 config.load_model = False
@@ -84,7 +88,7 @@ config.hyperparameters = {
         'learning_iterations': 1,
         'clip_rewards': False,
         'CNN': {
-            'num_conv_layers': 3,
+            'num_conv_layers': args.num_layers,
             'linear_hidden_units': [128, 128],
             'y_range': (-1, str_len),
             'batch_norm': False,
