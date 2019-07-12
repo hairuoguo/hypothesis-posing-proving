@@ -6,12 +6,13 @@ from matplotlib import pyplot as plt
 import pickle
 
 def save_plot(env_name, save_path):
-    print(env_name)
+    print('Plotting {}'.format(env_name))
     with open('data/' + env_name + '.pkl','rb') as f:
         data = pickle.load(f)
         data = data['DQN_HER'] # only one agent 
         data = data[0] # only one run for this agent
         ep_lens, avg_ep_lens, _, _, secs_taken = data
+        plt.clf()
         plt.plot(avg_ep_lens)
         plt.title('rolling 50-avg episode lengths ' + env_name)
         plt.xlabel('episode no.')
@@ -21,14 +22,12 @@ def save_plot(env_name, save_path):
 path = 'data/'
 files = [f for f in listdir(path) if isfile(join(path, f))]
 
+plots = []
 for file in files:
     env_name = file[:-4]
     plot_file = 'plots/' + env_name + '.png'
-    plots = []
     if not isfile(plot_file):
         save_plot(env_name, plot_file)
         plots.append(env_name)
 
 print('Made {} plots.'.format(len(plots)))
-if len(plots) > 0:
-    print(' ,'.join(plots))
