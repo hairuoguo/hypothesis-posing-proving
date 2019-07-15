@@ -12,6 +12,7 @@ import deep_rl.utilities.file_numberer as file_numberer
 import argparse
 import torch
 import deep_rl.utilities.info_maker as info_maker
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description='DQN-HER parameters')
 parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int, 
@@ -24,8 +25,14 @@ parser.add_argument('-d', '--num_layers', default=2, metavar='D', type=int,
         help='number of fc layers in network')
 parser.add_argument('-e', '--num_eps', default=10000, metavar='E', type=int, 
         help='number of episodes to run')
-parser.add_argument('-s', '--save_every', default=10000, metavar='S', type=int, 
+parser.add_argument('-sr', '--save_every', default=10000, metavar='A', type=int, 
         help='save data, model every _ episodes')
+parser.add_argument('-l', '--path_len', default=5, metavar='L', type=int, 
+        help='path length mean for Reverse Environment')
+parser.add_argument('-f', '--file_name', default='', metavar='F', type=str, 
+        help='file name to save data, model, info, plot with')
+parser.add_argument("--no_save", help="don't save results", action="store_true")
+parser.add_argument("--no_gpu", help="don't use gpu", action="store_true")
 
 args = parser.parse_args()
 config = Config()
@@ -34,15 +41,17 @@ str_len = args.str_len
 reverse_len = args.reverse_len
 reverse_offset = 1
 num_obscured = 0
-path_len_mean = 3
+path_len_mean = args.path_len
 path_len_std = 0
 
 env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
         hypothesis_enabled=False, path_len_mean=path_len_mean,
         path_len_std=path_len_std, print_results=False)
 data_dir = 'data/reverse_env'
-model_name = str.format('cnn_{0}_{1}', str_len, reverse_len)
-#        reverse_offset, num_obscured)
+if len(args.file_name) > 0:
+    model_name = args.file_name
+else:
+    model_name = str.format('cnn2_{0}_{1}_l{2}', str_len, reverse_len, path_len_mean)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
@@ -50,23 +59,26 @@ model_name = str.format('cnn_{0}_{1}', str_len, reverse_len)
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
         model_name)
 
+# Immediately mark file as used so that other programs don't think it's untaken yet
+Path(config.file_to_save_session_info).touch()
+
 config.cnn = True
 config.environment = env
 config.info = 'testing cnn'
 config.no_random = False # if True, disables random actions but still trains
 config.num_episodes_to_run = args.num_eps
 config.save_every_n_episodes = args.save_every
+config.save_results = not args.no_save
 # config.starting_episode_number = 5
-config.use_GPU = torch.cuda.is_available()
+config.use_GPU = torch.cuda.is_available() and not args.no_gpu
 print('Using GPU? {}'.format(config.use_GPU))
-config.flush = True
+config.flush = False
 # for plotting
 config.visualise_overall_agent_results = False
 config.visualise_individual_results = False # otherwise does it twice
 
 config.load_model = False
 config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
-config.save_results = True
 
 
 config.hyperparameters = {
