@@ -26,11 +26,13 @@ parser.add_argument('-d', '--num_layers', default=2, metavar='D', type=int,
 parser.add_argument('-e', '--num_eps', default=10000, metavar='E', type=int, 
         help='number of episodes to run')
 parser.add_argument('-sr', '--save_every', default=10000, metavar='A', type=int, 
-        help='save data, model every _ episodes')
+        help='save data & model every _ episodes')
 parser.add_argument('-l', '--path_len', default=5, metavar='L', type=int, 
         help='path length mean for Reverse Environment')
 parser.add_argument('-f', '--file_name', default='', metavar='F', type=str, 
         help='file name to save data, model, info, plot with')
+parser.add_argument('-i', '--info', default='', metavar='I', type=str, 
+        help='info string for training run')
 parser.add_argument("--no_save", help="don't save results", action="store_true")
 parser.add_argument("--no_gpu", help="don't use gpu", action="store_true")
 
@@ -51,7 +53,7 @@ data_dir = 'data/reverse_env'
 if len(args.file_name) > 0:
     model_name = args.file_name
 else:
-    model_name = str.format('cnn2_{0}_{1}_l{2}', str_len, reverse_len, path_len_mean)
+    model_name = str.format('fc2_{0}_{1}_l{2}', str_len, reverse_len, path_len_mean)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
@@ -62,9 +64,13 @@ else:
 # Immediately mark file as used so that other programs don't think it's untaken yet
 Path(config.file_to_save_session_info).touch()
 
-config.cnn = True
+config.cnn = False
 config.environment = env
-config.info = 'testing cnn'
+if len(args.info) > 0:
+    config.info = args.info
+else:
+    config.info = 'testing how fc compares to cnn of previous round'
+
 config.no_random = False # if True, disables random actions but still trains
 config.num_episodes_to_run = args.num_eps
 config.save_every_n_episodes = args.save_every
