@@ -39,9 +39,9 @@ parser.add_argument('-nhid', type=int, default=64, help='number of hidden units 
 parser.add_argument('-dropout', type=float, default=0, help='controller dropout')
 parser.add_argument('-memory_type', type=str, default='dnc', help='dense or sparse memory: dnc | sdnc | sam')
 
-parser.add_argument('-nlayer', type=int, default=1, help='number of layers')
+parser.add_argument('-nlayer', type=int, default=2, help='number of layers')
 parser.add_argument('-nhlayer', type=int, default=2, help='number of hidden layers')
-parser.add_argument('-lr', type=float, default=1e-7, help='initial learning rate')
+parser.add_argument('-lr', type=float, default=1e-3, help='initial learning rate')
 parser.add_argument('-optim', type=str, default='adam', help='learning rule, supports adam|rmsprop')
 parser.add_argument('-clip', type=float, default=50, help='gradient clipping')
 
@@ -59,7 +59,7 @@ parser.add_argument('-iterations', type=int, default=1000, metavar='N', help='to
 parser.add_argument('-summarize_freq', type=int, default=100, metavar='N', help='summarize frequency')
 parser.add_argument('-check_freq', type=int, default=100, metavar='N', help='check point frequency')
 parser.add_argument('-visdom', action='store_true', help='plot memory content on visdom per -summarize_freq steps')
-parser.add_argument('-gamma', type=float, default=0.9, help='gamma value for reward decay')
+parser.add_argument('-gamma', type=float, default=0.25, help='gamma value for reward decay')
 
 args = parser.parse_args()
 print(args)
@@ -69,12 +69,12 @@ dnc_saved_log_probs = []
 
 bit_str_len = 10
 
-env = rev.ReverseEnv(bit_str_len, 3, 1, 0, hypothesis_enabled=True)
+env = rev.ReverseEnv(bit_str_len, 3, 1, 0, hypothesis_enabled=False)
 ep = env.start_ep()
 num_subgoals = 3
 her_sample = False
 her_coeff = 1.
-ab = True
+ab = False
 rnn = DNC(
     input_size=bit_str_len*2+1,
     hidden_size=len(env.ep.actions_list),
@@ -210,11 +210,12 @@ def action_bootstrap(path_index, policy_loss):
         if action == sampled_action:
             action = torch.Tensor([action])
             log_prob = m.log_prob(action)
-            reward = dist_to_subgoals[i]*10
+            reward = dist_to_subgoals[i]*1
             policy_loss.append(-log_prob * reward)
+            #print(-log_prob * reward)
         else:
             log_prob = m.log_prob(sampled_action)
-            reward = -1*dist_to_subgoals[i]
+            reward = -10*dist_to_subgoals[i]
             policy_loss.append(-log_prob*reward)
 
 if __name__ == '__main__':
@@ -231,7 +232,7 @@ if __name__ == '__main__':
 
     num_eps = 100000
 
-    max_steps = 10
+    max_steps = 5
     
     ep = env.start_ep()
 
@@ -255,7 +256,7 @@ if __name__ == '__main__':
                 output, (chx, mhx, rv), v = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
             else:
                 output, (chx, mhx, rv) = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
-
+            if i % 100 == 0: print(output)
             action = select_action(output)
             obs1, obs2, reward, isEnd = ep.make_action(action)
             dnc_rewards.append(reward) 

@@ -36,7 +36,7 @@ ep = env.start_ep()
 num_subgoals = 3
 her_sample = False
 her_coeff = 0.5
-ab = True
+ab = False
 ab_coeff = 1.
 
 class Policy(nn.Module):
@@ -168,7 +168,7 @@ def finish_episode(i_episode):
     del policy.saved_log_probs[:]
 
 
-def run_on_env(num_eps=50000, max_num_actions=10, test=False, plot=False):
+def run_on_env(num_eps=50000, max_num_actions=5, test=False, plot=False):
     print("lr: %s, num_eps: %s, max_num_actions: %s" % (lr, num_eps, max_num_actions))
     avg_num_actions = 0
     list_t = []

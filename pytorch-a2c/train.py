@@ -68,8 +68,8 @@ def action_bootstrap(env, model, path_index, policy_loss, num_subgoals=1):
 
         criterion = torch.nn.CrossEntropyLoss()
         loss = criterion(logit, torch.Tensor([action]).long()).reshape([1])
-        policy_loss = policy_loss - loss
-        '''
+        #policy_loss = policy_loss - loss
+        
         m = Categorical(prob) 
         sampled_action = m.sample()
         if action == sampled_action:
@@ -77,7 +77,7 @@ def action_bootstrap(env, model, path_index, policy_loss, num_subgoals=1):
         else:
             advantage = -1 - value
         policy_loss + 0.5*(10-value)**2
-        '''
+        
     return policy_loss 
 
     
@@ -89,10 +89,9 @@ def train(args, model, env, optimizer=None):
     # env = create_car_racing_env()
     env.seed(args.seed)
 
-    num_subgoals = 3
     her_sample = False
     her_coeff = 0.5
-    ab = True
+    ab = False
     ab_coeff = 1. 
 
 
@@ -176,7 +175,6 @@ def train(args, model, env, optimizer=None):
                 policy_loss = action_bootstrap(env, model, i, policy_loss)
             policy_loss = policy_loss - \
                 log_probs[i] * Variable(gae) - 0.01 * entropies[i]
-
         optimizer.zero_grad()
 
         (policy_loss + 0.5 * value_loss).backward()
