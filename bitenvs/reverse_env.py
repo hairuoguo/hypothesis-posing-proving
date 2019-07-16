@@ -223,10 +223,11 @@ class ReverseEpisode:
     def get_reward(self):
         if np.array_equal(self.state.hidden_state, self.state.target):
 #            return 1.
-            return self.str_len
+            #return self.str_len
+            return 1
         else:
 #            return 0.
-            return -1
+            return -10
 
     '''
     def target_reached(self):

@@ -19,15 +19,15 @@ from test import test
 # https://github.com/pytorch/examples/tree/master/mnist_hogwild
 # Training settings
 parser = argparse.ArgumentParser(description='A3C')
-parser.add_argument('--lr', type=float, default=1e-1, metavar='LR',
+parser.add_argument('--lr', type=float, default=1e-2, metavar='LR',
                     help='learning rate (default: 0.0001)')
-parser.add_argument('--gamma', type=float, default=0.9, metavar='G',
+parser.add_argument('--gamma', type=float, default=0.25, metavar='G',
                     help='discount factor for rewards (default: 0.99)')
 parser.add_argument('--tau', type=float, default=1.00, metavar='T',
                     help='parameter for GAE (default: 1.00)')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
-parser.add_argument('--num-steps', type=int, default=10, metavar='NS',
+parser.add_argument('--num-steps', type=int, default=5, metavar='NS',
                     help='number of forward steps in A3C (default: 500)')
 parser.add_argument('--num-updates', type=int, default=50, metavar='NU',
                     help='number of updates between tests (default: 100)')
