@@ -49,7 +49,7 @@ path_len_std = 0
 env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
         hypothesis_enabled=False, path_len_mean=path_len_mean,
         path_len_std=path_len_std, print_results=False)
-data_dir = 'data/reverse_env'
+
 if len(args.file_name) > 0:
     model_name = args.file_name
 else:
@@ -61,31 +61,24 @@ else:
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
         model_name)
 
-# Immediately mark file as used so that other programs don't think it's untaken yet
-Path(config.file_to_save_session_info).touch()
-
-config.cnn = False
-config.environment = env
 if len(args.info) > 0:
     config.info = args.info
 else:
-    config.info = 'testing how fc compares to cnn of previous round'
+    config.info = 'testing how cnn compares to fc'
 
+config.environment = env
 config.no_random = False # if True, disables random actions but still trains
 config.num_episodes_to_run = args.num_eps
 config.save_every_n_episodes = args.save_every
 config.save_results = not args.no_save
-# config.starting_episode_number = 5
 config.use_GPU = torch.cuda.is_available() and not args.no_gpu
-print('Using GPU? {}'.format(config.use_GPU))
-config.flush = False
-# for plotting
-config.visualise_overall_agent_results = False
+config.flush = False # when logging performance each episode
+config.visualise_overall_agent_results = False # for plotting
 config.visualise_individual_results = False # otherwise does it twice
 
 config.load_model = False
-config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
-
+config.file_to_load_model = None
+# config.starting_episode_number = 5 # in case you want to resume training
 
 config.hyperparameters = {
     'DQN_Agents': {
@@ -96,19 +89,19 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [128],
-        'final_layer_activation': None,
-        'y_range': (-1, str_len),
-        'batch_norm': False,
         'gradient_clipping_norm': 5,
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
         'clip_rewards': False,
+        'net_type': 'CNN',
+#        'FC': {
+#            "linear_hidden_units": [128]*2,
+#            "y_range": (-str_len, str_len),
+#        },
         'CNN': {
             'num_conv_layers': args.num_layers,
-            'linear_hidden_units': [128, 128],
-            'y_range': (-1, str_len),
-            'batch_norm': False,
+            'linear_hidden_units': [128]*2,
+            'y_range': (-str_len, str_len),
         }
     }
 }

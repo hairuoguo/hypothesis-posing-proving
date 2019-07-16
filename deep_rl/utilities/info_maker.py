@@ -1,6 +1,6 @@
 import datetime
 
-def make_info_string(*argv)
+def make_info_string(*argv):
     '''
         Puts the values of the variables of each argument into a string form for
         easy recording of training run parameters.

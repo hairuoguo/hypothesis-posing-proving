@@ -2,7 +2,8 @@ import os
 import numpy as np
 
 def get_unused_filepaths(model_name, format_str='_({})'):
-    folders = ['data/data', '/om/user/salford/models'
+#    folders = ['data/data', '/om/user/salford/models'
+    folders = ['data/data', '/Users/alfordsimon/data'
             ,'data/plots', 'data/info']
     exts = ['.pkl', '.pt', '.png', '.txt']
     i = 0

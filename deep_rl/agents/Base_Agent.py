@@ -339,30 +339,47 @@ class Base_Agent(object):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
     def create_NN(self, input_dim, output_dim, key_to_use=None, override_seed=None, hyperparameters=None):
+        print('input dim: {}'.format(input_dim))
         """Creates a neural network for the agents to use"""
         if hyperparameters is None: hyperparameters = self.hyperparameters
         if key_to_use: hyperparameters = hyperparameters[key_to_use]
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        default_hyperparameter_choices = {"output_activation": None,
-                "hidden_activations": "relu",
-                "dropout": 0.0,
-                "initialiser": "default",
-                "batch_norm": False,
-                "columns_of_data_to_be_embedded": [],
-                "embedding_dimensions": [],
-                "y_range": (),
-                }
+        if hyperparameters['net_type'] == 'CNN':
+            hyperparameters = hyperparameters['CNN']
+            default_hyperparameter_choices = {"batch_norm": False,
+                    "num_conv_layers": 3,
+                    "linear_hidden_units": [128],
+                    "y_range": ()
+                    }
 
-        for key in default_hyperparameter_choices:
-            if key not in hyperparameters.keys():
-                hyperparameters[key] = default_hyperparameter_choices[key]
+            for key in default_hyperparameter_choices:
+                if key not in hyperparameters.keys():
+                    hyperparameters[key] = default_hyperparameter_choices[key]
 
-        if self.config.cnn:
             return CNN(input_dim, output_dim,
-                    self.config.hyperparameters['CNN']).to(self.device)
-        else:
+                    batch_norm=hyperparameters['batch_norm'],
+                    num_conv_layers=hyperparameters['num_conv_layers'],
+                    linear_hidden_units=hyperparameters['linear_hidden_units'],
+                    y_range=hyperparameters['y_range']).to(self.device)
+
+        elif self.hyperparameters['net_type'] == 'FC':
+            hyperparameters = hyperparameters['FC']
+            default_hyperparameter_choices = {"final_layer_activation": None,
+                    "hidden_activations": "relu",
+                    "dropout": 0.0,
+                    "initialiser": "default",
+                    "batch_norm": False,
+                    "columns_of_data_to_be_embedded": [],
+                    "embedding_dimensions": [],
+                    "y_range": (),
+                    }
+
+            for key in default_hyperparameter_choices:
+                if key not in hyperparameters.keys():
+                    hyperparameters[key] = default_hyperparameter_choices[key]
+
             return NN(input_dim=input_dim,
                     layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
                     output_activation=hyperparameters["final_layer_activation"],
