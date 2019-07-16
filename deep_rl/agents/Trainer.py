@@ -127,7 +127,7 @@ class Trainer(object):
             self.environment_name = agent.environment_title
             print(agent.hyperparameters)
             print("RANDOM SEED " , agent_config.seed)
-            # workaround so that you can save every n episodes.
+            # workaround so that you can save every n episodes. 
             game_scores, rolling_scores, time_taken = agent.run_n_episodes(
                    results_to_save=self.results, agent_results=agent_results)
             print("Time taken: {}".format(time_taken), flush=True)

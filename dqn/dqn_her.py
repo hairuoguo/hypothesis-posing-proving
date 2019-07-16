@@ -88,7 +88,6 @@ config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
 
 
 config.hyperparameters = {
-    'reverse_env': env,
     'DQN_Agents': {
         'learning_rate': 0.001,
         'batch_size': 128,
