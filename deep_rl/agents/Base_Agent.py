@@ -7,16 +7,18 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
+from deep_rl.nn_builder.pytorch.cnn2 import CNN
 # from tensorboardX import SummaryWriter
 from torch.optim import optimizer
+import pickle
 
 class Base_Agent(object):
 
     def __init__(self, config):
+        self.config = config
         self.logger = self.setup_logger()
         self.debug_mode = config.debug_mode
         # if self.debug_mode: self.tensorboard = SummaryWriter()
-        self.config = config
         self.set_random_seeds(config.seed)
         self.environment = config.environment
         self.environment_title = self.get_environment_title()
@@ -43,7 +45,7 @@ class Base_Agent(object):
         self.device = "cuda:0" if config.use_GPU else "cpu"
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
-        self.turn_off_exploration = False
+        self.turn_off_exploration = config.no_random
         gym.logger.set_level(40)  # stops it from printing an unnecessary warning
         self.log_game_info()
 
@@ -115,6 +117,8 @@ class Base_Agent(object):
 
     def setup_logger(self):
         """Sets up the logger"""
+        if not self.config.log_training:
+            return logging.getLogger('dummy')
         filename = "Training.log"
         if os.path.isfile(filename): os.remove(filename)
         logger = logging.getLogger(__name__)
@@ -172,7 +176,9 @@ class Base_Agent(object):
         self.episode_next_states.append(self.next_state)
         self.episode_dones.append(self.done)
 
-    def run_n_episodes(self, num_episodes=None, show_whether_achieved_goal=True, save_and_print_results=True):
+    def run_n_episodes(self, num_episodes=None,
+           show_whether_achieved_goal=False, save_and_print_results=True,
+           results_to_save=None, agent_results=None):
         """Runs game to completion n times and then summarises results and saves model (if asked to)"""
         if num_episodes is None: num_episodes = self.config.num_episodes_to_run
         start = time.time()
@@ -180,10 +186,32 @@ class Base_Agent(object):
             self.reset_game()
             self.step()
             if save_and_print_results: self.save_and_print_result()
+            if self.config.save_every_n_episodes and (self.episode_number %
+                    self.config.save_every_n_episodes == 0):
+                print('\n') # so model parameters print statement shows up
+                self.locally_save_policy()
+                self.save_running_results(self.game_full_episode_scores,
+                        self.rolling_results, time.time() - start,
+                        results_to_save, agent_results)
+
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_at_all and self.config.save_model: self.locally_save_policy()
+        if self.config.save_results: self.locally_save_policy()
         return self.game_full_episode_scores, self.rolling_results, time_taken
+
+
+    def save_running_results(self, game_scores, rolling_scores, time_taken,
+            results_to_save, agent_results):
+        agent_running_result = [game_scores, rolling_scores,
+                len(rolling_scores), -1 * max(rolling_scores), time_taken]
+        results_to_save[self.agent_name] = (agent_results +
+                [agent_running_result])
+
+        with open(self.config.file_to_save_data_results, 'wb') as f:
+            pickle.dump(results_to_save, f, pickle.HIGHEST_PROTOCOL)
+
+        print('saved running data at ' + self.config.file_to_save_data_results)
+
 
     def conduct_action(self, action):
         """Conducts an action in the environment"""
@@ -222,7 +250,10 @@ class Base_Agent(object):
         text = """"\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}"""
         sys.stdout.write(text.format(self.episode_number, self.rolling_results[-1], self.max_rolling_score_seen,
                                      self.game_full_episode_scores[-1], self.max_episode_score_seen))
-        sys.stdout.flush()
+        if self.config.flush:
+            sys.stdout.flush()
+        else: sys.stdout.write('\n')
+
 
     def show_whether_achieved_goal(self):
         """Prints out whether the agent achieved the environment target goal"""
@@ -314,22 +345,37 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        default_hyperparameter_choices = {"output_activation": None, "hidden_activations": "relu", "dropout": 0.0,
-                                          "initialiser": "default", "batch_norm": False,
-                                          "columns_of_data_to_be_embedded": [],
-                                          "embedding_dimensions": [], "y_range": ()}
+        default_hyperparameter_choices = {"output_activation": None,
+                "hidden_activations": "relu",
+                "dropout": 0.0,
+                "initialiser": "default",
+                "batch_norm": False,
+                "columns_of_data_to_be_embedded": [],
+                "embedding_dimensions": [],
+                "y_range": (),
+                }
 
         for key in default_hyperparameter_choices:
             if key not in hyperparameters.keys():
                 hyperparameters[key] = default_hyperparameter_choices[key]
 
-        return NN(input_dim=input_dim, layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
-                  output_activation=hyperparameters["final_layer_activation"],
-                  batch_norm=hyperparameters["batch_norm"], dropout=hyperparameters["dropout"],
-                  hidden_activations=hyperparameters["hidden_activations"], initialiser=hyperparameters["initialiser"],
-                  columns_of_data_to_be_embedded=hyperparameters["columns_of_data_to_be_embedded"],
-                  embedding_dimensions=hyperparameters["embedding_dimensions"], y_range=hyperparameters["y_range"],
-                  random_seed=seed).to(self.device)
+        if self.config.cnn:
+            return CNN(input_dim, output_dim,
+                    self.config.hyperparameters['CNN']).to(self.device)
+        else:
+            return NN(input_dim=input_dim,
+                    layers_info=hyperparameters["linear_hidden_units"] + [output_dim],
+                    output_activation=hyperparameters["final_layer_activation"],
+                    batch_norm=hyperparameters["batch_norm"],
+                    dropout=hyperparameters["dropout"],
+                    hidden_activations=hyperparameters["hidden_activations"],
+                    initialiser=hyperparameters["initialiser"],
+                    columns_of_data_to_be_embedded=hyperparameters[
+                        "columns_of_data_to_be_embedded"],
+                    embedding_dimensions=hyperparameters[
+                        "embedding_dimensions"],
+                    y_range=hyperparameters["y_range"],
+                    random_seed=seed).to(self.device)
 
     def turn_on_any_epsilon_greedy_exploration(self):
         """Turns off all exploration with respect to the epsilon greedy exploration strategy"""

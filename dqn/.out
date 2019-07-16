@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "dqn_her.py", line 25, in <module>
+    num_obscured)
+  File "../bitenvs/reverse_gym_env.py", line 22, in __init__
+    num_obscured)
+  File "../bitenvs/reverse_env.py", line 121, in __init__
+    assert str_len > 0 and reverse_len > 0
+TypeError: '>' not supported between instances of 'str' and 'int'
+Traceback (most recent call last):
+  File "dqn_her.py", line 25, in <module>
+    num_obscured)
+  File "../bitenvs/reverse_gym_env.py", line 22, in __init__
+    num_obscured)
+  File "../bitenvs/reverse_env.py", line 121, in __init__
+    assert str_len > 0 and reverse_len > 0
+TypeError: '>' not supported between instances of 'str' and 'int'
+Traceback (most recent call last):
+  File "dqn_her.py", line 25, in <module>
+    num_obscured)
+  File "../bitenvs/reverse_gym_env.py", line 22, in __init__
+    num_obscured)
+  File "../bitenvs/reverse_env.py", line 121, in __init__
+    assert str_len > 0 and reverse_len > 0
+TypeError: '>' not supported between instances of 'str' and 'int'
+Traceback (most recent call last):
+  File "dqn_her.py", line 25, in <module>
+    num_obscured)
+  File "../bitenvs/reverse_gym_env.py", line 22, in __init__
+    num_obscured)
+  File "../bitenvs/reverse_env.py", line 121, in __init__
+    assert str_len > 0 and reverse_len > 0
+TypeError: '>' not supported between instances of 'str' and 'int'
+Traceback (most recent call last):
+  File "dqn_her.py", line 25, in <module>
+    num_obscured)
+  File "../bitenvs/reverse_gym_env.py", line 22, in __init__
+    num_obscured)
+  File "../bitenvs/reverse_env.py", line 121, in __init__
+    assert str_len > 0 and reverse_len > 0
+TypeError: '>' not supported between instances of 'str' and 'int'

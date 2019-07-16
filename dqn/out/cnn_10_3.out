@@ -1,0 +1,22 @@
+Using GPU? True
+AGENT NAME: DQN_HER
+[1m1.1: DQN_HER[0m
+TITLE  ReverseEnv: (10, 3, 1, 0)
+Traceback (most recent call last):
+  File "dqn_her.py", line 99, in <module>
+    trainer.run_games_for_agents()
+  File "../deep_rl/agents/Trainer.py", line 82, in run_games_for_agents
+    self.run_games_for_agent(agent_number + 1, agent_class)
+  File "../deep_rl/agents/Trainer.py", line 128, in run_games_for_agent
+    agent = agent_class(agent_config)
+  File "../deep_rl/agents/DQN_agents/DQN_HER.py", line 8, in __init__
+    DQN.__init__(self, config)
+  File "../deep_rl/agents/DQN_agents/DQN.py", line 19, in __init__
+    self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size)
+  File "../deep_rl/agents/Base_Agent.py", line 339, in create_NN
+    self.config.hyperparameters['CNN']).to(self.device)
+  File "../deep_rl/nn_builder/pytorch/cnn2.py", line 40, in __init__
+    self.linear_hidden_units[i+1]) for i in range(len(self.linear_hidden_units))])
+  File "../deep_rl/nn_builder/pytorch/cnn2.py", line 40, in <listcomp>
+    self.linear_hidden_units[i+1]) for i in range(len(self.linear_hidden_units))])
+IndexError: list index out of range

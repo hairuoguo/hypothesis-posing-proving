@@ -7,12 +7,17 @@ import tkinter as tk
 import tkinter.font as font
 
 
-def play_game(str_len, reverse_len, offset, num_obscured):
-    print(f'Game with string length = {str_len}, reverse size = {reverse_len}, offset = {offset}.')
+def play_game(str_len, reverse_len, offset, num_obscured, path_len_mean=5,
+        path_len_std=0.5):
+    print(f''''Game with string length = {str_len}, reverse size = {reverse_len},
+            offset = {offset}, path length mean = {path_len_mean}, path length
+            standard deviation = {path_len_std}.''')
     steps_taken = []
     n_steps = 0
 
-    env = ReverseEnv(str_len, reverse_len, offset, num_obscured)
+    env = ReverseEnv(str_len, reverse_len, offset, num_obscured,
+            hypothesis_enabled=False, path_len_mean=path_len_mean,
+            path_len_std=path_len_std)
     ep = env.start_ep()
     n_actions = len(env.actions_list)
 
@@ -22,11 +27,13 @@ def play_game(str_len, reverse_len, offset, num_obscured):
 
     def press(i):
         nonlocal n_steps
+        nonlocal str_len
         n_steps += 1
         lm = leftmost(i)
         action = int(lm / offset)
         nonlocal ep
         obs, _, reward, done = ep.make_action(action) # pivot is one left
+        done = done or n_steps == str_len
         if not done:
             for i, b in enumerate(current_buttons):
                 b.config(text=str(obs[i]))
@@ -55,7 +62,6 @@ def play_game(str_len, reverse_len, offset, num_obscured):
     def ununderline(i):
         for b in current_buttons[leftmost(i):rightmost(i)+1]:
             b.config(font=tahoma_small)
-
 
 
     root = tk.Tk()
@@ -121,9 +127,21 @@ def play_game(str_len, reverse_len, offset, num_obscured):
     root.mainloop()
 
     print('Steps taken each game: ' + str(steps_taken))
+    print('reverse env config: ')
+    print('\n'.join(str.format('{0}: {1}',k,v) for k, v in vars(env).items()))
 
 
 if __name__ == '__main__':
-    str_len, reverse_len, offset = map(int, sys.argv[1:])
+    if len(sys.argv) == 4:
+        str_len, reverse_len, offset = map(int, sys.argv[1:])
+        path_len_mean = 5
+        path_len_std = 0.5
+    elif len(sys.argv) == 5:
+        str_len, reverse_len, offset, path_len_mean = map(int, sys.argv[1:])
+        path_len_std = 0
+    elif len(sys.argv) == 6:
+        str_len, reverse_len, offset, path_len_mean, path_len_std = map(int, sys.argv[1:])
+
     num_obscured = 0
-    play_game(str_len, reverse_len, offset, num_obscured)
+    play_game(str_len, reverse_len, offset, num_obscured, path_len_mean,
+            path_len_std)

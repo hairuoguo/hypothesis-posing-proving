@@ -17,7 +17,8 @@ class DDQN_Wrapper(Base_Agent):
         super().__init__(config)
         self.end_of_episode_symbol = end_of_episode_symbol
         self.global_action_id_to_primitive_actions = global_action_id_to_primitive_actions
-        self.memory = Replay_Buffer(self.hyperparameters["buffer_size"], self.hyperparameters["batch_size"], config.seed)
+        self.memory = Replay_Buffer(self.hyperparameters["buffer_size"],
+                self.hyperparameters["batch_size"], config.seed, config.use_GPU)
         self.exploration_strategy = Epsilon_Greedy_Exploration(config)
 
         self.oracle = self.create_oracle()

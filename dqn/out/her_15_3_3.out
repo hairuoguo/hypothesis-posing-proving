@@ -1,0 +1,62 @@
+AGENT NAME: DQN_HER
+[1m1.1: DQN_HER[0m
+TITLE  ReverseEnv: (15, 3, 1, 0)
+{'learning_rate': 0.001, 'batch_size': 128, 'buffer_size': 100000, 'epsilon_decay_rate_denominator': 150, 'discount_rate': 0.999, 'incremental_td_error': 1e-08, 'update_every_n_steps': 1, 'linear_hidden_units': [4096, 4096, 4096], 'final_layer_activation': None, 'y_range': (-1, 15), 'batch_norm': False, 'gradient_clipping_norm': 5, 'HER_sample_proportion': 0.8, 'learning_iterations': 1, 'clip_rewards': False, 'output_activation': None, 'hidden_activations': 'relu', 'dropout': 0.0, 'initialiser': 'default', 'columns_of_data_to_be_embedded': [], 'embedding_dimensions': []}
+RANDOM SEED  422529625
+" Episode 1, Score:  15.00, Max score seen:  15.00, Rolling score:  15.00, Max rolling score seen:  inf
+" Episode 2, Score:  15.00, Max score seen:  15.00, Rolling score:  15.00, Max rolling score seen:  inf
+" Episode 3, Score:  10.00, Max score seen:  10.00, Rolling score:  13.33, Max rolling score seen:  inf
+" Episode 4, Score:  15.00, Max score seen:  10.00, Rolling score:  13.75, Max rolling score seen:  inf
+" Episode 5, Score:  15.00, Max score seen:  10.00, Rolling score:  14.00, Max rolling score seen:  inf
+" Episode 6, Score:  15.00, Max score seen:  10.00, Rolling score:  14.17, Max rolling score seen:  inf
+" Episode 7, Score:  15.00, Max score seen:  10.00, Rolling score:  14.29, Max rolling score seen:  inf
+" Episode 8, Score:  15.00, Max score seen:  10.00, Rolling score:  14.38, Max rolling score seen:  inf
+" Episode 9, Score:  15.00, Max score seen:  10.00, Rolling score:  14.44, Max rolling score seen:  inf
+" Episode 10, Score:  15.00, Max score seen:  10.00, Rolling score:  14.50, Max rolling score seen:  inf
+" Episode 11, Score:  15.00, Max score seen:  10.00, Rolling score:  14.55, Max rolling score seen:  inf
+" Episode 12, Score:  3.00, Max score seen:  3.00, Rolling score:  13.58, Max rolling score seen:  inf
+" Episode 13, Score:  15.00, Max score seen:  3.00, Rolling score:  13.69, Max rolling score seen:  inf
+" Episode 14, Score:  15.00, Max score seen:  3.00, Rolling score:  13.79, Max rolling score seen:  inf
+" Episode 15, Score:  15.00, Max score seen:  3.00, Rolling score:  13.87, Max rolling score seen:  inf
+" Episode 16, Score:  15.00, Max score seen:  3.00, Rolling score:  13.94, Max rolling score seen:  inf
+" Episode 17, Score:  15.00, Max score seen:  3.00, Rolling score:  14.00, Max rolling score seen:  inf
+" Episode 18, Score:  15.00, Max score seen:  3.00, Rolling score:  14.06, Max rolling score seen:  inf
+" Episode 19, Score:  15.00, Max score seen:  3.00, Rolling score:  14.11, Max rolling score seen:  inf
+" Episode 20, Score:  15.00, Max score seen:  3.00, Rolling score:  14.15, Max rolling score seen:  inf
+" Episode 21, Score:  15.00, Max score seen:  3.00, Rolling score:  14.19, Max rolling score seen:  inf
+" Episode 22, Score:  15.00, Max score seen:  3.00, Rolling score:  14.23, Max rolling score seen:  inf
+" Episode 23, Score:  15.00, Max score seen:  3.00, Rolling score:  14.26, Max rolling score seen:  inf
+" Episode 24, Score:  15.00, Max score seen:  3.00, Rolling score:  14.29, Max rolling score seen:  inf
+" Episode 25, Score:  15.00, Max score seen:  3.00, Rolling score:  14.32, Max rolling score seen:  inf
+" Episode 26, Score:  15.00, Max score seen:  3.00, Rolling score:  14.35, Max rolling score seen:  inf
+" Episode 27, Score:  15.00, Max score seen:  3.00, Rolling score:  14.37, Max rolling score seen:  inf
+" Episode 28, Score:  15.00, Max score seen:  3.00, Rolling score:  14.39, Max rolling score seen:  inf
+" Episode 29, Score:  15.00, Max score seen:  3.00, Rolling score:  14.41, Max rolling score seen:  inf
+" Episode 30, Score:  15.00, Max score seen:  3.00, Rolling score:  14.43, Max rolling score seen:  inf
+" Episode 31, Score:  15.00, Max score seen:  3.00, Rolling score:  14.45, Max rolling score seen:  inf
+" Episode 32, Score:  15.00, Max score seen:  3.00, Rolling score:  14.47, Max rolling score seen:  inf
+" Episode 33, Score:  15.00, Max score seen:  3.00, Rolling score:  14.48, Max rolling score seen:  inf
+" Episode 34, Score:  15.00, Max score seen:  3.00, Rolling score:  14.50, Max rolling score seen:  inf
+" Episode 35, Score:  15.00, Max score seen:  3.00, Rolling score:  14.51, Max rolling score seen:  inf
+" Episode 36, Score:  15.00, Max score seen:  3.00, Rolling score:  14.53, Max rolling score seen:  inf
+" Episode 37, Score:  15.00, Max score seen:  3.00, Rolling score:  14.54, Max rolling score seen:  inf
+" Episode 38, Score:  15.00, Max score seen:  3.00, Rolling score:  14.55, Max rolling score seen:  inf
+" Episode 39, Score:  15.00, Max score seen:  3.00, Rolling score:  14.56, Max rolling score seen:  inf
+" Episode 40, Score:  15.00, Max score seen:  3.00, Rolling score:  14.57, Max rolling score seen:  inf
+" Episode 41, Score:  15.00, Max score seen:  3.00, Rolling score:  14.59, Max rolling score seen:  inf
+" Episode 42, Score:  15.00, Max score seen:  3.00, Rolling score:  14.60, Max rolling score seen:  inf
+" Episode 43, Score:  15.00, Max score seen:  3.00, Rolling score:  14.60, Max rolling score seen:  inf
+" Episode 44, Score:  15.00, Max score seen:  3.00, Rolling score:  14.61, Max rolling score seen:  inf
+" Episode 45, Score:  15.00, Max score seen:  3.00, Rolling score:  14.62, Max rolling score seen:  inf
+" Episode 46, Score:  15.00, Max score seen:  3.00, Rolling score:  14.63, Max rolling score seen:  inf
+" Episode 47, Score:  15.00, Max score seen:  3.00, Rolling score:  14.64, Max rolling score seen:  inf
+" Episode 48, Score:  15.00, Max score seen:  3.00, Rolling score:  14.65, Max rolling score seen:  inf
+" Episode 49, Score:  15.00, Max score seen:  3.00, Rolling score:  14.65, Max rolling score seen:  inf
+" Episode 50, Score:  15.00, Max score seen:  3.00, Rolling score:  14.66, Max rolling score seen:  inf
+saved model parameters at data/reverse_env/models/her_15_3_1_0_(2).pt
+Time taken: 42.858914613723755
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+ 
+saved data at data/reverse_env/data/her_15_3_1_0_(2).pkl
+saved info at data/reverse_env/info/her_15_3_1_0_(2).txt

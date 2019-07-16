@@ -116,8 +116,11 @@ class EpState:
 class ReverseEnv:
     #should hold general information about environment
 
-    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False):
+    def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
+            hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
+            print_results = False):
         assert str_len > 0 and reverse_len > 0
+        self.print_results = print_results
         self.str_len = str_len #length of bitstring/bitarray
         self.reverse_len = reverse_len #length of each subsection that is reverse
         self.reverse_offset = reverse_offset # distance between start of each reversed section
@@ -125,10 +128,12 @@ class ReverseEnv:
         self.actions_list = None
         self.action_indices = None
         self.hypothesis_enabled = hypothesis_enabled
+        self.path_len_mean = path_len_mean
+        self.path_len_std = path_len_std
         self.__generate_func_list()
         self.__generate_indices()
         self.ep = None
-    
+
     def __generate_func_list(self): #generates list of actions that reverse substrings
         self.actions_list = [functools.partial(self.__reverse_substring, reverse_len=self.reverse_len, start_index=i) for i in range(0, self.str_len-self.reverse_len + 1, self.reverse_offset)]
 
@@ -160,7 +165,10 @@ class ReverseEnv:
         
 
     def start_ep(self):
-        self.ep = ReverseEpisode(copy.copy(self.actions_list), self.str_len, self.num_obscured, copy.copy(self.action_indices), self.reverse_len, self.reverse_offset)
+        self.ep = ReverseEpisode(copy.copy(self.actions_list), self.str_len,
+                self.num_obscured, copy.copy(self.action_indices),
+                self.reverse_len, self.reverse_offset, self.path_len_mean,
+                self.path_len_std, self.print_results)
         if self.hypothesis_enabled:
             self.hypothesis_enable_ep(self.ep)
         return self.ep
@@ -174,7 +182,10 @@ class ReverseEpisode:
     #should hold information about episode (str_len, reverse_len, etc)
 
     
-    def __init__(self, actions_list, str_len, num_obscured, action_indices, reverse_len, reverse_offset):
+    def __init__(self, actions_list, str_len, num_obscured, action_indices,
+            reverse_len, reverse_offset, path_len_mean, path_len_std,
+            print_results=False):
+#        print('\n')
         
         self.reverse_len = None
         self.reverse_offset = None
@@ -183,9 +194,13 @@ class ReverseEpisode:
         self.actions_list = actions_list 
         self.str_len = str_len
         self.state = None
-        #self.generate_strings(5, 0.5, 2, 0)
-        self.generate_strings(2, 0, 0, 0)
+        self.generate_strings(path_len_mean, path_len_std, 2, 0)
+        #self.generate_strings(3, 0, 0, 0)
         self.stats = EpStats() 
+        self.print_results = print_results
+        if self.print_results:
+            print(str(self.state.target) + ' = target')
+            print(str(self.state.hidden_state) + ' = starting')
 
 
     def make_action(self, action_index):
@@ -195,12 +210,14 @@ class ReverseEpisode:
         self.stats.max_poss_entropy_decrease.append(self.get_max_poss_entropy_decrease)
         self.state.make_action(self.actions_list[action_index])
         self.state.update_info()
-        #print(obs[0][:10], self.get_obs()[0][:10], action_index)
+#        #print(obs[0][:10], self.get_obs()[0][:10], action_index)
         isEnd = self.state.isEnd()
         if self.stats.path != None:
             self.stats.path.append(copy.deepcopy(self.state))
             self.stats.obs_action_reward.append((obs, action_index, self.get_reward()))
         self.stats.entropy_decrease.append(curr_entropy - self.state.entropy)
+        if self.print_results:
+            print(self.get_obs()[0][:self.str_len])
         return (self.get_obs()[0], self.get_obs()[1], self.get_reward(), isEnd)
 
     def get_reward(self):
@@ -237,7 +254,9 @@ class ReverseEpisode:
 
     def __generate_hypothesis_ep(self, path_len, num_questions):
         #method generates target from self.state with initial hidden string
-        question_indices = np.random.choice(range(path_len), num_questions, replace=False)#indices in path where we want to promote question-asking
+        #indices in path where we want to promote question-asking
+        question_indices = np.random.choice(range(path_len), num_questions,
+                replace=(num_questions > path_len))
         path = [] #list of states representing path that will be answer
         actions = [] #list of actions associated with path
         hidden_states = set() #states that algorithm has reached before
@@ -300,6 +319,7 @@ class ReverseEpisode:
     def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std, hidden_state=None):
         path_len = math.ceil(np.random.normal(path_len_m, path_len_std))
         num_qs = math.floor(np.random.normal(num_qs_m, num_qs_std))
+
         if hidden_state == None:
             hidden_state = np.random.choice([1, 0], size=self.str_len) #actual state
         hidden_indices = random.sample(range(self.str_len), self.num_obscured) #indicies of hidden states
@@ -313,7 +333,7 @@ class ReverseEpisode:
         else:
             self.state.target = target
             self.state.update_info()
-    
+
     ''' 
     def __generate_hypothesis_ep(self, path_len, num_questions):
         for n in range(len(self.actions_list)):

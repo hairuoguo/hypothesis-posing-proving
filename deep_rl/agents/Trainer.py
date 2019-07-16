@@ -6,6 +6,7 @@ import gym
 from gym import wrappers
 import numpy as np
 import matplotlib.pyplot as plt
+plt.ioff()
 
 class Trainer(object):
     """Runs games for given agents. Optionally will visualise and save the results"""
@@ -75,30 +76,27 @@ class Trainer(object):
 
     def run_games_for_agents(self):
         """Run a set of games for each agent. Optionally visualising and/or saving the results"""
+        if self.config.save_results:
+            with open(self.config.file_to_save_session_info, 'w+') as f:
+                f.write(self.config.info_string)
+            print('saved info at ' + self.config.file_to_save_session_info)
         self.results = self.create_object_to_store_results()
         for agent_number, agent_class in enumerate(self.agents):
             agent_name = agent_class.agent_name
             self.run_games_for_agent(agent_number + 1, agent_class)
             if self.config.visualise_overall_agent_results:
-                agent_rolling_score_results = [results[1] for results in  self.results[agent_name]]
+                agent_rolling_score_results = [results[1] for results in self.results[agent_name]]
                 self.visualise_overall_agent_results(agent_rolling_score_results, agent_name, show_mean_and_std_range=True)
-        if self.config.save_at_all and self.config.file_to_save_data_results:
+                if self.config.save_results:
+                    plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
+                    print('saved figure at ' + self.config.file_to_save_results_graph)
+        if self.config.save_results:
             self.save_obj(self.results, self.config.file_to_save_data_results)
             print('saved data at ' + self.config.file_to_save_data_results)
-        if self.config.save_at_all and self.config.file_to_save_results_graph:
-            plt.savefig(self.config.file_to_save_results_graph, bbox_inches="tight")
-            print('saved figure at ' + self.config.file_to_save_results_graph)
-        if self.config.save_at_all and self.config.file_to_save_session_info:
-            print(('Please enter a short description of the training session' 
-                + 'for future reference in info file.'))
-            desc = input('')
-            with open(self.config.file_to_save_session_info, 'w+') as f:
-                f.write(desc + '\n' + '\n'.join(
-                    str.format('{0}: {1}',k,v) for k, v in vars(self.config).items()))
-            print('saved info at ' + self.config.file_to_save_session_info)
             
         plt.show()
         return self.results
+
 
     def create_object_to_store_results(self):
         """Creates a dictionary that we will store the results in if it doesn't exist, otherwise it loads it up"""
@@ -129,15 +127,19 @@ class Trainer(object):
             self.environment_name = agent.environment_title
             print(agent.hyperparameters)
             print("RANDOM SEED " , agent_config.seed)
-            game_scores, rolling_scores, time_taken = agent.run_n_episodes()
+            # workaround so that you can save every n episodes.
+            game_scores, rolling_scores, time_taken = agent.run_n_episodes(
+                   results_to_save=self.results, agent_results=agent_results)
             print("Time taken: {}".format(time_taken), flush=True)
             self.print_two_empty_lines()
-            agent_results.append([game_scores, rolling_scores, len(rolling_scores), -1 * max(rolling_scores), time_taken])
+            agent_results.append([game_scores, rolling_scores,
+                len(rolling_scores), -1 * max(rolling_scores), time_taken])
             if self.config.visualise_individual_results:
                 self.visualise_overall_agent_results([rolling_scores], agent_name, show_each_run=True)
                 plt.show()
             agent_round += 1
         self.results[agent_name] = agent_results
+
 
     def environment_has_changeable_goals(self, env):
         """Determines whether environment is such that for each episode there is a different goal or not"""

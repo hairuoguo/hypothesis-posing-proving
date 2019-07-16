@@ -9,7 +9,8 @@ class DDQN_With_Prioritised_Experience_Replay(DDQN):
 
     def __init__(self, config):
         DDQN.__init__(self, config)
-        self.memory = Prioritised_Replay_Buffer(self.hyperparameters, config.seed)
+        self.memory = Prioritised_Replay_Buffer(self.hyperparameters,
+                config.seed, config.use_GPU)
 
     def learn(self):
         """Runs a learning iteration for the Q network after sampling from the replay buffer in a prioritised way"""

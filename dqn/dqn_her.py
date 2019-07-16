@@ -7,50 +7,88 @@ from deep_rl.agents.DQN_agents.DQN_HER_alt import DQN_HER_alt
 from deep_rl.agents.Trainer import Trainer
 from deep_rl.utilities.data_structures.Config import Config
 from deep_rl.agents.DQN_agents.DQN import DQN
-# to get the Deep RL modules accessible
 from bitenvs.reverse_gym_env import ReverseGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
+import argparse
+import torch
+import deep_rl.utilities.info_maker as info_maker
+from pathlib import Path
 
+parser = argparse.ArgumentParser(description='DQN-HER parameters')
+parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int, 
+        help='string length of Reverse Environment')
+parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
+        help='length of reversal operation')
+parser.add_argument('-w', '--layer_size', default=128, metavar='W', type=int, 
+        help='layer size in network')
+parser.add_argument('-d', '--num_layers', default=2, metavar='D', type=int, 
+        help='number of fc layers in network')
+parser.add_argument('-e', '--num_eps', default=10000, metavar='E', type=int, 
+        help='number of episodes to run')
+parser.add_argument('-sr', '--save_every', default=10000, metavar='A', type=int, 
+        help='save data & model every _ episodes')
+parser.add_argument('-l', '--path_len', default=5, metavar='L', type=int, 
+        help='path length mean for Reverse Environment')
+parser.add_argument('-f', '--file_name', default='', metavar='F', type=str, 
+        help='file name to save data, model, info, plot with')
+parser.add_argument('-i', '--info', default='', metavar='I', type=str, 
+        help='info string for training run')
+parser.add_argument("--no_save", help="don't save results", action="store_true")
+parser.add_argument("--no_gpu", help="don't use gpu", action="store_true")
+
+args = parser.parse_args()
 config = Config()
 
-str_len = 10
-reverse_len = 3
+str_len = args.str_len
+reverse_len = args.reverse_len
 reverse_offset = 1
 num_obscured = 0
+path_len_mean = args.path_len
+path_len_std = 0
 
-config.environment = ReverseGymEnv(str_len, reverse_len, reverse_offset,
-        num_obscured)
-data_dir = '/Users/alfordsimon/Python/hypothesis-posing-proving/dqn/data/reverse_env'
-model_name = str.format('her_{0}_{1}_{2}_{3}', str_len,
-        reverse_len, reverse_offset, num_obscured)
+env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
+        hypothesis_enabled=False, path_len_mean=path_len_mean,
+        path_len_std=path_len_std, print_results=False)
+data_dir = 'data/reverse_env'
+if len(args.file_name) > 0:
+    model_name = args.file_name
+else:
+    model_name = str.format('fc2_{0}_{1}_l{2}', str_len, reverse_len, path_len_mean)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
  config.file_to_save_results_graph,
- config.file_to_save_session_info) = file_numberer.get_unused_filepaths(data_dir,
-         model_name)
+ config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
+        model_name)
 
-config.seed = 1
-config.num_episodes_to_run = 2
-config.starting_episode_number=1000
-config.show_solution_score = False
-config.visualise_individual_results = False
-config.visualise_overall_agent_results = True
-config.standard_deviation_results = 1.0
-config.runs_per_agent = 1
-config.use_GPU = False
-config.overwrite_existing_results_file = True
-config.randomise_random_seed = True
-config.save_model = False
-config.seed = 1
+# Immediately mark file as used so that other programs don't think it's untaken yet
+Path(config.file_to_save_session_info).touch()
 
-config.load_model = True
-config.file_to_load_model = data_dir + '/models/' + model_name + '_(1).pt'
-config.save_at_all = False
+config.cnn = False
+config.environment = env
+if len(args.info) > 0:
+    config.info = args.info
+else:
+    config.info = 'testing how fc compares to cnn of previous round'
 
+config.no_random = False # if True, disables random actions but still trains
+config.num_episodes_to_run = args.num_eps
+config.save_every_n_episodes = args.save_every
+config.save_results = not args.no_save
+# config.starting_episode_number = 5
+config.use_GPU = torch.cuda.is_available() and not args.no_gpu
+print('Using GPU? {}'.format(config.use_GPU))
+config.flush = False
+# for plotting
+config.visualise_overall_agent_results = False
+config.visualise_individual_results = False # otherwise does it twice
+
+config.load_model = False
+config.file_to_load_model = data_dir + '/models/' + model_name + '.pt'
 
 
 config.hyperparameters = {
+    'reverse_env': env,
     'DQN_Agents': {
         'learning_rate': 0.001,
         'batch_size': 128,
@@ -59,21 +97,26 @@ config.hyperparameters = {
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
-        'linear_hidden_units': [64, 64],
+        'linear_hidden_units': [128],
         'final_layer_activation': None,
-#        'y_range': (0, 1),
         'y_range': (-1, str_len),
         'batch_norm': False,
         'gradient_clipping_norm': 5,
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
-        'clip_rewards': False
+        'clip_rewards': False,
+        'CNN': {
+            'num_conv_layers': args.num_layers,
+            'linear_hidden_units': [128, 128],
+            'y_range': (-1, str_len),
+            'batch_norm': False,
+        }
     }
 }
 
+config.info_string = info_maker.make_info_string(config, env.env)
+
 if __name__== '__main__':
-    AGENTS = [DQN_HER_alt]
+    AGENTS = [DQN_HER]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
-
-
