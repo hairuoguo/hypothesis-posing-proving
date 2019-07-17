@@ -10,7 +10,7 @@ class Config(object):
         self.file_to_save_model = None
         self.runs_per_agent = 1
         self.visualise_overall_agent_results = True
-        self.visualise_individual_results = True
+        self.visualise_individual_results = False
         self.hyperparameters = None
         self.use_GPU = None
         self.overwrite_existing_results_file = None

@@ -12,7 +12,6 @@ import deep_rl.utilities.file_numberer as file_numberer
 import argparse
 import torch
 import deep_rl.utilities.info_maker as info_maker
-from pathlib import Path
 
 parser = argparse.ArgumentParser(description='DQN-HER parameters')
 parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int, 
@@ -53,7 +52,7 @@ env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
 if len(args.file_name) > 0:
     model_name = args.file_name
 else:
-    model_name = str.format('fc2_{0}_{1}_l{2}', str_len, reverse_len, path_len_mean)
+    model_name = str.format('all_conv_{0}_{1}_L{2}', str_len, reverse_len, path_len_mean)
 
 (config.file_to_save_data_results,
  config.file_to_save_model,
@@ -64,7 +63,7 @@ else:
 if len(args.info) > 0:
     config.info = args.info
 else:
-    config.info = 'testing how cnn compares to fc'
+    config.info = 'testing all_conv net'
 
 config.environment = env
 config.no_random = False # if True, disables random actions but still trains
@@ -72,9 +71,8 @@ config.num_episodes_to_run = args.num_eps
 config.save_every_n_episodes = args.save_every
 config.save_results = not args.no_save
 config.use_GPU = torch.cuda.is_available() and not args.no_gpu
-config.flush = False # when logging performance each episode
-config.visualise_overall_agent_results = False # for plotting
-config.visualise_individual_results = False # otherwise does it twice
+config.flush = True # when logging performance each episode
+config.visualise_overall_agent_results = True # for plotting
 
 config.load_model = False
 config.file_to_load_model = None
@@ -93,16 +91,12 @@ config.hyperparameters = {
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
         'clip_rewards': False,
-        'net_type': 'CNN',
-#        'FC': {
-#            "linear_hidden_units": [128]*2,
-#            "y_range": (-str_len, str_len),
-#        },
-        'CNN': {
-            'num_conv_layers': args.num_layers,
-            'linear_hidden_units': [128]*2,
-            'y_range': (-str_len, str_len),
-        }
+        'net_type': 'CNN3',
+        'y_range': (-1, str_len),
+#       "linear_hidden_units": [128]*2,
+#        'num_conv_layers': args.num_layers,
+#        'linear_hidden_units': [128]*2,
+#        'y_range': (-str_len, str_len),
     }
 }
 

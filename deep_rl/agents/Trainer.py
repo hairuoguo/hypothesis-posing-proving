@@ -6,6 +6,7 @@ import gym
 from gym import wrappers
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 plt.ioff()
 
 class Trainer(object):
@@ -75,9 +76,9 @@ class Trainer(object):
         return agent_to_color_dictionary
 
     def run_games_for_agents(self):
-        print('Using GPU? {}'.format(config.use_GPU))
+        print('Using GPU? {}'.format(self.config.use_GPU))
         # Immediately mark file as used so that other programs don't think it's untaken yet
-        Path(config.file_to_save_session_info).touch()
+        Path(self.config.file_to_save_session_info).touch()
 
         """Run a set of games for each agent. Optionally visualising and/or saving the results"""
         if self.config.save_results:

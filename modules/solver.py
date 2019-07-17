@@ -9,9 +9,6 @@ class Solver(nn.Module):
     """
     Module which puts together the attention and all conv modules to create a
     solver for the Reverse Environment.
-
-    General procedure:
-
     """
 
     def __init__(self, input_dim, output_dim):

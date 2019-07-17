@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import numpy as np
-from deep_rl.nn_builder.pytorch.Base_Network import Base_Network
 import torch.nn.functional as F
 
 class CNN(nn.Module):
@@ -23,10 +21,10 @@ class CNN(nn.Module):
         # don't think Conv net is good to mapping to larger space
 
         # L_out = L_in + 2*padding - kernel_size + 1
-        conv1 = torch.nn.Conv1d(1, 10, 3, stride=1, padding=1, bias=True)
+        conv1 = torch.nn.Conv1d(1, 10, 3, stride=1, padding=1)
 
         self.conv_layers = nn.ModuleList([conv1] 
-                + [torch.nn.Conv1d(10, 10, 3, stride=1, padding=1, bias=True) 
+                + [torch.nn.Conv1d(10, 10, 3, stride=1, padding=1) 
                     for _ in range(self.num_conv_layers-1)])
 
         print('conv layers: {}'.format(len(self.conv_layers)))
@@ -39,15 +37,19 @@ class CNN(nn.Module):
                     for i in range(len(self.linear_hidden_units)-1)])
 
     def forward(self, x):
-        print('shape: {}'.format(x.shape))
         # reshape to (batch_size, num_channels, length)
         x = x.view(-1, 1, self.input_dim)
+
         for layer in self.conv_layers:
             x = F.relu(layer(x))
 
         x = x.view(-1, 10*self.input_dim)
-        for layer in self.fc_layers:
+
+        for layer in self.fc_layers[:-1]:
             x = F.relu(layer(x))
+
+        # don't want relu for the last layer
+        x = self.fc_layers[-1](x)
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -

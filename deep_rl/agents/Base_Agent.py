@@ -8,7 +8,7 @@ import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
 from deep_rl.nn_builder.pytorch.cnn2 import CNN
-# from tensorboardX import SummaryWriter
+from modules.cnn import CNN as CNN3
 from torch.optim import optimizer
 import pickle
 
@@ -339,33 +339,27 @@ class Base_Agent(object):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
     def create_NN(self, input_dim, output_dim, key_to_use=None, override_seed=None, hyperparameters=None):
-        print('input dim: {}'.format(input_dim))
         """Creates a neural network for the agents to use"""
         if hyperparameters is None: hyperparameters = self.hyperparameters
         if key_to_use: hyperparameters = hyperparameters[key_to_use]
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        if hyperparameters['net_type'] == 'CNN':
-            hyperparameters = hyperparameters['CNN']
-            default_hyperparameter_choices = {"batch_norm": False,
-                    "num_conv_layers": 3,
-                    "linear_hidden_units": [128],
-                    "y_range": ()
-                    }
+        if hyperparameters['net_type'] == 'CNN3':
+            return CNN3(input_dim, output_dim,
+                    y_range=hyperparameters['y_range']).to(self.device)
 
-            for key in default_hyperparameter_choices:
-                if key not in hyperparameters.keys():
-                    hyperparameters[key] = default_hyperparameter_choices[key]
+        elif hyperparameters['net_type'] == 'all_conv':
+            return AllConvNet1D(input_dim, output_dim,
+            y_range=hyperparameters['y_range']).to(self.device)
 
+        elif hyperparameters['net_type'] == 'CNN':
             return CNN(input_dim, output_dim,
-                    batch_norm=hyperparameters['batch_norm'],
                     num_conv_layers=hyperparameters['num_conv_layers'],
                     linear_hidden_units=hyperparameters['linear_hidden_units'],
                     y_range=hyperparameters['y_range']).to(self.device)
 
         elif self.hyperparameters['net_type'] == 'FC':
-            hyperparameters = hyperparameters['FC']
             default_hyperparameter_choices = {"final_layer_activation": None,
                     "hidden_activations": "relu",
                     "dropout": 0.0,
@@ -393,6 +387,9 @@ class Base_Agent(object):
                         "embedding_dimensions"],
                     y_range=hyperparameters["y_range"],
                     random_seed=seed).to(self.device)
+        else:
+            raise ValueError('invalid net_type hyperparameter: {}'
+                    .format(self.hyperparameters['net_type']))
 
     def turn_on_any_epsilon_greedy_exploration(self):
         """Turns off all exploration with respect to the epsilon greedy exploration strategy"""
