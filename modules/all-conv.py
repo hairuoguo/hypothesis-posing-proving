@@ -1,8 +1,6 @@
 import torch as nn
 import torch.nn.functional as F
 
-#TODO: should also just try one-layer CNN on implemented models to see if learns.
-#TODO: would be nice to have way to differentiate between target and obs
 
 class AllConvNet1D(nn.Module):
     def __init__(self, input_size, n_classes=10, **kwargs):
