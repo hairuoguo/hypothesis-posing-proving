@@ -1,6 +1,8 @@
 import logging
 import os
 import sys
+sys.path.append("../../")
+from modules.cnn_attention import CNNAttention 
 import gym
 import random
 import numpy as np
@@ -358,6 +360,11 @@ class Base_Agent(object):
                     num_conv_layers=hyperparameters['num_conv_layers'],
                     linear_hidden_units=hyperparameters['linear_hidden_units'],
                     y_range=hyperparameters['y_range']).to(self.device)
+
+        elif self.hyperparameters['net_type'] == 'CNNAttention':
+                model = CNNAttention(input_dim, output_dim)
+                model.cuda()
+                return model
 
         elif self.hyperparameters['net_type'] == 'FC':
             default_hyperparameter_choices = {"final_layer_activation": None,

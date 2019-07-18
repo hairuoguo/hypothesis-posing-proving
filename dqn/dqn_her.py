@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import os
-from gym.wrappers import FlattenDictWrapper
+#from gym.wrappers import FlattenDictWrapper
 from deep_rl.agents.DQN_agents.DQN_HER import DQN_HER
 from deep_rl.agents.DQN_agents.DQN_HER_alt import DQN_HER_alt
 from deep_rl.agents.Trainer import Trainer
@@ -91,7 +91,7 @@ config.hyperparameters = {
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
         'clip_rewards': False,
-        'net_type': 'CNN3',
+        'net_type': 'CNNAttention',
         'y_range': (-1, str_len),
 #       "linear_hidden_units": [128]*2,
 #        'num_conv_layers': args.num_layers,
