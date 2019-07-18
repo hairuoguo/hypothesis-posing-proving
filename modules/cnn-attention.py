@@ -48,5 +48,5 @@ class CNN-attention(nn.Module):
         centered_input = x - 0.5
         final_output, layer_outputs = self.conv_net(x)
         out = self.attention(layer_outputs, final_output)
-        out = F.adaptive_max_pool1d(out, self.output_dim)
+#        out = F.adaptive_max_pool1d(out, self.output_dim)
         return out

@@ -32,4 +32,4 @@ class CNN(nn.Module):
             x6 = self.y_range[0] + (self.y_range[1] -
                     self.y_range[0])*nn.Sigmoid()(x6)
 
-        return x6, torch.cat([x1, x2, x3, x4], dim=1)
+        return x6, torch.cat([x1, x2, x3, x4_1], dim=1)
