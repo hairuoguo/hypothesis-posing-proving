@@ -25,11 +25,10 @@ class Attention(nn.Module):
         """
         Attention - Forward-pass
         """
-        input = input.view((-1, self.input_size))
         keys0 = F.relu(self.key_layer1(input))
         keys = self.key_layer2(keys0)
-        keys.transpose_(0, 1)
-        weights = F.softmax(torch.div(torch.matmul(query, keys), math.sqrt(self.query_size)))
-        output = torch.matmul(weights, input)
-        
+        weights = F.softmax(torch.div(torch.mul(query.unsqueeze(1), keys), math.sqrt(self.query_size)))
+        weights = torch.sum(weights, dim=2)
+        #output = torch.matmul(weights, input).view((1, -1))
+        output = torch.mul(weights.unsqueeze(2), input).contiguous().view((-1, self.input_size*4))
         return output
