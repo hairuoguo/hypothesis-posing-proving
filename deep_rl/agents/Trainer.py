@@ -84,6 +84,8 @@ class Trainer(object):
         if self.config.save_results:
             with open(self.config.file_to_save_session_info, 'w+') as f:
                 f.write(self.config.info_string)
+            # do at start in case you quit before it finishes, but it still
+            # saved the partial result
             print('saved info at ' + self.config.file_to_save_session_info)
         self.results = self.create_object_to_store_results()
         for agent_number, agent_class in enumerate(self.agents):
@@ -133,11 +135,12 @@ class Trainer(object):
             print(agent.hyperparameters)
             print("RANDOM SEED " , agent_config.seed)
             # workaround so that you can save every n episodes. 
-            game_scores, rolling_scores, time_taken = agent.run_n_episodes(
+            game_scores, rolling_scores, rolling_percent_solved, time_taken = agent.run_n_episodes(
                    results_to_save=self.results, agent_results=agent_results)
             print("Time taken: {}".format(time_taken), flush=True)
             self.print_two_empty_lines()
             agent_results.append([game_scores, rolling_scores,
+                rolling_percent_solved,
                 len(rolling_scores), -1 * max(rolling_scores), time_taken])
             if self.config.visualise_individual_results:
                 self.visualise_overall_agent_results([rolling_scores], agent_name, show_each_run=True)

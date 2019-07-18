@@ -9,8 +9,9 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
-from deep_rl.nn_builder.pytorch.cnn2 import CNN
+from modules.cnn2 import CNN
 from modules.cnn import CNN as CNN3
+from modules.resnet import ResNet
 from torch.optim import optimizer
 import pickle
 
@@ -34,14 +35,13 @@ class Base_Agent(object):
         self.hyperparameters = config.hyperparameters
         self.average_score_required_to_win = self.get_score_required_to_win()
         self.rolling_score_window = self.get_trials()
-        # self.max_steps_per_episode = self.environment.spec.max_episode_steps
         self.total_episode_score_so_far = 0
         self.game_full_episode_scores = []
         self.rolling_results = []
+        self.solved_episodes = []
+        self.rolling_percent_solved = []
         self.max_rolling_score_seen = float("inf")
         self.max_episode_score_seen = float("inf")
-#        self.max_rolling_score_seen = float("-inf")
-#        self.max_episode_score_seen = float("-inf")
         self.starting_episode_number = config.starting_episode_number if config.starting_episode_number else 0
         self.episode_number = self.starting_episode_number
         self.device = "cuda:0" if config.use_GPU else "cpu"
@@ -198,8 +198,12 @@ class Base_Agent(object):
 
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_results: self.locally_save_policy()
-        return self.game_full_episode_scores, self.rolling_results, time_taken
+        if self.config.save_results:
+            print('\n') # so model parameters print statement shows up
+            self.locally_save_policy()
+
+        return (self.game_full_episode_scores, self.rolling_results,
+                self.rolling_percent_solved, time_taken)
 
 
     def save_running_results(self, game_scores, rolling_scores, time_taken,
@@ -232,7 +236,10 @@ class Base_Agent(object):
     def save_result(self):
         """Saves the result of an episode of the game"""
         self.game_full_episode_scores.append(self.total_episode_score_so_far)
+        self.solved_episodes.append(self.environment.is_solved)
         self.rolling_results.append(np.mean(self.game_full_episode_scores[-1 * self.rolling_score_window:]))
+        self.rolling_percent_solved.append(np.mean(self.solved_episodes[-1 *
+            self.rolling_score_window:]))
         self.save_max_result_seen()
 
     def save_max_result_seen(self):
@@ -249,9 +256,11 @@ class Base_Agent(object):
 
     def print_rolling_result(self):
         """Prints out the latest episode results"""
-        text = """"\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}"""
-        sys.stdout.write(text.format(self.episode_number, self.rolling_results[-1], self.max_rolling_score_seen,
-                                     self.game_full_episode_scores[-1], self.max_episode_score_seen))
+        text = """\r Episode {0}, Score: {3: .2f}, Max score seen: {4: .2f}, Rolling score: {1: .2f}, Max rolling score seen: {2: .2f}, Percent won (rolling): {5: .2f}"""
+        sys.stdout.write(text.format(self.episode_number,
+                self.rolling_results[-1], self.max_rolling_score_seen,
+                self.game_full_episode_scores[-1], self.max_episode_score_seen,
+                self.rolling_percent_solved[-1]))
         if self.config.flush:
             sys.stdout.flush()
         else: sys.stdout.write('\n')
@@ -346,6 +355,10 @@ class Base_Agent(object):
         if key_to_use: hyperparameters = hyperparameters[key_to_use]
         if override_seed: seed = override_seed
         else: seed = self.config.seed
+
+        if hyperparameters['net_type'] == 'ResNet':
+            return ResNet(input_dim, output_dim,
+                    y_range=hyperparameters['y_range']).to(self.device)
 
         if hyperparameters['net_type'] == 'CNN3':
             return CNN3(input_dim, output_dim,

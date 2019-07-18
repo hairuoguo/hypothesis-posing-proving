@@ -38,12 +38,13 @@ class ReverseGymEnv(gym.Env):
         # you're getting closer to the reward threshold.
         self.reward_threshold = str_len
         self.trials = 50 # num of trials to avg over
-        self.max_episode_steps = str_len # max episode steps
+#        self.max_episode_steps = str_len # now done dynamically for each episode
         self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
 #        self.reward_for_achieving_goal = 1
 #        self.step_reward_for_not_achieving_goal = 0
         self.reward_for_achieving_goal = str_len
         self.step_reward_for_not_achieving_goal = -1
+        self.is_solved = False
 
 
     def seed(self, seed=None):
@@ -56,6 +57,7 @@ class ReverseGymEnv(gym.Env):
         and 'achieved_goal'
         """
         self.ep = self.env.start_ep()
+        self.max_episode_steps = self.ep.path_len + 1
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1
         # distance)
@@ -63,6 +65,7 @@ class ReverseGymEnv(gym.Env):
         self.state = obs1
         self.desired_goal = obs1[self.str_len:]
         self.achieved_goal = obs1[:self.str_len]
+        self.is_solved = False
 
 
         return {"observation": np.array(obs1[:self.str_len]), "desired_goal":
@@ -77,6 +80,7 @@ class ReverseGymEnv(gym.Env):
         self.done = isEnd or self.step_count >= self.max_episode_steps
         self.achieved_goal = obs1[:self.str_len]
         self.state = self.next_state
+        self.is_solved = isEnd
 
         return ({"observation": np.array(obs1[:self.str_len]),
                 "desired_goal": np.array(self.desired_goal),

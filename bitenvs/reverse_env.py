@@ -193,6 +193,7 @@ class ReverseEpisode:
         self.action_indices = action_indices
         self.actions_list = actions_list 
         self.str_len = str_len
+        self.path_len = None
         self.state = None
         self.generate_strings(path_len_mean, path_len_std, 2, 0)
         #self.generate_strings(3, 0, 0, 0)
@@ -319,6 +320,7 @@ class ReverseEpisode:
     def generate_strings(self, path_len_m, path_len_std, num_qs_m, num_qs_std, hidden_state=None):
         path_len = math.ceil(np.random.normal(path_len_m, path_len_std))
         num_qs = math.floor(np.random.normal(num_qs_m, num_qs_std))
+        self.path_len = path_len
 
         if hidden_state == None:
             hidden_state = np.random.choice([1, 0], size=self.str_len) #actual state
