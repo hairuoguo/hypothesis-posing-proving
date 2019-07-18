@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 import os
-from gym.wrappers import FlattenDictWrapper
+#from gym.wrappers import FlattenDictWrapper
 from deep_rl.agents.DQN_agents.DQN_HER import DQN_HER
 from deep_rl.agents.DQN_agents.DQN_HER_alt import DQN_HER_alt
 from deep_rl.agents.Trainer import Trainer
@@ -105,7 +105,6 @@ config.hyperparameters = {
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
         'clip_rewards': False,
-        # network params
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
         'y_range': (-1, str_len),
         # for CNN
