@@ -31,6 +31,7 @@ parser.add_argument('--info', default='', metavar='I', type=str,
 parser.add_argument('--net_type', default='FC', metavar='N', type=str, 
         help='network type used by agent')
 parser.add_argument("--no_save", help="don't save results", action="store_true")
+parser.add_argument("--batch_norm", help="use batch_norm", action="store_true")
 parser.add_argument("--no_gpu", help="don't use gpu", action="store_true")
 
 args = parser.parse_args()
@@ -99,6 +100,7 @@ config.hyperparameters = {
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
         'y_range': (-1, str_len),
         'linear_hidden_units': [128]*2,
+        'batch_norm': args.batch_norm,
         'num_conv_layers': 3 # for CNN
     }
 }
