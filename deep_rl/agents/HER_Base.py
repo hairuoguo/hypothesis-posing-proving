@@ -8,7 +8,7 @@ class HER_Base(object):
     """Contains methods needed to turn an algorithm into a hindsight experience replay (HER) algorithm"""
     def __init__(self, buffer_size, batch_size, HER_sample_proportion):
         self.HER_memory = Replay_Buffer(buffer_size, batch_size,
-                self.config.seed, self.config.use_GPU)
+                self.config.seed, self.config.device)
         self.ordinary_buffer_batch_size = int(batch_size * (1.0 - HER_sample_proportion))
         self.HER_buffer_batch_size = batch_size - self.ordinary_buffer_batch_size
 

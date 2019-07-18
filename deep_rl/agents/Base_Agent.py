@@ -42,7 +42,7 @@ class Base_Agent(object):
         self.max_episode_score_seen = float("inf")
         self.starting_episode_number = config.starting_episode_number if config.starting_episode_number else 0
         self.episode_number = self.starting_episode_number
-        self.device = "cuda:0" if config.use_GPU else "cpu"
+        self.device = config.device
         self.visualise_results_boolean = config.visualise_individual_results
         self.global_step_number = 0
         self.turn_off_exploration = config.no_random
@@ -367,10 +367,11 @@ class Base_Agent(object):
             y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'CNN':
-            return CNN(input_dim, output_dim,
+            net = CNN(input_dim, output_dim,
                     num_conv_layers=hyperparameters['num_conv_layers'],
                     linear_hidden_units=hyperparameters['linear_hidden_units'],
                     y_range=hyperparameters['y_range']).to(self.device)
+            return net
 
         elif self.hyperparameters['net_type'] == 'FC':
             default_hyperparameter_choices = {"final_layer_activation": None,
