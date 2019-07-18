@@ -15,7 +15,7 @@ class DQN(Base_Agent):
     def __init__(self, config):
         Base_Agent.__init__(self, config)
         self.memory = Replay_Buffer(self.hyperparameters["buffer_size"],
-                self.hyperparameters["batch_size"], config.seed, config.use_GPU)
+                self.hyperparameters["batch_size"], config.seed, config.device)
         self.q_network_local = self.create_NN(input_dim=self.state_size, output_dim=self.action_size)
         if config.load_model:
             self.q_network_local.load_state_dict(torch.load(config.file_to_load_model,
