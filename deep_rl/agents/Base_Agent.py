@@ -196,7 +196,9 @@ class Base_Agent(object):
 
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
-        if self.config.save_results: self.locally_save_policy()
+        if self.config.save_results:
+            print('\n') # so model parameters print statement shows up
+            self.locally_save_policy()
 
         return (self.game_full_episode_scores, self.rolling_results,
                 self.rolling_percent_solved, time_taken)

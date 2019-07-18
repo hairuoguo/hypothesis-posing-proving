@@ -53,11 +53,16 @@ else:
     model_name = str.format('resnet_comp_{}_{}_L{}', str_len, reverse_len,
             path_len_mean)
 
+data_dir = 'data/data'
+model_dir = '/om/user/salford/models/' # because stored models take up lots of space
+plot_dir = 'data/plots'
+info_dir = 'data/info'
+
 (config.file_to_save_data_results,
  config.file_to_save_model,
  config.file_to_save_results_graph,
  config.file_to_save_session_info) = file_numberer.get_unused_filepaths(
-        model_name)
+         model_name, data_dir, model_dir, plot_dir, info_dir)
 
 if len(args.info) > 0:
     config.info = args.info
