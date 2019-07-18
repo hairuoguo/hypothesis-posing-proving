@@ -31,6 +31,10 @@ parser.add_argument('--info', default='', metavar='I', type=str,
         help='info string for training run')
 parser.add_argument("--cuda_index", default='1',metavar='I', type=int,
         help="gpu device index")
+parser.add_argument("--num_blocks", default='1',metavar='I', type=int,
+        help="num residual blocks for ResNet")
+parser.add_argument("--num_filters", default='256',metavar='I', type=int,
+        help="num_filters for ResNet")
 parser.add_argument('--net_type', default='FC', metavar='N', type=str, 
         help='network type used by agent')
 parser.add_argument("--no_save", help="don't save results", action="store_true")
@@ -86,7 +90,7 @@ if torch.cuda.is_available():
     config.device = 'cuda:{}'.format(config.cuda_index)
 else:
     config.device = 'cpu'
-config.flush = False # when logging performance each episode
+config.flush = True # when logging performance each episode
 config.visualise_overall_agent_results = False # for plotting
 config.load_model = False
 config.file_to_load_model = None
@@ -111,7 +115,10 @@ config.hyperparameters = {
         'num_conv_layers': 3,
         # for FC
         'linear_hidden_units': [1024]*3,
-        'batch_norm': True
+        'batch_norm': True,
+        # for ResNet
+        'num_blocks':args.num_blocks,
+        'num_filters':args.num_filters
     }
 }
 

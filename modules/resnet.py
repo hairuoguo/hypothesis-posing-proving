@@ -63,9 +63,10 @@ class ResNet(nn.Module):
 
 class BasicBlock(nn.Module):
     def __init__(self, conv1_filters, conv2_filters):
-        self.conv1 = nn.Conv1d(conv1_filters, conv2_filters, padding=1)
+        super(BasicBlock, self).__init__()
+        self.conv1 = nn.Conv1d(conv1_filters, conv2_filters, 3, padding=1)
         self.bn1 = nn.BatchNorm1d(conv1_filters)
-        self.conv2 = nn.Conv1d(conv2_filters, conv2_filters, padding=1)
+        self.conv2 = nn.Conv1d(conv2_filters, conv2_filters, 3, padding=1)
         self.bn2 = nn.BatchNorm1d(conv2_filters)
 
     def forward(self, x):
@@ -85,15 +86,15 @@ class BasicBlock(nn.Module):
 class ResNet2(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10,
             num_blocks=1):
-        super(ResNet, self).__init__()
+        super(ResNet2, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
         self.num_filters = num_filters
-        self.conv1 = nn.Conv1d(1, num_filters, padding=1)
-        self.bn1 - nn.BatchNorm1d(num_filters)
-        basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters) for i
-            in range(num_layers)])
+        self.conv1 = nn.Conv1d(1, num_filters, 3, padding=1)
+        self.bn1 = nn.BatchNorm1d(num_filters)
+        self.basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters) for i
+            in range(num_blocks)])
         self.fc1 = nn.Linear(num_filters*input_dim, 256)
         self.bn2 = nn.BatchNorm1d(256)
         self.fc2 = nn.Linear(256, output_dim)
@@ -107,13 +108,13 @@ class ResNet2(nn.Module):
         x = self.bn1(x)
         x = F.relu(x)
 
-        for block in basic_blocks:
+        for block in self.basic_blocks:
             x = block(x)
 
-        x.view(-1, self.input_dim*self.num_filters)
+        x = x.view(-1, self.input_dim*self.num_filters)
 
         x = self.fc1(x)
-        x = self.bn1(x)
+        x = self.bn2(x)
         x = F.relu(x)
 
         x = self.fc2(x)

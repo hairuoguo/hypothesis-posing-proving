@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 sys.path.append("../../")
-from modules.cnn_attention import CNNAttention 
 import gym
 import random
 import numpy as np
@@ -11,7 +10,8 @@ import time
 from deep_rl.nn_builder.pytorch.NN import NN
 from modules.cnn2 import CNN
 from modules.cnn import CNN as CNN3
-from modules.resnet import ResNet
+from modules.resnet import ResNet as CNN4
+from modules.resnet import ResNet2 as ResNet
 from torch.optim import optimizer
 import pickle
 
@@ -357,7 +357,12 @@ class Base_Agent(object):
         else: seed = self.config.seed
 
         if hyperparameters['net_type'] == 'ResNet':
-            return ResNet(input_dim, output_dim,
+            return ResNet(input_dim, output_dim, 
+                    y_range=hyperparameters['y_range'],
+                    num_filters=hyperparameters['num_filters'],
+                    num_blocks=hyperparameters['num_blocks']).to(self.device)
+        if hyperparameters['net_type'] == 'CNN4':
+            return CNN4(input_dim, output_dim,
                     y_range=hyperparameters['y_range']).to(self.device)
 
         if hyperparameters['net_type'] == 'CNN3':
