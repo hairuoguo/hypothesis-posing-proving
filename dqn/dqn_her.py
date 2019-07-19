@@ -56,8 +56,7 @@ if not args.no_save:
     if len(args.file_name) > 0:
         model_name = args.file_name
     else:
-        model_name = str.format('comp2_{}_{}_{}_{}_L{}', args.net_type,
-                args.num_blocks, str_len, reverse_len, path_len_mean)
+        model_name = str.format('test_{}_{}_{}_L{}', args.net_type, str_len, reverse_len, path_len_mean)
 
     data_dir = 'data/data'
     model_dir = '/om/user/salford/models' # because stored models take up lots of space

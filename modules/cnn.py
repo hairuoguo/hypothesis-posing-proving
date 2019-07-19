@@ -20,7 +20,7 @@ class CNN(nn.Module):
     def forward(self, x):
         # reshape to (batch_size, num_channels, length)
         x = x.view(-1, 1, self.input_dim)
-        x1 = F.relu(self.conv1(x))
+        x1 = F.relu(self.conv1(x)) 
         x2 = F.relu(self.conv2(x1))
         x3 = F.relu(self.conv3(x2))
         x4_1 = F.relu(self.conv4(x3))
@@ -28,8 +28,8 @@ class CNN(nn.Module):
         x5 = F.relu(self.fc1(x4_2))
         x6 = self.fc2(x5) # no activation needed before sigmoid
 
-        if self.y_range:
-            x6 = self.y_range[0] + (self.y_range[1] -
-                    self.y_range[0])*nn.Sigmoid()(x6)
-
+#        if self.y_range:
+#            x6 = self.y_range[0] + (self.y_range[1] -
+#                    self.y_range[0])*nn.Sigmoid()(x6)
+#
         return x6, torch.cat([x1, x2, x3, x4_1], dim=1)

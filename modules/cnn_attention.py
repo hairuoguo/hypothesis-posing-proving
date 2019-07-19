@@ -14,10 +14,11 @@ class CNNAttention(nn.Module):
     solver for the Reverse Environment.
     """
 
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, output_dim, y_range=()):
         super(CNNAttention, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
+        self.y_range = y_range
 
         self.conv_net = CNN(input_dim, 256)
         self.attention = Attention(256, input_dim)
@@ -45,6 +46,14 @@ class CNNAttention(nn.Module):
 
         centered_input = x - 0.5
         final_output, layer_outputs = self.conv_net(x)
+
+        # layer outputs has dimension [4, batch_size, num_channels, input_dim]
         out = self.attention(layer_outputs, final_output)
-        out = F.relu(self.fc1(out))
+        out = self.fc1(out)
+
+        if self.y_range:
+            out = self.y_range[0] + (self.y_range[1] -
+                    self.y_range[0])*nn.Sigmoid()(out)
+
+
         return out
