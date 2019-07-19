@@ -1,7 +1,20 @@
 #!usr/bin/env bash
-#nohup python dqn_her.py -n 10 -r 6 -e 50000 --save_every 5000 --net_type ResNet > /om/user/salford/out/res_10_6.out &
-#nohup python dqn_her.py -n 15 -r 3 -e 50000 --save_every 5000 --net_type ResNet > /om/user/salford/out/res_15_3.out &
-#nohup python dqn_her.py -n 10 -r 6 -e 50000 --save_every 5000 --net_type FC > /om/user/salford/out/fc_10_6.out &
-#nohup python dqn_her.py -e 5000 --no_save --cuda_index 4 > /om/user/salford/out/test2.out &
-python dqn_her.py -e 50 --no_save --cuda_index 4 > /om/user/salford/out/test33.out
-python dqn_her.py -e 50 --no_save --cuda_index 4
+nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres_10_3 &
+nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres_15_3 &
+nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres_10_6 &
+nohup python -u dqn_her.py -n 15 -r 6 -e 500000 --cuda_index 4 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres_15_6 &
+
+nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres3_10_3 &
+nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres3_15_3 &
+nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres3_10_6 &
+nohup python -u dqn_her.py -n 15 -r 6 -e 500000 --cuda_index 4 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres3_15_6 &
+
+nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 10 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres0_10_3 &
+nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 10 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres0_15_3 &
+nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 10 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres0_10_6 &
+nohup python -u dqn_her.py -n 15 -r 6 -e 500000 --cuda_index 4 --num_blocks 10 --num_filters 256 --net_type ResNet > /om/user/salford/out/comppres0_15_6 &
+
+nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --net_type FC > /om/user/salford/out/comppfc_10_3 &
+nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --net_type FC > /om/user/salford/out/comppfc_15_3 &
+nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --net_type FC > /om/user/salford/out/comppfc_10_6 &
+nohup python -u dqn_her.py -n 15 -r 6 -e 500000 --cuda_index 4 --net_type FC > /om/user/salford/out/comppfc_15_6 &

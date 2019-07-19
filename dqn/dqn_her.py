@@ -1,12 +1,9 @@
 import sys
 sys.path.append('../')
 import os
-#from gym.wrappers import FlattenDictWrapper
 from deep_rl.agents.DQN_agents.DQN_HER import DQN_HER
-from deep_rl.agents.DQN_agents.DQN_HER_alt import DQN_HER_alt
 from deep_rl.agents.Trainer import Trainer
 from deep_rl.utilities.data_structures.Config import Config
-from deep_rl.agents.DQN_agents.DQN import DQN
 from bitenvs.reverse_gym_env import ReverseGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
 import argparse
@@ -21,7 +18,7 @@ parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int,
         help='string length of Reverse Environment')
 parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
         help='length of reversal operation')
-parser.add_argument('--save_every', default=10000, metavar='N', type=int, 
+parser.add_argument('--save_every', default=25000, metavar='N', type=int, 
         help='save data & model every _ episodes')
 parser.add_argument('--path_len', default=5, metavar='L', type=int, 
         help='path length mean for Reverse Environment')
@@ -59,8 +56,8 @@ if not args.no_save:
     if len(args.file_name) > 0:
         model_name = args.file_name
     else:
-        model_name = str.format('comp_{}_{}_{}_L{}', args.net_type, str_len, reverse_len,
-                path_len_mean)
+        model_name = str.format('comp2_{}_{}_{}_{}_L{}', args.net_type,
+                args.num_blocks, str_len, reverse_len, path_len_mean)
 
     data_dir = 'data/data'
     model_dir = '/om/user/salford/models' # because stored models take up lots of space
