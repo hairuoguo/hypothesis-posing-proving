@@ -10,6 +10,7 @@ import time
 from deep_rl.nn_builder.pytorch.NN import NN
 from modules.cnn2 import CNN
 from modules.cnn import CNN as CNN3
+from modules.cnn_attention import CNNAttention
 from modules.resnet import ResNet as CNN4
 from modules.resnet import ResNet2 as ResNet
 from torch.optim import optimizer
@@ -381,8 +382,8 @@ class Base_Agent(object):
             return net
 
         elif self.hyperparameters['net_type'] == 'CNNAttention':
-                model = CNNAttention(input_dim, output_dim)
-                model.cuda()
+                model = CNNAttention(input_dim, output_dim,
+                        y_range=hyperparameters['y_range']).to(self.device)
                 return model
 
         elif self.hyperparameters['net_type'] == 'FC':
