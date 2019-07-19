@@ -57,7 +57,9 @@ class ReverseGymEnv(gym.Env):
         and 'achieved_goal'
         """
         self.ep = self.env.start_ep()
-        self.max_episode_steps = self.ep.path_len + 1
+#        self.max_episode_steps = self.ep.path_len + 1
+#        self.max_episode_steps = self.str_len
+        self.max_episode_steps = self.ep.path_len*2 + 1
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1
         # distance)
