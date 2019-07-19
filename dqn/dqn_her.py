@@ -56,7 +56,8 @@ if not args.no_save:
     if len(args.file_name) > 0:
         model_name = args.file_name
     else:
-        model_name = str.format('test_{}_{}_{}_L{}', args.net_type, str_len, reverse_len, path_len_mean)
+        model_name = str.format('comp3_{}_{}_{}_L{}', args.net_type,
+                args.num_blocks, str_len, reverse_len, path_len_mean)
 
     data_dir = 'data/data'
     model_dir = '/om/user/salford/models' # because stored models take up lots of space
@@ -86,7 +87,7 @@ if torch.cuda.is_available():
     config.device = 'cuda:{}'.format(config.cuda_index)
 else:
     config.device = 'cpu'
-config.flush = True # when logging performance each episode
+config.flush = True # make output scrollling or not
 config.visualise_overall_agent_results = False # for plotting
 config.load_model = False
 config.file_to_load_model = None
@@ -106,7 +107,7 @@ config.hyperparameters = {
         'learning_iterations': 1,
         'clip_rewards': False,
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
-        'y_range': (-1, str_len),
+        'y_range': (-1, 2*args.path_len + 1),
         # for CNN
         'num_conv_layers': 3,
         # for FC
