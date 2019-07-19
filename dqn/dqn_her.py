@@ -110,7 +110,7 @@ config.hyperparameters = {
         # for CNN
         'num_conv_layers': 3,
         # for FC
-        'linear_hidden_units': [1024]*3,
+        'linear_hidden_units': [128]*2,
         'batch_norm': True,
         # for ResNet
         'num_blocks':args.num_blocks,
