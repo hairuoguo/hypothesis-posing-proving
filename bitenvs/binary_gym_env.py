@@ -5,10 +5,11 @@ import numpy as np
 from gym import spaces
 from gym.utils import seeding
 
-class Bit_Flipping_Environment(gym.Env):
-    environment_name = "Bit Flipping Game"
+class BinaryEnv(gym.Env):
+    environment_name = "Binary Environment"
 
-    def __init__(self, environment_dimension=20, deterministic=False):
+    def __init__(self, environment_dimension=2, num_to_flip=1,
+            deterministic=False):
 
         self.action_space = spaces.Discrete(environment_dimension)
         self.observation_space = spaces.Dict(dict(
@@ -23,11 +24,9 @@ class Bit_Flipping_Environment(gym.Env):
         self.max_episode_steps = environment_dimension
         self.id = "Bit Flipping"
         self.environment_dimension = environment_dimension
-        self.reward_for_achieving_goal = 1
-        self.step_reward_for_not_achieving_goal = 0
-#        self.reward_for_achieving_goal = self.environment_dimension
-#        self.step_reward_for_not_achieving_goal = -1
-
+        self.num_to_flip = num_to_flip
+        self.reward_for_achieving_goal = self.environment_dimension
+        self.step_reward_for_not_achieving_goal = -1
         self.deterministic = deterministic
 
     def seed(self, seed=None):
@@ -36,9 +35,10 @@ class Bit_Flipping_Environment(gym.Env):
 
     def reset(self):
         self.is_solved = False
+
         if not self.deterministic:
-            self.desired_goal = self.randomly_pick_state_or_goal()
-            self.state = self.randomly_pick_state_or_goal()
+            self.desired_goal = self.make_desired_goal()
+            self.state = self.make_state()
         else:
             self.desired_goal = [0 for _ in range(self.environment_dimension)]
             self.state = [1 for _ in range(self.environment_dimension)]
@@ -51,6 +51,16 @@ class Bit_Flipping_Environment(gym.Env):
     def randomly_pick_state_or_goal(self):
         return [random.randint(0, 1) for _ in range(self.environment_dimension)]
 
+    def make_desired_goal(self):
+        return [0]*self.environment_dimension
+
+    def make_state(self):
+        a = [0]*self.environment_dimension
+        for i in random.sample(range(0, self.environment_dimension),
+                self.num_to_flip):
+            a[i] = 1
+        return a
+
     def step(self, action):
         """Conducts the discrete action chosen and updated next_state, reward and done"""
         if type(action) is np.ndarray:
@@ -59,7 +69,7 @@ class Bit_Flipping_Environment(gym.Env):
         self.step_count += 1
         if action != self.environment_dimension + 1: #otherwise no bit is flipped
             self.next_state = copy.copy(self.state)
-            self.next_state[action] = (self.next_state[action] + 1) % 2
+            self.next_state[action] = 0
         if self.goal_achieved(self.next_state):
             self.reward = self.reward_for_achieving_goal
             self.done = True

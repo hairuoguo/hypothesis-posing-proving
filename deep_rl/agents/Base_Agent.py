@@ -11,6 +11,7 @@ from deep_rl.nn_builder.pytorch.NN import NN
 from modules.cnn_attention import CNNAttention
 from modules.cnn3 import CNN
 from modules.resnet import ResNet
+from modules.dnc_wrapper import DNCWrapper
 from torch.optim import optimizer
 import pickle
 
@@ -355,7 +356,12 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        if hyperparameters['net_type'] == 'ResNet':
+        if hyperparameters['net_type'] == 'DNC':
+            return DNCWrapper(input_dim, output_dim,
+                    y_range=hyperparameters['y_range'],
+                    cuda_index=self.config.cuda_index)
+
+        elif hyperparameters['net_type'] == 'ResNet':
             return ResNet(input_dim, output_dim, 
                     y_range=hyperparameters['y_range'],
                     num_filters=hyperparameters['num_filters'],
