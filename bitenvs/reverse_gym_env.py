@@ -6,7 +6,6 @@ from gym import spaces
 from gym.utils import seeding
 import sys
 import random as rand
-sys.path.append('/Users/alfordsimon/Python/hypothesis-posing-proving')
 from bitenvs.reverse_env import ReverseEnv
  
 # a wrapper over ReverseEnv that extends gym.Env to allow running DQN_HER 

@@ -13,6 +13,7 @@ from modules.cnn import CNN as CNN3
 from modules.cnn_attention import CNNAttention
 from modules.resnet import ResNet as CNN4
 from modules.resnet import ResNet2 as ResNet
+from modules.dnc_wrapper import DNCWrapper
 from torch.optim import optimizer
 import pickle
 
@@ -357,16 +358,21 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        if hyperparameters['net_type'] == 'ResNet':
+        if hyperparameters['net_type'] == 'DNC':
+            return DNCWrapper(input_dim, output_dim,
+                    y_range=hyperparameters['y_range'],
+                    cuda_index=self.config.cuda_index)
+
+        elif hyperparameters['net_type'] == 'ResNet':
             return ResNet(input_dim, output_dim, 
                     y_range=hyperparameters['y_range'],
                     num_filters=hyperparameters['num_filters'],
                     num_blocks=hyperparameters['num_blocks']).to(self.device)
-        if hyperparameters['net_type'] == 'CNN4':
+        elif hyperparameters['net_type'] == 'CNN4':
             return CNN4(input_dim, output_dim,
                     y_range=hyperparameters['y_range']).to(self.device)
 
-        if hyperparameters['net_type'] == 'CNN3':
+        elif hyperparameters['net_type'] == 'CNN3':
             return CNN3(input_dim, output_dim,
                     y_range=hyperparameters['y_range']).to(self.device)
 

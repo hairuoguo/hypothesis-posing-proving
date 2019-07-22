@@ -33,7 +33,7 @@ def play_game(str_len, reverse_len, offset, num_obscured, path_len_mean=5,
         action = int(lm / offset)
         nonlocal ep
         obs, _, reward, done = ep.make_action(action) # pivot is one left
-        done = done or n_steps == str_len
+        done = done # or n_steps == str_len
         if not done:
             for i, b in enumerate(current_buttons):
                 b.config(text=str(obs[i]))
