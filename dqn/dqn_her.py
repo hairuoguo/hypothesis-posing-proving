@@ -23,21 +23,21 @@ parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int,
         help='length of reversal operation')
 parser.add_argument('--save_every', default=25000, metavar='N', type=int, 
         help='save data & model every _ episodes')
-parser.add_argument('--path_len', default=5, metavar='L', type=int, 
+parser.add_argument('-p', '--path_len', default=3, metavar='L', type=int, 
         help='path length mean for Reverse Environment')
-parser.add_argument('--file_name', default='', metavar='F', type=str, 
+parser.add_argument('-f', '--file_name', default='', metavar='F', type=str, 
         help='file name to save data, model, info, plot with')
-parser.add_argument('--info', default='', metavar='I', type=str, 
+parser.add_argument('-i', '--info', default='', metavar='I', type=str, 
         help='info string for training run')
 parser.add_argument("--cuda_index", default='1',metavar='I', type=int,
         help="gpu device index")
 parser.add_argument("--num_blocks", default='1',metavar='I', type=int,
         help="num residual blocks for ResNet")
-parser.add_argument("--num_filters", default='256',metavar='I', type=int,
+parser.add_argument("--num_filters", default='10',metavar='I', type=int,
         help="num_filters for ResNet")
-parser.add_argument('--net_type', default='FC', metavar='N', type=str, 
+parser.add_argument('-t', '--net_type', default='FC', metavar='N', type=str, 
         help='network type used by agent')
-parser.add_argument("--no_save", help="don't save results", action="store_true")
+parser.add_argument('-o', "--no_save", help="don't save results", action="store_true")
 
 args = parser.parse_args()
 config = Config()
@@ -49,25 +49,26 @@ num_obscured = 0
 path_len_mean = args.path_len
 path_len_std = 0
 
-#env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
-#        hypothesis_enabled=False, path_len_mean=path_len_mean,
-#        path_len_std=path_len_std, print_results=False)
+env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
+        hypothesis_enabled=False, path_len_mean=path_len_mean,
+        path_len_std=path_len_std, print_results=False)
 #env = BinaryEnv(str_len, path_len_mean)
-env = Bit_Flipping_Environment(environment_dimension=str_len)
+#env = Bit_Flipping_Environment(environment_dimension=str_len)
 
 config.save_every_n_episodes = args.save_every
 config.save_results = not args.no_save
+
+data_dir = '/om/user/salford/data'
+model_dir = '/om/user/salford/models'
+plot_dir = '/om/user/salford/plots'
+info_dir = '/om/user/salford/info'
+
 if not args.no_save:
     if len(args.file_name) > 0:
         model_name = args.file_name
     else:
         model_name = str.format('comp3_{}_{}_{}_L{}', args.net_type,
                 args.num_blocks, str_len, reverse_len, path_len_mean)
-
-    data_dir = 'data/data'
-    model_dir = '/om/user/salford/models' # because stored models take up lots of space
-    plot_dir = 'data/plots'
-    info_dir = 'data/info'
 
     (config.file_to_save_data_results,
      config.file_to_save_model,
@@ -92,11 +93,11 @@ if torch.cuda.is_available():
     config.device = 'cuda:{}'.format(config.cuda_index)
 else:
     config.device = 'cpu'
-config.flush = True # make output scrollling or not
+config.flush = True # if false, output scrolls (good for putting into .out file)
 config.visualise_overall_agent_results = False # for plotting
 config.load_model = False
-config.file_to_load_model = None
-# config.starting_episode_number = 5 # in case you want to resume training
+config.file_to_load_model = model_dir + '/' + 'all_conv1' + '.pt'
+#config.starting_episode_number = 8000 # in case you want to resume training
 
 config.hyperparameters = {
     'DQN_Agents': {
@@ -112,8 +113,9 @@ config.hyperparameters = {
         'learning_iterations': 1,
         'clip_rewards': False,
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
-        'y_range': (-1, 2*args.path_len + 1),
-        # for CNN
+        # assuming std is zero, this is good. if not may need three std higher
+        # to cover almost all possible values.
+        'y_range': (-1, 2*args.path_len + 1), 
         'num_conv_layers': 3,
         # for FC
         'linear_hidden_units': [64]*2,
@@ -124,9 +126,9 @@ config.hyperparameters = {
     }
 }
 
-#config.info_string_to_log = info_maker.make_info_string(config, env.env)
+config.info_string_to_log = info_maker.make_info_string(config, env.env)
 
 if __name__== '__main__':
-    AGENTS = [DQN_HER, DQN]
+    AGENTS = [DQN_HER]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()

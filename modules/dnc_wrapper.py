@@ -25,10 +25,26 @@ class DNCWrapper(nn.Module):
                 batch_first=True,
                 independent_linears=True
         )
+        self.controller_hidden = None
+        self.memory = None
+        self.read_vectors = None
+        self.reset_experience = True # used for next forward pass
+
+
+    def reset_experience(self):
+        self.reset_experience = True
+
 
 
     def forward(self, x):
-        x = self.dnc(x)
+        print(x.shape)
+        x.view(-1, 1, self.input_dim)
+        print(x.shape)
+
+        x, (self.controller_hidden, self.memory, self.read_vectors) = self.dnc(
+                x, (self.controller_hidden, self.memory, self.read_vectors),
+                reset_experience=self.reset_experience)
+        self.reset_experience = False
         print('shape1: {}'.format(x))
 
         if self.y_range:

@@ -11,7 +11,11 @@ from deep_rl.nn_builder.pytorch.NN import NN
 from modules.cnn_attention import CNNAttention
 from modules.cnn3 import CNN
 from modules.resnet import ResNet
+from modules.resnet import CNNRes
 from modules.dnc_wrapper import DNCWrapper
+from modules.all_conv import AllConv
+from modules.all_conv import CNNRes2
+from modules.all_conv import FC2
 from torch.optim import optimizer
 import pickle
 
@@ -356,7 +360,20 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        if hyperparameters['net_type'] == 'DNC':
+        if hyperparameters['net_type'] == 'FC2':
+            return FC2(input_dim, output_dim, 
+                    y_range=hyperparameters['y_range']).to(self.device)
+
+        if hyperparameters['net_type'] == 'AllConv':
+            return AllConv(input_dim, output_dim,
+                    y_range=hyperparameters['y_range']).to(self.device)
+
+        elif hyperparameters['net_type'] == 'CNNRes2':
+            return CNNRes2(input_dim, output_dim,
+                    num_filters=hyperparameters['num_filters'],
+                    y_range=hyperparameters['y_range']).to(self.device)
+
+        elif hyperparameters['net_type'] == 'DNC':
             return DNCWrapper(input_dim, output_dim,
                     y_range=hyperparameters['y_range'],
                     cuda_index=self.config.cuda_index)
@@ -370,6 +387,12 @@ class Base_Agent(object):
         elif hyperparameters['net_type'] == 'CNN':
             net = CNN(input_dim, output_dim,
                     y_range=hyperparameters['y_range']).to(self.device)
+            return net
+
+        elif hyperparameters['net_type'] == 'CNNRes':
+            net = CNNRes(input_dim, output_dim,
+                    y_range=hyperparameters['y_range'],
+                    num_filters=hyperparameters['num_filters']).to(self.device)
             return net
 
         elif self.hyperparameters['net_type'] == 'CNNAttention':
