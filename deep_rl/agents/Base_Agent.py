@@ -8,11 +8,9 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
-from modules.cnn2 import CNN
-from modules.cnn import CNN as CNN3
 from modules.cnn_attention import CNNAttention
-from modules.resnet import ResNet as CNN4
-from modules.resnet import ResNet2 as ResNet
+from modules.cnn3 import CNN
+from modules.resnet import ResNet
 from torch.optim import optimizer
 import pickle
 
@@ -362,22 +360,9 @@ class Base_Agent(object):
                     y_range=hyperparameters['y_range'],
                     num_filters=hyperparameters['num_filters'],
                     num_blocks=hyperparameters['num_blocks']).to(self.device)
-        if hyperparameters['net_type'] == 'CNN4':
-            return CNN4(input_dim, output_dim,
-                    y_range=hyperparameters['y_range']).to(self.device)
-
-        if hyperparameters['net_type'] == 'CNN3':
-            return CNN3(input_dim, output_dim,
-                    y_range=hyperparameters['y_range']).to(self.device)
-
-        elif hyperparameters['net_type'] == 'all_conv':
-            return AllConvNet1D(input_dim, output_dim,
-            y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'CNN':
             net = CNN(input_dim, output_dim,
-                    num_conv_layers=hyperparameters['num_conv_layers'],
-                    linear_hidden_units=hyperparameters['linear_hidden_units'],
                     y_range=hyperparameters['y_range']).to(self.device)
             return net
 

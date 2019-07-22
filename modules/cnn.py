@@ -26,7 +26,7 @@ class CNN(nn.Module):
         x3 = F.relu(self.conv3(x2))
         x4_1 = F.relu(self.conv4(x3))
         x4_2 = x4_1.view(-1, self.input_dim*self.num_filters)
-        print('shape4_2: {}'.format(x4_2.shape))
+        #print('shape4_2: {}'.format(x4_2.shape))
         x5 = F.relu(self.fc1(x4_2))
         x6 = self.fc2(x5) # no activation needed before sigmoid
 

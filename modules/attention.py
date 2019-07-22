@@ -30,22 +30,11 @@ class Attention(nn.Module):
         - output = weights * input
 
         """
-        print('input: {}'.format(input.shape)) 
-        print('query: {}'.format(query.shape)) 
         keys0 = F.relu(self.key_layer1(input))
-        print('keys0: {}'.format(keys0.shape)) 
         keys = self.key_layer2(keys0)
-        print('keys: {}'.format(keys.shape)) 
-        print('query unsqueeze: {}'.format(query.unsqueeze(1).shape))
         weights = F.softmax(torch.div(torch.mul(query.unsqueeze(1), keys), math.sqrt(self.query_size)))
-        print('shape weights: {}'.format(weights.shape)) 
         weights = torch.sum(weights, dim=2)
-        print('shape weightsum: {}'.format(weights.shape)) 
         #output = torch.matmul(weights, input).view((1, -1))
-        print('shape weightsum us: {}'.format(weights.unsqueeze(2).shape)) 
-        print('input shape: {}'.format(input.shape)) 
-        print('mult shape: {}'.format(torch.mul(weights.unsqueeze(2), input).shape))
         output = torch.mul(weights.unsqueeze(2), input).contiguous().view((-1,
                 self.input_size*4*10)) # 4 is number of conv layers, 10 is number of filters
-        print('out shape: {}'.format(output.shape))
         return output

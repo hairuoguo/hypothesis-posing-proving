@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ResNet(nn.Module):
+class CNNRes(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10):
         super(ResNet, self).__init__()
         self.input_dim = input_dim
@@ -83,7 +83,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-class ResNet2(nn.Module):
+class ResNet(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10,
             num_blocks=1):
         super(ResNet2, self).__init__()
