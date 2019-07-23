@@ -75,85 +75,53 @@ class AllConv(nn.Module):
         self.y_range = y_range
         self.num_filters = num_filters
 
-        self.conv1 = nn.Conv1d(1, num_filters, 3, padding=1, bias=False)
-        nn.init.constant_(self.conv1.weight, 1)
+        self.conv1 = nn.Conv1d(1, num_filters, 3, padding=1)
         self.bn1 = nn.BatchNorm1d(num_filters)
         self.basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters)
             for i in range(num_blocks)])
 
-        self.hidden_filter_dim = 5
-        self.conv2 = nn.Conv1d(num_filters, self.hidden_filter_dim, 1,bias=False)
-        nn.init.constant_(self.conv2.weight[0], 1)
-        nn.init.constant_(self.conv2.weight[1], -1)
-        nn.init.constant_(self.conv2.weight[2], 2)
-        nn.init.constant_(self.conv2.weight[3], -2)
-        nn.init.constant_(self.conv2.weight[4], 0)
+        self.hidden_filter_dim = 512
+        self.conv2 = nn.Conv1d(num_filters, self.hidden_filter_dim, 1)
         self.bn2 = nn.BatchNorm1d(self.hidden_filter_dim)
-        self.conv3 = nn.Conv2d(self.hidden_filter_dim, self.hidden_filter_dim,
-                kernel_size=(1,2), bias=False)
-        nn.init.constant_(self.conv3.weight[0], 1)
-        nn.init.constant_(self.conv3.weight[1], 2)
-        nn.init.constant_(self.conv3.weight[2], 3)
-        nn.init.constant_(self.conv3.weight[3], 4)
-        nn.init.constant_(self.conv3.weight[4], 0)
+        self.conv3 = nn.Conv2d(self.hidden_filter_dim, self.hidden_filter_dim, kernel_size=(1,2))
         self.bn3 = nn.BatchNorm2d(self.hidden_filter_dim)
-        self.conv4 = nn.Conv1d(self.hidden_filter_dim, 1, 1, bias=False)
-        nn.init.constant_(self.conv4.weight, 1)
+        self.conv4 = nn.Conv1d(self.hidden_filter_dim, 1, 1)
 
-    def forward(self, input):
-        x = input
-        print('x1s: {}'.format(x.shape))
-        print('x1: {}'.format(x))
+    def forward(self, inputs):
+        x = inputs
         # reshape to (batch_size, num_channels, length)
         x = x.view(-1, 1, self.input_dim)
 
         x = self.conv1(x)
-        print('x3: {}'.format(x))
-#        x = self.bn1(x)
+        x = self.bn1(x)
         x = F.relu(x)
-        print('x4: {}'.format(x))
 
         for block in self.basic_blocks:
             x = block(x)
 
         x = self.conv2(x)
-        print('x6: {}'.format(x))
-#        x = self.bn2(x)
+        x = self.bn2(x)
         x = F.relu(x)
 
         # the 2D conv to convert from being 2*str_len long to 1*str_len long.
         # converts  (batch_size, num_filters, str_len) to 
         #           (batch_size, num_filters, str_len/2) by taking a convolution
         x = x.view(-1, self.hidden_filter_dim, 2, self.str_len).transpose(2, 3)
-        print('x8s: {}'.format(x.shape))
-        print('x8: {}'.format(x))
         x = self.conv3(x) 
-        print('x9s: {}'.format(x.shape))
-        print('x9: {}'.format(x))
-#        x = self.bn3(x)
+        x = self.bn3(x)
         x = F.relu(x)
 
         x = x.view(-1, self.hidden_filter_dim, self.str_len)
-        print('x11s: {}'.format(x.shape))
-        print('x11: {}'.format(x))
 
         x = self.conv4(x)
-        print('x12s: {}'.format(x.shape))
-        print('x12: {}'.format(x))
         x = x.view(-1, self.str_len)
-        print('x13s: {}'.format(x.shape))
-        print('x13: {}'.format(x))
         x = x[:, self.first_reverse_index:self.last_reverse_index]
-        print('x14s: {}'.format(x.shape))
-        print('x14: {}'.format(x))
 
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -
                     self.y_range[0])*nn.Sigmoid()(x)
 
-        print('x15s: {}'.format(x.shape))
-        print('x15: {}'.format(x))
         return x
 
 class CNNRes2(nn.Module):
