@@ -21,7 +21,7 @@ parser.add_argument('-n', '--str_len', default=10, metavar='N', type=int,
         help='string length of Reverse Environment')
 parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int, 
         help='length of reversal operation')
-parser.add_argument('--save_every', default=25000, metavar='N', type=int, 
+parser.add_argument('-se', '--save_every', default=25000, metavar='N', type=int, 
         help='save data & model every _ episodes')
 parser.add_argument('-p', '--path_len', default=3, metavar='L', type=int, 
         help='path length mean for Reverse Environment')
@@ -119,7 +119,7 @@ config.hyperparameters = {
         'num_conv_layers': 3,
         # for FC
         'linear_hidden_units': [64]*2,
-        'batch_norm': False,
+        'batch_norm': True,
         # for ResNet
         'num_blocks':args.num_blocks,
         'num_filters':args.num_filters
