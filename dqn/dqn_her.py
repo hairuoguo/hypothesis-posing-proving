@@ -23,7 +23,7 @@ parser.add_argument('-r', '--reverse_len', default=3, metavar='R', type=int,
         help='length of reversal operation')
 parser.add_argument('-se', '--save_every', default=25000, metavar='N', type=int, 
         help='save data & model every _ episodes')
-parser.add_argument('-p', '--path_len', default=3, metavar='L', type=int, 
+parser.add_argument('-l', '--path_len', default=3, metavar='L', type=int, 
         help='path length mean for Reverse Environment')
 parser.add_argument('-f', '--file_name', default='', metavar='F', type=str, 
         help='file name to save data, model, info, plot with')
@@ -38,6 +38,7 @@ parser.add_argument("--num_filters", default='10',metavar='I', type=int,
 parser.add_argument('-t', '--net_type', default='FC', metavar='N', type=str, 
         help='network type used by agent')
 parser.add_argument('-o', "--no_save", help="don't save results", action="store_true")
+parser.add_argument('-nf', "--no_flush", help="don't flush output", action="store_true")
 
 args = parser.parse_args()
 config = Config()
@@ -93,7 +94,7 @@ if torch.cuda.is_available():
     config.device = 'cuda:{}'.format(config.cuda_index)
 else:
     config.device = 'cpu'
-config.flush = True # if false, output scrolls (good for putting into .out file)
+config.flush = not args.no_flush # if false, output scrolls (good for putting into .out file)
 config.visualise_overall_agent_results = False # for plotting
 config.load_model = False
 config.file_to_load_model = model_dir + '/' + 'all_conv1' + '.pt'

@@ -6,7 +6,7 @@ from pytorch_dnc_simon.dnc.dnc import DNC
 
 class DNCWrapper(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), cuda_index=0):
-        super(DNCWrapper, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range

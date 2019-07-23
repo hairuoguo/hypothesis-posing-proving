@@ -4,30 +4,31 @@ import torch.nn.functional as F
 from modules.resnet import BasicBlock
 import math
 
-class AllConv(nn.Module):
+class AllConv2(nn.Module):
     def __init__(self, input_dim, reverse_len, y_range=(), num_filters=10,
             num_blocks=1):
-        super(AllConv, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
+
         # for determining output dim. assumes stride of reverse_env is 1.
-        self.first_reverse_index = math.floor((reverse_len-1)/2)
-        assert input_dim % 2 == 0, 'should have even length input for reverse_env with HER'
         self.str_len = int(input_dim / 2)
+        self.first_reverse_index = math.floor((reverse_len-1)/2)
+        self.last_reverse_index = self.str_len - math.floor(reverse_len/2)
+        assert input_dim % 2 == 0, 'should have even length input for reverse_env with HER'
 
         self.y_range = y_range
         self.num_filters = num_filters
 
         self.conv1 = nn.Conv1d(1, num_filters, 3, padding=1)
         self.bn1 = nn.BatchNorm1d(num_filters)
+
         self.basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters)
             for i in range(num_blocks)])
 
         self.hidden_filter_dim = 512
         self.conv2 = nn.Conv1d(num_filters, self.hidden_filter_dim, 1)
         self.bn2 = nn.BatchNorm1d(self.hidden_filter_dim)
-        self.conv3 = nn.Conv2d(self.hidden_filter_dim, self.hidden_filter_dim, kernel_size=(1,2))
-        self.bn3 = nn.BatchNorm2d(self.hidden_filter_dim)
-        self.conv4 = nn.Conv1d(self.hidden_filter_dim, 1, 1)
+        self.conv3 = nn.Conv1d(self.hidden_filter_dim, 1, 1)
 
     def forward(self, inputs):
         x = inputs
@@ -41,32 +42,17 @@ class AllConv(nn.Module):
         for block in self.basic_blocks:
             x = block(x)
 
-        print('shape1: {}'.format(x.shape))
-        x = self.conv2(x)
-        print('shape2: {}'.format(x.shape))
+        x = self.conv2(x) # gives hidden_dim filters
         x = self.bn2(x)
         x = F.relu(x)
 
-        # the 2D conv to convert from being 2*str_len long to 1*str_len long.
-        # converts  (batch_size, num_filters, str_len) to 
-        #           (batch_size, num_filters, str_len/2) by taking a convolution
-        x = x.view(-1, self.hidden_filter_dim, 2, self.str_len).transpose(2, 3)
-        print('shape2.2:{}'.format(x.shape))
-        x = self.conv3(x) 
-        x = self.bn3(x)
-        x = F.relu(x)
+        # collapse left and right sides
+        x = x[:, :, :self.str_len] + x[:, :, self.str_len:] 
 
-        print('shape3: {}'.format(x.shape))
-        x = x.view(-1, self.hidden_filter_dim, self.str_len)
-        print('shape4: {}'.format(x.shape))
-
-        x = self.conv4(x)
-        print('shape5: {}'.format(x.shape))
+        # put down to one filter.
+        x = self.conv3(x)  
         x = x.view(-1, self.str_len)
-        print('shape6: {}'.format(x.shape))
-        x = x[:, self.first_reverse_index:self.first_reverse_index+self.str_len]
-        print('shape7: {}'.format(x.shape))
-
+        x = x[:, self.first_reverse_index:self.last_reverse_index]
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -
@@ -74,9 +60,105 @@ class AllConv(nn.Module):
 
         return x
 
+class AllConv(nn.Module):
+    def __init__(self, input_dim, reverse_len, y_range=(), num_filters=10,
+            num_blocks=1):
+        super().__init__()
+        self.input_dim = input_dim
+
+        # for determining output dim. assumes stride of reverse_env is 1.
+        self.str_len = int(input_dim / 2)
+        self.first_reverse_index = math.floor((reverse_len-1)/2)
+        self.last_reverse_index = self.str_len - math.floor(reverse_len/2)
+        assert input_dim % 2 == 0, 'should have even length input for reverse_env with HER'
+
+        self.y_range = y_range
+        self.num_filters = num_filters
+
+        self.conv1 = nn.Conv1d(1, num_filters, 3, padding=1, bias=False)
+        nn.init.constant_(self.conv1.weight, 1)
+        self.bn1 = nn.BatchNorm1d(num_filters)
+        self.basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters)
+            for i in range(num_blocks)])
+
+        self.hidden_filter_dim = 5
+        self.conv2 = nn.Conv1d(num_filters, self.hidden_filter_dim, 1,bias=False)
+        nn.init.constant_(self.conv2.weight[0], 1)
+        nn.init.constant_(self.conv2.weight[1], -1)
+        nn.init.constant_(self.conv2.weight[2], 2)
+        nn.init.constant_(self.conv2.weight[3], -2)
+        nn.init.constant_(self.conv2.weight[4], 0)
+        self.bn2 = nn.BatchNorm1d(self.hidden_filter_dim)
+        self.conv3 = nn.Conv2d(self.hidden_filter_dim, self.hidden_filter_dim,
+                kernel_size=(1,2), bias=False)
+        nn.init.constant_(self.conv3.weight[0], 1)
+        nn.init.constant_(self.conv3.weight[1], 2)
+        nn.init.constant_(self.conv3.weight[2], 3)
+        nn.init.constant_(self.conv3.weight[3], 4)
+        nn.init.constant_(self.conv3.weight[4], 0)
+        self.bn3 = nn.BatchNorm2d(self.hidden_filter_dim)
+        self.conv4 = nn.Conv1d(self.hidden_filter_dim, 1, 1, bias=False)
+        nn.init.constant_(self.conv4.weight, 1)
+
+    def forward(self, input):
+        x = input
+        print('x1s: {}'.format(x.shape))
+        print('x1: {}'.format(x))
+        # reshape to (batch_size, num_channels, length)
+        x = x.view(-1, 1, self.input_dim)
+
+        x = self.conv1(x)
+        print('x3: {}'.format(x))
+#        x = self.bn1(x)
+        x = F.relu(x)
+        print('x4: {}'.format(x))
+
+        for block in self.basic_blocks:
+            x = block(x)
+
+        x = self.conv2(x)
+        print('x6: {}'.format(x))
+#        x = self.bn2(x)
+        x = F.relu(x)
+
+        # the 2D conv to convert from being 2*str_len long to 1*str_len long.
+        # converts  (batch_size, num_filters, str_len) to 
+        #           (batch_size, num_filters, str_len/2) by taking a convolution
+        x = x.view(-1, self.hidden_filter_dim, 2, self.str_len).transpose(2, 3)
+        print('x8s: {}'.format(x.shape))
+        print('x8: {}'.format(x))
+        x = self.conv3(x) 
+        print('x9s: {}'.format(x.shape))
+        print('x9: {}'.format(x))
+#        x = self.bn3(x)
+        x = F.relu(x)
+
+        x = x.view(-1, self.hidden_filter_dim, self.str_len)
+        print('x11s: {}'.format(x.shape))
+        print('x11: {}'.format(x))
+
+        x = self.conv4(x)
+        print('x12s: {}'.format(x.shape))
+        print('x12: {}'.format(x))
+        x = x.view(-1, self.str_len)
+        print('x13s: {}'.format(x.shape))
+        print('x13: {}'.format(x))
+        x = x[:, self.first_reverse_index:self.last_reverse_index]
+        print('x14s: {}'.format(x.shape))
+        print('x14: {}'.format(x))
+
+
+        if self.y_range:
+            x = self.y_range[0] + (self.y_range[1] -
+                    self.y_range[0])*nn.Sigmoid()(x)
+
+        print('x15s: {}'.format(x.shape))
+        print('x15: {}'.format(x))
+        return x
+
 class CNNRes2(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10):
-        super(CNNRes2, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
@@ -137,7 +219,7 @@ class CNNRes2(nn.Module):
 
 class BasicBlock(nn.Module):
     def __init__(self, conv1_filters, conv2_filters):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv1d(conv1_filters, conv2_filters, 3, padding=1)
         self.bn1 = nn.BatchNorm1d(conv1_filters)
         self.conv2 = nn.Conv1d(conv2_filters, conv2_filters, 3, padding=1)
@@ -160,7 +242,7 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10,
             num_blocks=1):
-        super(ResNet2, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
@@ -201,16 +283,17 @@ class ResNet(nn.Module):
 
 class FC2(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), batch_norm=True):
-        super(FC2, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.hidden_dim = 10
+        self.hidden_dim = 256
         self.batch_norm = batch_norm
         self.y_range = y_range
         self.fc1 = nn.Linear(self.input_dim, self.hidden_dim)
-        if self.batch_norm:
-            self.bn1 = nn.BatchNorm1d(self.hidden_dim)
-        self.fc2 = nn.Linear(self.hidden_dim, self.output_dim)
+        self.fc2 = nn.Linear(self.hidden_dim, self.hidden_dim)
+        self.bn1 = nn.BatchNorm1d(self.hidden_dim)
+        self.bn2 = nn.BatchNorm1d(self.hidden_dim)
+        self.fc3 = nn.Linear(self.hidden_dim, self.output_dim)
 
     def forward(self, x):
         x = self.fc1(x)
@@ -219,6 +302,11 @@ class FC2(nn.Module):
         x = F.relu(x)
 
         x = self.fc2(x)
+        if self.batch_norm:
+            x = self.bn2(x)
+        x = F.relu(x)
+
+        x = self.fc3(x)
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -

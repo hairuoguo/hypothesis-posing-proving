@@ -37,7 +37,6 @@ class ReverseGymEnv(gym.Env):
         # you're getting closer to the reward threshold.
         self.reward_threshold = str_len
         self.trials = 50 # num of trials to avg over
-#        self.max_episode_steps = str_len # now done dynamically for each episode
         self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
 #        self.reward_for_achieving_goal = 1
 #        self.step_reward_for_not_achieving_goal = 0
@@ -57,8 +56,8 @@ class ReverseGymEnv(gym.Env):
         """
         self.ep = self.env.start_ep()
 #        self.max_episode_steps = self.ep.path_len + 1
-#        self.max_episode_steps = self.str_len
-        self.max_episode_steps = self.ep.path_len*2 + 1
+        self.max_episode_steps = self.str_len
+#        self.max_episode_steps = self.ep.path_len*2 + 1
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1
         # distance)
