@@ -30,8 +30,10 @@ class AllConv2(nn.Module):
         self.bn2 = nn.BatchNorm1d(self.hidden_filter_dim)
         self.conv3 = nn.Conv1d(self.hidden_filter_dim, 1, 1)
 
-    def forward(self, inputs):
-        x = inputs
+    def forward(self, input):
+        print('input: {}'.format(input))
+        x = input
+
         # reshape to (batch_size, num_channels, length)
         x = x.view(-1, 1, self.input_dim)
 

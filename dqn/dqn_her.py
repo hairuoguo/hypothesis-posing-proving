@@ -96,9 +96,9 @@ else:
     config.device = 'cpu'
 config.flush = not args.no_flush # if false, output scrolls (good for putting into .out file)
 config.visualise_overall_agent_results = False # for plotting
-config.load_model = False
-config.file_to_load_model = model_dir + '/' + 'all_conv1' + '.pt'
-#config.starting_episode_number = 8000 # in case you want to resume training
+config.load_model = True
+config.file_to_load_model = model_dir + '/' + 'AC_7_3' + '.pt'
+config.starting_episode_number = 10000 # in case you want to resume training
 
 config.hyperparameters = {
     'DQN_Agents': {

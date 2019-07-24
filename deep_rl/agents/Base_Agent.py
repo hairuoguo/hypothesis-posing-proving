@@ -12,7 +12,6 @@ from modules.old_cnn2 import CNN
 from modules.resnet import ResNet
 from modules.resnet import CNNRes
 from modules.dnc_wrapper import DNCWrapper
-from modules.all_conv import AllConv2
 from modules.all_conv import AllConv
 from modules.all_conv import CNNRes2
 from modules.all_conv import FC2
@@ -365,13 +364,8 @@ class Base_Agent(object):
                     y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'AllConv':
+            print('using all conv')
             return AllConv(input_dim, self.config.environment.env.reverse_len,
-                    y_range=hyperparameters['y_range'],
-                    num_blocks=hyperparameters['num_blocks'],
-                    num_filters=hyperparameters['num_filters']).to(self.device)
-
-        elif hyperparameters['net_type'] == 'AllConv2':
-            return AllConv2(input_dim, self.config.environment.env.reverse_len,
                     y_range=hyperparameters['y_range'],
                     num_blocks=hyperparameters['num_blocks'],
                     num_filters=hyperparameters['num_filters']).to(self.device)
