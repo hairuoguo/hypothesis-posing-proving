@@ -2,7 +2,8 @@ import logging
 import os
 import sys
 sys.path.append("../../")
-from modules.cnn_attention import CNNAttention 
+from modules.cnn_attention import CNNAttention
+from modules.ABCNN import ABCNN 
 import gym
 import random
 import numpy as np
@@ -376,8 +377,12 @@ class Base_Agent(object):
             return net
 
         elif self.hyperparameters['net_type'] == 'CNNAttention':
-                model = CNNAttention(input_dim, output_dim)
-                model.cuda()
+                model = CNNAttention(input_dim, output_dim,
+                y_range=hyperparameters['y_range']).to(self.device)
+                return model
+        elif self.hyperparameters['net_type'] == 'ABCNN':
+                model = ABCNN(input_dim, output_dim,
+                y_range=hyperparameters['y_range']).to(self.device)
                 return model
 
         elif self.hyperparameters['net_type'] == 'FC':

@@ -94,7 +94,7 @@ config.file_to_load_model = None
 
 config.hyperparameters = {
     'DQN_Agents': {
-        'learning_rate': 0.001,
+        'learning_rate': 0.0001,
         'batch_size': 128,
         'buffer_size': 100000,
         'epsilon_decay_rate_denominator': 150,
