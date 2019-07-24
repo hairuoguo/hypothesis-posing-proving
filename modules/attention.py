@@ -25,13 +25,24 @@ class Attention(nn.Module):
                 query):
         """
         Attention - Forward-pass
+
+        - make input the same dim as query with a fc network
+        - weights = softmax(query . keys) / sqrt(query_size))
+        - output = weights * input
+
         """
         #keys0 = F.relu(self.key_layer1(input.transpose_(1,2)))
         keys0 = F.relu(self.key_layer1(input))
         keys = self.key_layer2(keys0)
         weights = F.softmax(torch.div(torch.mul(query.unsqueeze(1), keys), math.sqrt(self.query_size)))
         weights = torch.sum(weights, dim=2)
+<<<<<<< HEAD
         #output = torch.mul(weights.unsqueeze(2), input).contiguous().view((-1, self.input_size*4*10))
         output = torch.mul(weights.unsqueeze(2), input).contiguous()
         output = output.view((-1, self.input_size*4*10))
+=======
+        #output = torch.matmul(weights, input).view((1, -1))
+        output = torch.mul(weights.unsqueeze(2), input).contiguous().view((-1,
+                self.input_size*4*10)) # 4 is number of conv layers, 10 is number of filters
+>>>>>>> 9a31c454f69924d9e36bcf890ec1dc2e09adf025
         return output

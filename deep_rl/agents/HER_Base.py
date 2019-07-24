@@ -62,6 +62,7 @@ class HER_Base(object):
     def conduct_action_in_changeable_goal_envs(self, action):
         """Adapts conduct_action from base agent so that can handle changeable goal environments"""
         self.next_state_dict, self.reward, self.done, _ = self.environment.step(action)
+         
 #        self.total_episode_score_so_far += self.reward
         self.total_episode_score_so_far += 1
         if self.hyperparameters["clip_rewards"]:

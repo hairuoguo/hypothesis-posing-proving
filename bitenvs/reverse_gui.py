@@ -21,9 +21,19 @@ def play_game(str_len, reverse_len, offset, num_obscured, path_len_mean=5,
     ep = env.start_ep()
     n_actions = len(env.actions_list)
 
+
+    def leftmost(i):
+        return i + 1 - math.ceil(reverse_len / 2)
+    
+
+    def rightmost(i):
+        return i - 1 + math.ceil(reverse_len / 2) + (reverse_len % 2 == 0)
+
+
     def is_rotatable(i):
         lm = leftmost(i)
         return lm >= 0 and lm % offset == 0 and lm / offset < n_actions
+
 
     def press(i):
         nonlocal n_steps
@@ -33,7 +43,7 @@ def play_game(str_len, reverse_len, offset, num_obscured, path_len_mean=5,
         action = int(lm / offset)
         nonlocal ep
         obs, _, reward, done = ep.make_action(action) # pivot is one left
-        done = done or n_steps == str_len
+        done = done # or n_steps == str_len
         if not done:
             for i, b in enumerate(current_buttons):
                 b.config(text=str(obs[i]))
@@ -49,11 +59,6 @@ def play_game(str_len, reverse_len, offset, num_obscured, path_len_mean=5,
                 g.config(text=str(goal[i]))
                 b.config(text=str(current[i]))
 
-    def leftmost(i):
-        return i + 1 - math.ceil(reverse_len / 2)
-    
-    def rightmost(i):
-        return i - 1 + math.ceil(reverse_len / 2) + (reverse_len % 2 == 0)
 
     def underline(i):
         for b in current_buttons[leftmost(i):rightmost(i)+1]:

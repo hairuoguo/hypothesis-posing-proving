@@ -19,32 +19,34 @@ class CNNAttention(nn.Module):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
+<<<<<<< HEAD
         self.conv_net = CNN(input_dim, 256)
         self.attention = Attention(input_dim, input_dim)
         self.fc1 = nn.Linear(input_dim*4*10, 2048)
         #self.fc1 = nn.Linear(input_dim*4*10, 2048)
         self.fc2 = nn.Linear(2048, output_dim)
+=======
+
+        self.cnn_output_dim = 256
+        self.conv_net = CNN(input_dim, self.cnn_output_dim)
+        self.attention = Attention(self.cnn_output_dim, input_dim)
+        self.cnn_num_layers = 4
+        self.fc1 = nn.Linear(input_dim*self.cnn_num_layers*10, output_dim)
+>>>>>>> 9a31c454f69924d9e36bcf890ec1dc2e09adf025
 
 
 
     def forward(self, x): 
-        """
-            x will probably have input dimension 20 to start. Then shape is
-            (batch_size, 20)
+        final_output, layer_outputs = self.conv_net(x)
 
-            steps:
-            - feed into CNN. CNN outputs tuple of layer outputs, each with the
-              same dimension.
-            - feed output of CNN into attention network. outputs a softmax.
-            - multiply the softmax with a centered version of the input.
-            - feed into a small fc network.
-            - output a prediction
+        out = self.attention(layer_outputs, final_output)
+        out = self.fc1(out)
 
-            Parameters I need:
-            - 
+        if self.y_range:
+            out = self.y_range[0] + (self.y_range[1] -
+                    self.y_range[0])*nn.Sigmoid()(out)
 
-        """
-
+<<<<<<< HEAD
         centered_input = x - 0.5
         final_output, layer_outputs = self.conv_net(x)
         out = self.attention(layer_outputs, x)
@@ -54,4 +56,6 @@ class CNNAttention(nn.Module):
         if self.y_range:
             out = self.y_range[0] + (self.y_range[1] -
                     self.y_range[0])*nn.Sigmoid()(out)
+=======
+>>>>>>> 9a31c454f69924d9e36bcf890ec1dc2e09adf025
         return out

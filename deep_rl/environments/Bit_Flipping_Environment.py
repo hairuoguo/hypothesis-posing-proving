@@ -35,6 +35,7 @@ class Bit_Flipping_Environment(gym.Env):
         return [seed]
 
     def reset(self):
+        self.is_solved = False
         if not self.deterministic:
             self.desired_goal = self.randomly_pick_state_or_goal()
             self.state = self.randomly_pick_state_or_goal()
@@ -62,6 +63,7 @@ class Bit_Flipping_Environment(gym.Env):
         if self.goal_achieved(self.next_state):
             self.reward = self.reward_for_achieving_goal
             self.done = True
+            self.is_solved = True
         else:
             self.reward = self.step_reward_for_not_achieving_goal
             if self.step_count >= self.environment_dimension:

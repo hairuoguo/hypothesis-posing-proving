@@ -29,7 +29,7 @@ from dnc.dnc import DNC
 from dnc.sdnc import SDNC
 from dnc.sam import SAM
 from dnc.util import *
-from visdom import Visdom
+#from visdom import Visdom
 
 
 parser = argparse.ArgumentParser(description='PyTorch Differentiable Neural Computer')
@@ -67,12 +67,16 @@ print(args)
 dnc_rewards = []
 dnc_saved_log_probs = []
 
-bit_str_len = 10
+bit_str_len = 4
+reverse_len = 2
+path_len_mean = 1
+path_len_std = 0
 
-env = rev.ReverseEnv(bit_str_len, 3, 1, 0, hypothesis_enabled=False)
+env = rev.ReverseEnv(bit_str_len, reverse_len, 1, 0,
+        path_len_mean=path_len_mean, path_len_std=path_len_std)
 ep = env.start_ep()
 num_subgoals = 3
-her_sample = False
+#her_sample = False
 her_coeff = 1.
 ab = False
 rnn = DNC(
@@ -223,7 +227,7 @@ if __name__ == '__main__':
 
     from_checkpoint = None
 
-    viz = Visdom()
+#    viz = Visdom()
 
 
     isEnd = False
