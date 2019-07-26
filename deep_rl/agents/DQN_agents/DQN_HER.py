@@ -1,5 +1,6 @@
 from deep_rl.agents.DQN_agents.DQN import DQN
 from deep_rl.agents.HER_Base import HER_Base
+import torch
 
 class DQN_HER(HER_Base, DQN):
     """DQN algorithm with hindsight experience replay"""
@@ -20,8 +21,15 @@ class DQN_HER(HER_Base, DQN):
             # long as there is enough experience in the buffers
             if self.time_for_q_network_to_learn():
                 # default learning iters = 1 for Bit_Flipping
-                for _ in range(self.hyperparameters["learning_iterations"]):
-                    self.learn(experiences=self.sample_from_HER_and_Ordinary_Buffer())
+                if self.hyperparameters["net_type"] == 'ABCNN-lstm':
+                    curr_state = self.q_network_local.curr_state
+                    self.q_network_local.curr_state = (torch.randn([1, self.hyperparameters["batch_size"]*2, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, self.hyperparameters["batch_size"]*2, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
+                    for _ in range(self.hyperparameters["learning_iterations"]):
+                        self.learn(experiences=self.sample_from_HER_and_Ordinary_Buffer(sample_seq_steps=True))
+                    self.q_network_local.curr_state = curr_state
+                else:
+                    for _ in range(self.hyperparameters["learning_iterations"]):
+                        self.learn(experiences=self.sample_from_HER_and_Ordinary_Buffer())
             # stores actions, reawrds, etc. from last step
             self.track_changeable_goal_episodes_data()
             # saves normal experience replay with newly formatted data from ^

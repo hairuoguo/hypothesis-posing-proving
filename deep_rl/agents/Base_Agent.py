@@ -10,11 +10,10 @@ import numpy as np
 import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
-from modules.cnn_attention import CNNAttention
 from modules.cnn3 import CNN
 from modules.resnet import ResNet
 from modules.resnet import CNNRes
-from modules.dnc_wrapper import DNCWrapper
+#from modules.dnc_wrapper import DNCWrapper
 from modules.all_conv import AllConv
 from modules.all_conv import CNNRes2
 from modules.all_conv import FC2
@@ -402,8 +401,10 @@ class Base_Agent(object):
                 y_range=hyperparameters['y_range']).to(self.device)
                 return model
         elif self.hyperparameters['net_type'] == 'ABCNN':
-                model = ABCNN(input_dim, output_dim,
-                y_range=hyperparameters['y_range']).to(self.device)
+                model = ABCNN(input_dim, output_dim, hidden_dim=hyperparameters['ABCNN_hidden_units'], y_range=hyperparameters['y_range']).to(self.device)
+                return model
+        elif self.hyperparameters['net_type'] == 'ABCNN-lstm':
+                model = ABCNN(input_dim, output_dim, hidden_dim=hyperparameters['ABCNN_hidden_units'], y_range=hyperparameters['y_range'], use_lstm=True, device=self.device).to(self.device)
                 return model
 
         elif self.hyperparameters['net_type'] == 'FC':

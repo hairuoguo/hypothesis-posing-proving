@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+torch.manual_seed(1)
+
 class ABCNN(nn.Module):
-    def __init__(self, input_dim, output_dim, hidden_dim=2048, y_range=()):
+    def __init__(self, input_dim, output_dim, hidden_dim=2048, y_range=(), use_lstm=False, device=None):
         super(ABCNN, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
@@ -14,15 +16,17 @@ class ABCNN(nn.Module):
         self.conv2 = nn.Conv1d(12, 12, 3, padding=1)
         self.conv3 = nn.Conv1d(12, 12, 3, padding=1)
         self.conv4 = nn.Conv1d(12, 12, 3, padding=1)
+        self.use_lstm = use_lstm
 
         self.avg_pool = nn.AvgPool1d(self.w, 1, padding=1)
         self.fc1 = nn.Linear(self.input_dim*12, self.hidden_dim)
         self.fc2 = nn.Linear(self.hidden_dim, output_dim)
-        
 
+        self.lstm = nn.LSTM(self.input_dim*12, self.hidden_dim)
+        if device:
+            self.curr_state = (torch.randn((1, 1, self.hidden_dim), device=device), torch.randn((1, 1, self.hidden_dim), device=device))
 
     def forward(self, x):
-    
         obs, target = torch.chunk(x, 2, dim=1)
         
         obs = obs.view(-1, 1, obs.size(1))
@@ -52,7 +56,14 @@ class ABCNN(nn.Module):
         x_target_4 = self.weighted_avg_pool(x_target_4)
 
         out = torch.cat((x_obs_4.view(x_obs_4.size(0), -1), x_target_4.view(x_target_4.size(0), -1)), dim=1) 
-        out = F.relu(self.fc1(out))
+
+
+        if self.use_lstm:
+            out, hidden = self.lstm(out.unsqueeze(0), self.curr_state)
+            self.curr_state = hidden
+            out = out.view(-1, self.hidden_dim)
+        else: 
+            out = F.relu(self.fc1(out))
         out = self.fc2(out)
 
         if self.y_range:
