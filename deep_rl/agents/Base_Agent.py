@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+sys.path.append("../../")
 import gym
 import random
 import numpy as np
@@ -8,11 +9,15 @@ import torch
 import time
 from deep_rl.nn_builder.pytorch.NN import NN
 from modules.cnn_attention import CNNAttention
+from modules.ABCNN import ABCNN 
 from modules.old_cnn2 import CNN
 from modules.resnet import ResNet
 from modules.resnet import CNNRes
 from modules.dnc_wrapper import DNCWrapper
 from modules.rnn import RNN
+from modules.cnn3 import CNN
+from modules.resnet import ResNet
+from modules.resnet import CNNRes
 from modules.all_conv import AllConv
 from modules.all_conv import FC2
 from torch.optim import optimizer
@@ -396,7 +401,13 @@ class Base_Agent(object):
 
         elif self.hyperparameters['net_type'] == 'CNNAttention':
                 model = CNNAttention(input_dim, output_dim,
-                        y_range=hyperparameters['y_range']).to(self.device)
+                y_range=hyperparameters['y_range']).to(self.device)
+                return model
+        elif self.hyperparameters['net_type'] == 'ABCNN':
+                model = ABCNN(input_dim, output_dim, hidden_dim=hyperparameters['ABCNN_hidden_units'], y_range=hyperparameters['y_range']).to(self.device)
+                return model
+        elif self.hyperparameters['net_type'] == 'ABCNN-lstm':
+                model = ABCNN(input_dim, output_dim, hidden_dim=hyperparameters['ABCNN_hidden_units'], y_range=hyperparameters['y_range'], use_lstm=True, device=self.device).to(self.device)
                 return model
 
         elif self.hyperparameters['net_type'] == 'FC':

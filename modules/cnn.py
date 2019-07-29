@@ -29,10 +29,12 @@ class CNN(nn.Module):
         #print('shape4_2: {}'.format(x4_2.shape))
         x5 = F.relu(self.fc1(x4_2))
         x6 = self.fc2(x5) # no activation needed before sigmoid
-
+    
+        '''
         if self.y_range:
             x6 = self.y_range[0] + (self.y_range[1] -
                     self.y_range[0])*nn.Sigmoid()(x6)
+        '''
 
         # second val has shape (batch_size, num_layers*num_channels, input_dim)
         return x6, torch.cat([x1, x2, x3, x4_1], dim=1)

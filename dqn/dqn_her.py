@@ -8,6 +8,7 @@ from deep_rl.utilities.data_structures.Config import Config
 from deep_rl.environments.Bit_Flipping_Environment import Bit_Flipping_Environment
 from bitenvs.reverse_gym_env import ReverseGymEnv
 from bitenvs.binary_gym_env import BinaryEnv
+from bitenvs.uncover_bits_gym_env import UncoverGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
 import argparse
 import torch
@@ -59,15 +60,18 @@ reverse_len = args.reverse_len
 # config.reverse_len = args.reverse_len # needed for all_conv.
 config.reverse_len = 1 # needed for all_conv.
 reverse_offset = 1
-num_obscured = 0
+num_obscured = 3
 path_len_mean = args.path_len
 path_len_std = 0
 
 # env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
 #         hypothesis_enabled=False, path_len_mean=path_len_mean,
 #         path_len_std=path_len_std, print_results=False)
-env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
-#env = Bit_Flipping_Environment(environment_dimension=str_len)
+# env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
+# env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
+
+# env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
+# env = Bit_Flipping_Environment(environment_dimension=str_len)
 
 config.save_every_n_episodes = args.save_every
 config.save_results = not args.no_save
@@ -112,9 +116,10 @@ config.starting_episode_number = args.starting_ep # in case you want to resume t
 
 config.hyperparameters = {
     'DQN_Agents': {
-        'learning_rate': 0.00003,
-        'batch_size': 128,
+        'learning_rate': 0.0001,
+        'batch_size': 5,
         'buffer_size': 100000,
+        'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
         'discount_rate': 0.999,
         'incremental_td_error': 1e-8,
@@ -133,7 +138,8 @@ config.hyperparameters = {
         'batch_norm': True,
         # for ResNet
         'num_blocks':args.num_blocks,
-        'num_filters':args.num_filters
+        'num_filters':args.num_filters,
+        'device': config.device
     }
 }
 

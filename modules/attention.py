@@ -17,6 +17,7 @@ class Attention(nn.Module):
         self.input_size = input_size
         self.query_size = query_size
         self.key_layer1 = nn.Linear(input_size, 2048)
+        #self.key_layer1 = nn.Linear(4*10, 2048)
         self.key_layer2 = nn.Linear(2048, query_size)
 
 
@@ -30,6 +31,7 @@ class Attention(nn.Module):
         - output = weights * input
 
         """
+        #keys0 = F.relu(self.key_layer1(input.transpose_(1,2)))
         keys0 = F.relu(self.key_layer1(input))
         keys = self.key_layer2(keys0)
         weights = F.softmax(torch.div(torch.mul(query.unsqueeze(1), keys), math.sqrt(self.query_size)))

@@ -96,13 +96,12 @@ class HER_Base(object):
 
         self.HER_memory.add_experience(new_states, self.episode_actions, new_rewards, new_next_states, self.episode_dones)
 
-    def sample_from_HER_and_Ordinary_Buffer(self):
+    def sample_from_HER_and_Ordinary_Buffer(self, sample_seq_steps=False):
         """Samples from the ordinary replay buffer and HER replay buffer according to a proportion specified in config"""
         # can train on a batch of both simultaneously since the format is the
         # same into the network.
-        states, actions, rewards, next_states, dones = self.memory.sample(self.ordinary_buffer_batch_size)
-        HER_states, HER_actions, HER_rewards, HER_next_states, HER_dones = self.HER_memory.sample(self.HER_buffer_batch_size)
-
+        states, actions, rewards, next_states, dones = self.memory.sample(self.ordinary_buffer_batch_size, sample_seq_steps=sample_seq_steps)
+        HER_states, HER_actions, HER_rewards, HER_next_states, HER_dones = self.HER_memory.sample(self.HER_buffer_batch_size, sample_seq_steps=sample_seq_steps)
         states = torch.cat((states, HER_states))
         actions = torch.cat((actions, HER_actions))
         rewards = torch.cat((rewards, HER_rewards))
