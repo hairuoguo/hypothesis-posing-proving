@@ -132,7 +132,10 @@ class ReverseEnv:
         self.path_len_std = path_len_std
         self.__generate_func_list()
         self.__generate_indices()
+        self.reward_for_achieving_goal = 10
+        self.step_reward_for_not_achieving_goal = -1
         self.ep = None
+
 
     def __generate_func_list(self): #generates list of actions that reverse substrings
         self.actions_list = [functools.partial(self.__reverse_substring, reverse_len=self.reverse_len, start_index=i) for i in range(0, self.str_len-self.reverse_len + 1, self.reverse_offset)]
@@ -168,7 +171,8 @@ class ReverseEnv:
         self.ep = ReverseEpisode(copy.copy(self.actions_list), self.str_len,
                 self.num_obscured, copy.copy(self.action_indices),
                 self.reverse_len, self.reverse_offset, self.path_len_mean,
-                self.path_len_std, self.print_results)
+                self.path_len_std, self.reward_for_achieving_goal,
+                self.step_reward_for_not_achieving_goal, self.print_results)
         if self.hypothesis_enabled:
             self.hypothesis_enable_ep(self.ep)
         return self.ep
@@ -184,6 +188,7 @@ class ReverseEpisode:
     
     def __init__(self, actions_list, str_len, num_obscured, action_indices,
             reverse_len, reverse_offset, path_len_mean, path_len_std,
+            achieve_reward, no_achieve_reward,
             print_results=False):
 #        print('\n')
         
@@ -199,6 +204,8 @@ class ReverseEpisode:
         #self.generate_strings(3, 0, 0, 0)
         self.stats = EpStats() 
         self.print_results = print_results
+        self.reward_for_achieving_goal = achieve_reward
+        self.step_reward_for_not_achieving_goal = no_achieve_reward
         if self.print_results:
             print(str(self.state.target) + ' = target')
             print(str(self.state.hidden_state) + ' = starting')
@@ -223,12 +230,9 @@ class ReverseEpisode:
 
     def get_reward(self):
         if np.array_equal(self.state.hidden_state, self.state.target):
-#            return 1.
-            #return self.str_len
-            return 1
+            return self.reward_for_achieving_goal
         else:
-#            return 0.
-            return -10
+            return self.step_reward_for_not_achieving_goal
 
     '''
     def target_reached(self):

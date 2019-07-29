@@ -67,16 +67,15 @@ class BinaryEnv(gym.Env):
             action = action[0]
         assert action <= self.environment_dimension + 1, "You picked an invalid action"
         self.step_count += 1
-        if action != self.environment_dimension + 1: #otherwise no bit is flipped
-            self.next_state = copy.copy(self.state)
-            self.next_state[action] = 0
+        self.next_state = copy.copy(self.state)
+        self.next_state[action] = 0
         if self.goal_achieved(self.next_state):
             self.reward = self.reward_for_achieving_goal
             self.done = True
             self.is_solved = True
         else:
             self.reward = self.step_reward_for_not_achieving_goal
-            if self.step_count >= self.environment_dimension:
+            if self.step_count >= self.environment_dimension + 2:
                 self.done = True
             else:
                 self.done = False

@@ -1,8 +1,7 @@
 #!usr/bin/env bash
-vim dqn/dqn_her.py\
-    deep_rl/agents/Base_Agent.py\
-    modules/all_conv.py\
-    modules/resnet.py\
+vim ../research.txt\
+    dqn/dqn_her.py\
     dqn/submit.sh\
-    session.sh\
-    ../research.txt
+    deep_rl/agents/Base_Agent.py\
+    modules/dnc_wrapper.py\
+    pytorch_dnc_simon/test.py\

@@ -55,6 +55,7 @@ class DQN(Base_Agent):
         self.q_network_local.eval() #puts network in evaluation mode
         with torch.no_grad():
             action_values = self.q_network_local(state)
+#         print('action values: {}'.format(action_values))
         self.q_network_local.train() #puts network back in training mode
         action = self.exploration_strategy.perturb_action_for_exploration_purposes({"action_values": action_values,
                                                                                     "turn_off_exploration": self.turn_off_exploration,

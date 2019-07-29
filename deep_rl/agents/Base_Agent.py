@@ -12,8 +12,8 @@ from modules.old_cnn2 import CNN
 from modules.resnet import ResNet
 from modules.resnet import CNNRes
 from modules.dnc_wrapper import DNCWrapper
+from modules.rnn import RNN
 from modules.all_conv import AllConv
-from modules.all_conv import CNNRes2
 from modules.all_conv import FC2
 from torch.optim import optimizer
 import pickle
@@ -363,22 +363,19 @@ class Base_Agent(object):
             return FC2(input_dim, output_dim, 
                     y_range=hyperparameters['y_range']).to(self.device)
 
+        elif hyperparameters['net_type'] == 'RNN':
+            return RNN(input_dim, output_dim,
+                    y_range=hyperparameters['y_range']).to(self.device)
         elif hyperparameters['net_type'] == 'AllConv':
-            print('using all conv')
-            return AllConv(input_dim, self.config.environment.env.reverse_len,
+            return AllConv(input_dim, self.config.reverse_len,
                     y_range=hyperparameters['y_range'],
                     num_blocks=hyperparameters['num_blocks'],
                     num_filters=hyperparameters['num_filters']).to(self.device)
 
-        elif hyperparameters['net_type'] == 'CNNRes2':
-            return CNNRes2(input_dim, output_dim,
-                    num_filters=hyperparameters['num_filters'],
-                    y_range=hyperparameters['y_range']).to(self.device)
-
         elif hyperparameters['net_type'] == 'DNC':
             return DNCWrapper(input_dim, output_dim,
                     y_range=hyperparameters['y_range'],
-                    cuda_index=self.config.cuda_index)
+                    cuda_index=self.config.cuda_index).to(self.device)
 
         elif hyperparameters['net_type'] == 'ResNet':
             return ResNet(input_dim, output_dim, 
