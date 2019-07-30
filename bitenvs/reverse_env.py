@@ -188,7 +188,7 @@ class ReverseEpisode:
     
     def __init__(self, actions_list, str_len, num_obscured, action_indices,
             reverse_len, reverse_offset, path_len_mean, path_len_std,
-            achieve_reward, no_achieve_reward,
+            reward_for_achieving_goal, step_reward_for_not_achieving_goal,
             print_results=False):
 #        print('\n')
         
@@ -201,11 +201,10 @@ class ReverseEpisode:
         self.path_len = None
         self.state = None
         self.generate_strings(path_len_mean, path_len_std, 2, 0)
-        #self.generate_strings(3, 0, 0, 0)
         self.stats = EpStats() 
         self.print_results = print_results
-        self.reward_for_achieving_goal = achieve_reward
-        self.step_reward_for_not_achieving_goal = no_achieve_reward
+        self.reward_for_achieving_goal = reward_for_achieving_goal
+        self.step_reward_for_not_achieving_goal = step_reward_for_not_achieving_goal
         if self.print_results:
             print(str(self.state.target) + ' = target')
             print(str(self.state.hidden_state) + ' = starting')
@@ -338,6 +337,8 @@ class ReverseEpisode:
             self.generate_strings(path_len_m, path_len_std, num_qs_m, num_qs_std)
         else:
             self.state.target = target
+            print('self.state.target: ' + str(self.state.target))
+            print('self.state.obs: ' + str(self.state.obs_state))
             self.state.update_info()
 
     ''' 

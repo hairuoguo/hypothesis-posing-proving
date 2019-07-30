@@ -21,7 +21,7 @@ class BinaryEnv(gym.Env):
         self.seed()
         self.reward_threshold = 0.0
         self.trials = 50
-        self.max_episode_steps = environment_dimension
+        self.max_episode_steps = num_to_flip  # environment_dimension
         self.id = "Bit Flipping"
         self.environment_dimension = environment_dimension
         self.num_to_flip = num_to_flip
@@ -75,7 +75,7 @@ class BinaryEnv(gym.Env):
             self.is_solved = True
         else:
             self.reward = self.step_reward_for_not_achieving_goal
-            if self.step_count >= self.environment_dimension + 2:
+            if self.step_count >= self.max_episode_steps: 
                 self.done = True
             else:
                 self.done = False

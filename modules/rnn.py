@@ -14,7 +14,7 @@ class RNN(nn.Module):
                 input_size=1, # size of each feature in sequence
                 hidden_size=self.hidden_size, 
                 num_layers=2,
-                batch_first=True, # shape of input tensor is (batch, seq_len, token_dim)
+                batch_first=True, # shape of input tensor is (seq_len, batch, token_dim)
         )
         self.fc1 = nn.Linear(self.hidden_size, self.output_dim)
 
@@ -22,14 +22,14 @@ class RNN(nn.Module):
     def forward(self, x):
         # input should be shape (batch_size, sequence_len, input_size) for the
         # dnc. Sequence_len is RNNed upon.
-#         print('input: {}'.format(x.shape))
+#        print('input: {}'.format(x.shape))
 
         x = x.view(-1, self.input_dim, 1)
 #         print('input2: {}'.format(x.shape))
         output, (h_n, c_n) = self.rnn(x)
 #         print('o: {}'.format(output.shape))
-        x = output[:,-1]
-#         print('x: {}'.format(x.shape)
+        x = output[:,-1, :] # only the last time step output. (batch, time, hidden_dim)
+#         print('x: {}'.format(x.shape))
 
         x = self.fc1(x)
 #         print('last: {}'.format(x.shape))

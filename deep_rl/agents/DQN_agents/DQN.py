@@ -73,19 +73,30 @@ class DQN(Base_Agent):
         actions_list = [action_X.item() for action_X in actions ]
 
         self.logger.info("Action counts {}".format(Counter(actions_list)))
-        self.take_optimisation_step(self.q_network_optimizer, self.q_network_local, loss, self.hyperparameters["gradient_clipping_norm"])
+        self.take_optimisation_step(self.q_network_optimizer, 
+                self.q_network_local, loss, self.hyperparameters["gradient_clipping_norm"])
 
     def compute_loss(self, states, next_states, rewards, actions, dones):
+        # print('COMPUTE_LOSS: ')
+        # print('states: ' + str(states))
+        # print('actions: ' + str(actions))
+        # print('next_states: ' + str(next_states))
+        # print('rewards: ' + str(rewards))
+        # print('dones: ' + str(dones))
         """Computes the loss required to train the Q network"""
         with torch.no_grad():
             Q_targets = self.compute_q_targets(next_states, rewards, dones)
+            # print('Q_targets: ' + str(Q_targets))
         Q_expected = self.compute_expected_q_values(states, actions)
+        # print('Q_expected: ' + str(Q_expected))
         loss = F.mse_loss(Q_expected, Q_targets)
+        # print('loss: ' + str(loss))
         return loss
 
     def compute_q_targets(self, next_states, rewards, dones):
         """Computes the q_targets we will compare to predicted q values to create the loss to train the Q network"""
         Q_targets_next = self.compute_q_values_for_next_states(next_states)
+        # print('Q_targets_next: ' + str(Q_targets_next))
         Q_targets = self.compute_q_values_for_current_states(rewards, Q_targets_next, dones)
         return Q_targets
 

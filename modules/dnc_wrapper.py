@@ -33,7 +33,11 @@ class DNCWrapper(nn.Module):
 
 
     def reset_experience(self):
+        print('hi')
         self.reset_experience = True
+
+    def should_stop_computing(self):
+        return True
 
 
     def forward(self, x):

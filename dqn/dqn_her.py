@@ -8,14 +8,14 @@ from deep_rl.utilities.data_structures.Config import Config
 from deep_rl.environments.Bit_Flipping_Environment import Bit_Flipping_Environment
 from bitenvs.reverse_gym_env import ReverseGymEnv
 from bitenvs.binary_gym_env import BinaryEnv
-from bitenvs.uncover_bits_gym_env import UncoverGymEnv
+# from bitenvs.uncover_bits_gym_env import UncoverGymEnv
 import deep_rl.utilities.file_numberer as file_numberer
 import argparse
 import torch
 import deep_rl.utilities.info_maker as info_maker
 from pathlib import Path
 
-parser = argparse.ArgumentParser(description='DQN-HER parameters')
+parser = argparse.ArgumentParser(description='RL parameters')
 parser.add_argument('-e', '--num_eps',type=int, default=10000,  
         help='number of episodes to run')
 parser.add_argument('-n', '--str_len',type=int, default=10,  
@@ -60,14 +60,14 @@ reverse_len = args.reverse_len
 # config.reverse_len = args.reverse_len # needed for all_conv.
 config.reverse_len = 1 # needed for all_conv.
 reverse_offset = 1
-num_obscured = 3
+num_obscured = 0
 path_len_mean = args.path_len
 path_len_std = 0
 
-# env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
+#env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
 #         hypothesis_enabled=False, path_len_mean=path_len_mean,
-#         path_len_std=path_len_std, print_results=False)
-# env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
+#         path_len_std=path_len_std, print_results=True)
+env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
 # env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
 
 # env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
@@ -113,15 +113,16 @@ config.visualise_overall_agent_results = False # for plotting
 config.load_model = args.load
 config.file_to_load_model = '/om/user/salford/models/' + args.load_model + '.pt'
 config.starting_episode_number = args.starting_ep # in case you want to resume training
+config.runs_per_agent = 1
 
 config.hyperparameters = {
     'DQN_Agents': {
-        'learning_rate': 0.0001,
-        'batch_size': 5,
+        'learning_rate': 0.001,
+        'batch_size': 128,
         'buffer_size': 100000,
         'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
-        'discount_rate': 0.999,
+        'discount_rate': 0, #0.999,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
         'gradient_clipping_norm': 5,
@@ -131,11 +132,11 @@ config.hyperparameters = {
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
         # assuming std is zero, this is good. if not may need three std higher
         # to cover almost all possible values.
-        'y_range': (-1, 2*args.path_len + 1), 
+        'y_range': (-1, 10),  # reverse_env
         'num_conv_layers': 3,
         # for FC
-        'linear_hidden_units': [64]*2,
-        'batch_norm': True,
+        'linear_hidden_units': [128],
+        'batch_norm': False,
         # for ResNet
         'num_blocks':args.num_blocks,
         'num_filters':args.num_filters,

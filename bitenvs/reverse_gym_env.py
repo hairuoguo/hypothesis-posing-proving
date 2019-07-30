@@ -17,7 +17,7 @@ class ReverseGymEnv(gym.Env):
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
             hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
-            print_results=False):
+            print_results=True):
 
         self.env = ReverseEnv(str_len, reverse_len, reverse_offset,
                 num_obscured, hypothesis_enabled=hypothesis_enabled,

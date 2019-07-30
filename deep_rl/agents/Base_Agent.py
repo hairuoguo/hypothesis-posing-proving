@@ -198,7 +198,8 @@ class Base_Agent(object):
             if save_and_print_results: self.save_and_print_result()
             if self.config.save_every_n_episodes and (self.episode_number %
                     self.config.save_every_n_episodes == 0):
-                print('\n') # so model parameters print statement shows up
+                print('\n')
+            if self.config.save_results:
                 self.locally_save_policy()
                 self.save_running_results(self.game_full_episode_scores,
                         self.rolling_results, time.time() - start,
@@ -369,8 +370,7 @@ class Base_Agent(object):
                     y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'RNN':
-            return RNN(input_dim, output_dim,
-                    y_range=hyperparameters['y_range']).to(self.device)
+            return RNN(input_dim, output_dim).to(self.device)
         elif hyperparameters['net_type'] == 'AllConv':
             return AllConv(input_dim, self.config.reverse_len,
                     y_range=hyperparameters['y_range'],
