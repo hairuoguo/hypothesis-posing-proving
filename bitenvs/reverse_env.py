@@ -337,8 +337,8 @@ class ReverseEpisode:
             self.generate_strings(path_len_m, path_len_std, num_qs_m, num_qs_std)
         else:
             self.state.target = target
-            print('self.state.target: ' + str(self.state.target))
-            print('self.state.obs: ' + str(self.state.obs_state))
+#            print('self.state.target: ' + str(self.state.target))
+#            print('self.state.obs: ' + str(self.state.obs_state))
             self.state.update_info()
 
     ''' 
