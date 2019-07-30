@@ -37,12 +37,9 @@ class ReverseGymEnv(gym.Env):
         # you're getting closer to the reward threshold.
         self.reward_threshold = str_len
         self.trials = 50 # num of trials to avg over
-#        self.max_episode_steps = str_len # now done dynamically for each episode
         self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
-#        self.reward_for_achieving_goal = 1
-#        self.step_reward_for_not_achieving_goal = 0
-        self.reward_for_achieving_goal = str_len
-        self.step_reward_for_not_achieving_goal = -1
+        self.reward_for_achieving_goal = self.env.reward_for_achieving_goal
+        self.step_reward_for_not_achieving_goal = self.env.step_reward_for_not_achieving_goal
         self.is_solved = False
 
 
@@ -57,14 +54,15 @@ class ReverseGymEnv(gym.Env):
         """
         self.ep = self.env.start_ep()
 #        self.max_episode_steps = self.ep.path_len + 1
-#        self.max_episode_steps = self.str_len
-        #self.max_episode_steps = self.ep.path_len*2 + 1
-        self.max_episode_steps = 6
+        self.max_episode_steps = self.str_len
+#        self.max_episode_steps = self.ep.path_len*2 + 1
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1
         # distance)
         obs1, l1 = self.ep.get_obs()
         self.state = obs1
+        print('start stat: {}'.format(obs1[:self.str_len]))
+        print('start goal: {}'.format(obs1[self.str_len:]))
         self.desired_goal = obs1[self.str_len:]
         self.achieved_goal = obs1[:self.str_len]
         self.is_solved = False
@@ -84,6 +82,8 @@ class ReverseGymEnv(gym.Env):
         self.state = self.next_state
         self.is_solved = isEnd
 
+        print('after move: {}'.format(obs1[:self.str_len]))
+        print('goal      : {}'.format(self.desired_goal))
         return ({"observation": np.array(obs1[:self.str_len]),
                 "desired_goal": np.array(self.desired_goal),
                 "achieved_goal": np.array(self.achieved_goal)}, reward,

@@ -1,17 +1,11 @@
 #!usr/bin/env bash
-nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res_10_3 &
-nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res_15_3 &
-nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 1 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res_10_6 &
 
-nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res3_10_3 &
-nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res3_15_3 &
-nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 3 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res3_10_6 &
-
-nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --num_blocks 6 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res0_10_3 &
-nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --num_blocks 6 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res0_15_3 &
-nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --num_blocks 6 --num_filters 256 --net_type ResNet > /om/user/salford/out/comp3res0_10_6 &
-
-nohup python -u dqn_her.py -n 10 -r 3 -e 100000 --cuda_index 1 --net_type FC > /om/user/salford/out/comp3fc_10_3 &
-nohup python -u dqn_her.py -n 15 -r 3 -e 500000 --cuda_index 2 --net_type FC > /om/user/salford/out/comp3fc_15_3 &
-nohup python -u dqn_her.py -n 10 -r 6 -e 500000 --cuda_index 3 --net_type FC > /om/user/salford/out/comp3fc_10_6 &
+python -u dqn_her.py --no_save -e 5000 -n 5 -l 1 -t RNN
+# nohup python -u dqn_her.py --load --no_save -lm AC_7_3_1 --starting_ep 1000 -nf -e 100 -n 12 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACzomb7_12 &
+# nohup python -u dqn_her.py --load --no_save -lm AC_7_3_1 --starting_ep 1000 -nf -e 100 -n 17 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACzomb7_17 &
+# nohup python -u dqn_her.py --no_save -lm AC_7_3_1 --starting_ep 1000 -nf -e 100 -n 12 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACnozomb7_12 &
+# nohup python -u dqn_her.py --no_save -lm AC_7_3_1 --starting_ep 1000 -nf -e 100 -n 17 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACnozomb7_17 &
+# nohup python -u dqn_her.py --load -lm AC_10_3_1_\(7\) --starting_ep 2000 -nf -e 2000 -n 10 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACzomb10_10 &
+# nohup python -u dqn_her.py --load -lm AC_10_3_1_\(7\) --starting_ep 2000 -nf -e 2000 -n 11 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACzomb10_11 &
+# nohup python -u dqn_her.py --load -lm AC_10_3_1_\(7\) --starting_ep 2000 -nf -e 2000 -n 15 -r 3 -l 1 -t AllConv -f AC_7_3_1 > /om/user/salford/out/ACzomb10_15 &
 

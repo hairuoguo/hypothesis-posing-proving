@@ -260,7 +260,9 @@ if __name__ == '__main__':
                 output, (chx, mhx, rv), v = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
             else:
                 output, (chx, mhx, rv) = rnn(Variable(torch.FloatTensor(obs)), (None, mhx, None), reset_experience=False, pass_through_memory=True)
+
             if i % 100 == 0: print(output)
+
             action = select_action(output)
             obs1, obs2, reward, isEnd = ep.make_action(action)
             dnc_rewards.append(reward) 

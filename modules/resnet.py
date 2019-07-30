@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 class BasicBlock(nn.Module):
     def __init__(self, conv1_filters, conv2_filters):
-        super(BasicBlock, self).__init__()
+        super().__init__()
         self.conv1 = nn.Conv1d(conv1_filters, conv2_filters, 3, padding=1)
         self.bn1 = nn.BatchNorm1d(conv1_filters)
         self.conv2 = nn.Conv1d(conv2_filters, conv2_filters, 3, padding=1)
@@ -27,7 +27,7 @@ class BasicBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10,
             num_blocks=1):
-        super(ResNet, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
@@ -36,9 +36,9 @@ class ResNet(nn.Module):
         self.bn1 = nn.BatchNorm1d(num_filters)
         self.basic_blocks = nn.ModuleList([BasicBlock(num_filters, num_filters) for i
             in range(num_blocks)])
-        self.fc1 = nn.Linear(num_filters*input_dim, output_dim)
-#        self.bn2 = nn.BatchNorm1d(256)
-#        self.fc2 = nn.Linear(256, output_dim)
+        self.fc1 = nn.Linear(num_filters*input_dim, 256)
+        self.bn2 = nn.BatchNorm1d(256)
+        self.fc2 = nn.Linear(256, output_dim)
 
     def forward(self, inputs):
         x = inputs
@@ -55,10 +55,10 @@ class ResNet(nn.Module):
         x = x.view(-1, self.input_dim*self.num_filters)
 
         x = self.fc1(x)
-#        x = self.bn2(x)
-#        x = F.relu(x)
+        x = self.bn2(x)
+        x = F.relu(x)
 
-#        x = self.fc2(x)
+        x = self.fc2(x)
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -
@@ -69,7 +69,7 @@ class ResNet(nn.Module):
 
 class CNNRes(nn.Module):
     def __init__(self, input_dim, output_dim, y_range=(), num_filters=10):
-        super(CNNRes, self).__init__()
+        super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.y_range = y_range
