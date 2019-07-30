@@ -46,13 +46,13 @@ config = Config()
 str_len = args.str_len
 reverse_len = args.reverse_len
 reverse_offset = 1
-num_obscured = 3
+num_obscured = 0
 path_len_mean = args.path_len
 path_len_std = 0
 
-#env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
+env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
 
-env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
+#env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
 #env = BinaryEnv(str_len, path_len_mean)
 #env = Bit_Flipping_Environment(environment_dimension=str_len)
 
@@ -102,14 +102,14 @@ config.file_to_load_model = model_dir + '/' + 'all_conv1' + '.pt'
 
 config.hyperparameters = {
     'DQN_Agents': {
-        'learning_rate': 0.0001,
-        'batch_size': 5,
+        'learning_rate': 10e-4,
+        'batch_size': 128,
         'buffer_size': 100000,
         'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
-        'discount_rate': 0.999,
+        'discount_rate': 0.99,
         'incremental_td_error': 1e-8,
-        'update_every_n_steps': 1,
+        'update_every_n_steps': 5,
         'gradient_clipping_norm': 5,
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,

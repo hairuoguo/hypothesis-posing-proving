@@ -23,9 +23,12 @@ class DQN_HER(HER_Base, DQN):
                 # default learning iters = 1 for Bit_Flipping
                 if self.hyperparameters["net_type"] == 'ABCNN-lstm':
                     curr_state = self.q_network_local.curr_state
-                    self.q_network_local.curr_state = (torch.randn([1, self.hyperparameters["batch_size"]*2, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, self.hyperparameters["batch_size"]*2, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
-                    for _ in range(self.hyperparameters["learning_iterations"]):
-                        self.learn(experiences=self.sample_from_HER_and_Ordinary_Buffer(sample_seq_steps=True))
+                    self.q_network_local.curr_state = (torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
+                    for i in range(self.hyperparameters["learning_iterations"]):
+                        self.learn(experiences=self.memory.sample(2, sample_seq_steps=True))
+                    self.q_network_local.curr_state = (torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
+                    for i in range(self.hyperparameters["learning_iterations"]):
+                        self.learn(experiences=self.HER_memory.sample(2, sample_seq_steps=True))
                     self.q_network_local.curr_state = curr_state
                 else:
                     for _ in range(self.hyperparameters["learning_iterations"]):
