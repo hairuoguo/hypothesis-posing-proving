@@ -22,7 +22,7 @@ class DQN(Base_Agent):
                 map_location=self.device))
             print('loaded model from: ' + config.file_to_load_model)
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(),
-                                              lr=self.hyperparameters["learning_rate"])
+                                              lr=self.hyperparameters["learning_rate"], weight_decay=0.1)
         self.exploration_strategy = Epsilon_Greedy_Exploration(config)
         self.file_to_save_model = config.file_to_save_model
 
@@ -67,7 +67,21 @@ class DQN(Base_Agent):
         """Runs a learning iteration for the Q network"""
         if experiences is None: states, actions, rewards, next_states, dones = self.sample_experiences() #Sample experiences
         else: states, actions, rewards, next_states, dones = experiences
-        loss = self.compute_loss(states, next_states, rewards, actions, dones)
+        ends = torch.nonzero(dones).tolist()
+        if self.hyperparameters["net_type"] == 'ABCNN-lstm' and len(ends) != 0:
+            loss = 0
+            for n in range(self.hyperparameters["batch_size"]): 
+                prev_end = 0
+                for end in ends:
+                    self.q_network_local.curr_state = (torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
+                    end = end[0] + 1
+                    loss += self.compute_loss(states[prev_end:end, :], next_states[prev_end:end, :], rewards[prev_end:end, :], actions[prev_end:end, :], dones[prev_end:end, :])
+                    prev_end = end
+                if prev_end < 2:
+                    self.q_network_local.curr_state = (torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']), torch.randn([1, 1, self.hyperparameters['ABCNN_hidden_units']], device=self.hyperparameters['device']))
+                    loss += self.compute_loss(states[prev_end:, :], next_states[prev_end:, :], rewards[prev_end:, :], actions[prev_end:, :], dones[prev_end:, :])
+        else:
+            loss = self.compute_loss(states, next_states, rewards, actions, dones)
 
         # .item() returns python number of a 0-dim tensor
         actions_list = [action_X.item() for action_X in actions ]

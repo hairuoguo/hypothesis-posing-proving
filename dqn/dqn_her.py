@@ -70,8 +70,9 @@ path_len_std = 0
 env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
 # env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
 
-# env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
-# env = Bit_Flipping_Environment(environment_dimension=str_len)
+#env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
+#env = BinaryEnv(str_len, path_len_mean)
+#env = Bit_Flipping_Environment(environment_dimension=str_len)
 
 config.save_every_n_episodes = args.save_every
 config.save_results = not args.no_save
@@ -124,7 +125,7 @@ config.hyperparameters = {
         'epsilon_decay_rate_denominator': 150,
         'discount_rate': 0, #0.999,
         'incremental_td_error': 1e-8,
-        'update_every_n_steps': 1,
+        'update_every_n_steps': 5,
         'gradient_clipping_norm': 5,
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,

@@ -5,7 +5,7 @@ import torch.nn.functional as F
 torch.manual_seed(1)
 
 class ABCNN(nn.Module):
-    def __init__(self, input_dim, output_dim, hidden_dim=2048, y_range=(), use_lstm=False, device=None):
+    def __init__(self, input_dim, output_dim, hidden_dim=512, y_range=(), use_lstm=False, device=None):
         super(ABCNN, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
@@ -27,6 +27,7 @@ class ABCNN(nn.Module):
             self.curr_state = (torch.randn((1, 1, self.hidden_dim), device=device), torch.randn((1, 1, self.hidden_dim), device=device))
 
     def forward(self, x):
+        #print(x.size())
         obs, target = torch.chunk(x, 2, dim=1)
         
         obs = obs.view(-1, 1, obs.size(1))
@@ -35,7 +36,7 @@ class ABCNN(nn.Module):
         x_target_1 = F.tanh(self.conv1(target))
         x_obs_1, x_target_1 = self.apply_attention(x_obs_1, x_target_1)
         x_obs_1 = self.weighted_avg_pool(x_obs_1)*self.w
-        x_target_1 = self.weighted_avg_pool(x_target_1)*self.w 
+        x_target_1 = self.weighted_avg_pool(x_target_1)*self.w
         
         x_obs_2 = F.tanh(self.conv2(x_obs_1))
         x_target_2 = F.tanh(self.conv2(x_target_1))
@@ -57,10 +58,11 @@ class ABCNN(nn.Module):
 
         out = torch.cat((x_obs_4.view(x_obs_4.size(0), -1), x_target_4.view(x_target_4.size(0), -1)), dim=1) 
 
-
+        seq_len = out.size()[0]
         if self.use_lstm:
-            out, hidden = self.lstm(out.unsqueeze(0), self.curr_state)
-            self.curr_state = hidden
+            out, hidden = self.lstm(out.unsqueeze(1), self.curr_state)
+            if seq_len == 1:
+                self.curr_state = hidden
             out = out.view(-1, self.hidden_dim)
         else: 
             out = F.relu(self.fc1(out))

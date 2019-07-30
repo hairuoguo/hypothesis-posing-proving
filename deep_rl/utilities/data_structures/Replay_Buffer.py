@@ -53,11 +53,9 @@ class Replay_Buffer(object):
         else: batch_size = self.batch_size
         return random.sample(self.memory, k=batch_size)
 
-    def pick_seq_experiences(self, num_experiences=None):
-        if num_experiences: batch_size = num_experiences
-        else: batch_size = self.batch_size
-        index = random.choice(range(0, len(self.memory)-batch_size))
-        return list(itertools.islice(self.memory, index, index+batch_size))
+    def pick_seq_experiences(self, seq_length):
+        index = random.choice(range(0, len(self.memory)-seq_length))
+        return list(itertools.islice(self.memory, index, index+seq_length))
 
     def __len__(self):
         return len(self.memory)
