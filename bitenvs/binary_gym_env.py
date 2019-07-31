@@ -21,11 +21,11 @@ class BinaryEnv(gym.Env):
         self.seed()
         self.reward_threshold = 0.0
         self.trials = 50
-        self.max_episode_steps = num_to_flip  # environment_dimension
-        self.id = "Bit Flipping"
+        self.max_episode_steps = num_to_flip  # = environment_dimension
+        self.id = "Bit Flipping length {} flip {}".format(environment_dimension, num_to_flip)
         self.environment_dimension = environment_dimension
         self.num_to_flip = num_to_flip
-        self.reward_for_achieving_goal = self.environment_dimension
+        self.reward_for_achieving_goal = 10
         self.step_reward_for_not_achieving_goal = -1
         self.deterministic = deterministic
 

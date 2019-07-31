@@ -73,10 +73,8 @@ env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
 
 if args.binary_env:
     env = BinaryEnv(str_len, path_len_mean) # path_len is num. bits flipped to 1
-# env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured, hypothesis_enabled=False, path_len_mean=path_len_mean, path_len_std=path_len_std, print_results=False)
 
 #env = UncoverGymEnv(str_len, reverse_len, reverse_offset, num_obscured)
-#env = BinaryEnv(str_len, path_len_mean)
 #env = Bit_Flipping_Environment(environment_dimension=str_len)
 
 config.save_every_n_episodes = args.save_every
@@ -128,7 +126,7 @@ config.hyperparameters = {
         'buffer_size': 100000,
         'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
-        'discount_rate': 0.999,
+        'discount_rate': 0,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
         'gradient_clipping_norm': 5,
@@ -141,7 +139,7 @@ config.hyperparameters = {
         'y_range': (-1, 10),
         'num_conv_layers': 3,
         # for FC
-        'linear_hidden_units': [128]*2,
+        'linear_hidden_units': [64]*2,
         'batch_norm': True,
         # for ResNet
         'num_blocks':args.num_blocks,
@@ -155,6 +153,7 @@ config.hyperparameters = {
 if __name__== '__main__':
     AGENTS = [DQN_HER]
     if args.DQN:
-        AGENTS = [DQN]
+        AGENTS = [DQN, DQN_HER]
+
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
