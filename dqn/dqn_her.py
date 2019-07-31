@@ -112,11 +112,11 @@ config.starting_episode_number = args.starting_ep # in case you want to resume t
 
 config.hyperparameters = {
     'DQN_Agents': {
-        'learning_rate': 0.00003,
-        'batch_size': 128,
+        'learning_rate': 0.001,
+        'batch_size': 5,
         'buffer_size': 100000,
         'epsilon_decay_rate_denominator': 150,
-        'discount_rate': 0.999,
+        'discount_rate': 0,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
         'gradient_clipping_norm': 5,
@@ -126,7 +126,7 @@ config.hyperparameters = {
         'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
         # assuming std is zero, this is good. if not may need three std higher
         # to cover almost all possible values.
-        'y_range': (-1, 2*args.path_len + 1), 
+        'y_range': (-1, 2*args.str_len + 1), 
         'num_conv_layers': 3,
         # for FC
         'linear_hidden_units': [64]*2,
@@ -140,6 +140,6 @@ config.hyperparameters = {
 # config.info_string_to_log = info_maker.make_info_string(config, env.env)
 
 if __name__== '__main__':
-    AGENTS = [DQN_HER]
+    AGENTS = [DQN, DQN_HER]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()
