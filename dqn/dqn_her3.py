@@ -122,7 +122,7 @@ config.runs_per_agent = 1
 config.hyperparameters = {
     'DQN_Agents': {
         'learning_rate': 0.001,
-        'batch_size': 128,
+        'batch_size': 5,
         'buffer_size': 100000,
         'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
@@ -133,10 +133,8 @@ config.hyperparameters = {
         'HER_sample_proportion': 0.8,
         'learning_iterations': 1,
         'clip_rewards': False,
-        'net_type': args.net_type, # see create_NN method of Base_Agent.py to see how used
-        # assuming std is zero, this is good. if not may need three std higher
-        # to cover almost all possible values.
-        'y_range': (-1, 10),
+        'net_type': args.net_type, # see create_NN method of Base_Agent.py
+        'y_range': (-1, 21),
         'num_conv_layers': 3,
         # for FC
         'linear_hidden_units': [64]*2,
