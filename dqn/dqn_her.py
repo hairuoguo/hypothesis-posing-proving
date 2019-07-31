@@ -155,6 +155,6 @@ config.hyperparameters = {
 if __name__== '__main__':
     AGENTS = [DQN_HER]
     if args.DQN:
-        AGENTS = [DQN]
+        AGENTS = [DQN_HER, DQN]
     trainer = Trainer(config, AGENTS)
     trainer.run_games_for_agents()

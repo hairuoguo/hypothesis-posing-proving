@@ -370,7 +370,8 @@ class Base_Agent(object):
                     y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'RNN':
-            return RNN(input_dim, output_dim).to(self.device)
+            return RNN(input_dim, output_dim,
+                    y_range=hyperparameters['y_range']).to(self.device)
         elif hyperparameters['net_type'] == 'AllConv':
             return AllConv(input_dim, self.config.reverse_len,
                     y_range=hyperparameters['y_range'],

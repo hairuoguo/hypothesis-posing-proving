@@ -22,7 +22,7 @@ class DQN(Base_Agent):
                 map_location=self.device))
             print('loaded model from: ' + config.file_to_load_model)
         self.q_network_optimizer = optim.Adam(self.q_network_local.parameters(),
-                                              lr=self.hyperparameters["learning_rate"], weight_decay=0.1)
+                                              lr=self.hyperparameters["learning_rate"])#, weight_decay=0.1)
         self.exploration_strategy = Epsilon_Greedy_Exploration(config)
         self.file_to_save_model = config.file_to_save_model
 
