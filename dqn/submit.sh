@@ -1,7 +1,8 @@
 #!usr/bin/env bash
 
-#nohup python -u dqn_her.py --num_filters 200 --num_blocks 3 -e 25000 --save_every 1000 -n 10 -r 4 -l 3 -t AllConv --cuda_index 0 > /om/user/salford/out/all_conv_baseline3.out &
-#python -u dqn_her3.py --no_save -e 5000 -se 1000 -n 10 -l 1 -t RNN --cuda_index 0 --binary_env --DQN
-python -u dqn_her3.py --no_save -e 5000 -se 500 -n 10 -l 1 -t RNN --cuda_index 0 --binary_env
-
-
+nohup python -u random_search.py --cuda_index 7 --id 1 --net_type RNN > /om/user/salford/out/rand_search_1.out &
+nohup python -u random_search.py --cuda_index 7 --id 2 --net_type RNN > /om/user/salford/out/rand_search_2.out &
+nohup python -u random_search.py --cuda_index 7 --id 3 --net_type RNN > /om/user/salford/out/rand_search_3.out &
+nohup python -u random_search.py --cuda_index 7 --id 4 --net_type CNN > /om/user/salford/out/rand_search_4.out &
+nohup python -u random_search.py --cuda_index 7 --id 5 --net_type CNN > /om/user/salford/out/rand_search_5.out &
+                                                                                                

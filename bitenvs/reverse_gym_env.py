@@ -16,6 +16,7 @@ class ReverseGymEnv(gym.Env):
     environment_name = "Reverse Bit Game"
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
+            max_episode_steps,
             hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
             print_results=True):
 
