@@ -8,8 +8,7 @@ from gym.utils import seeding
 class BinaryEnv(gym.Env):
     environment_name = "Binary Environment"
 
-    def __init__(self, environment_dimension=2, num_to_flip=1,
-            deterministic=False):
+    def __init__(self, environment_dimension, num_to_flip, max_episode_steps):
 
         self.action_space = spaces.Discrete(environment_dimension)
         self.observation_space = spaces.Dict(dict(
@@ -21,13 +20,12 @@ class BinaryEnv(gym.Env):
         self.seed()
         self.reward_threshold = 0.0
         self.trials = 50
-        self.max_episode_steps = environment_dimension
-        self.id = "Bit Flipping"
+        self.max_episode_steps = max_episode_steps
+        self.id = "Bit Flipping length {} flip {}".format(environment_dimension, num_to_flip)
         self.environment_dimension = environment_dimension
         self.num_to_flip = num_to_flip
-        self.reward_for_achieving_goal = self.environment_dimension
+        self.reward_for_achieving_goal = 10
         self.step_reward_for_not_achieving_goal = -1
-        self.deterministic = deterministic
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -36,12 +34,8 @@ class BinaryEnv(gym.Env):
     def reset(self):
         self.is_solved = False
 
-        if not self.deterministic:
-            self.desired_goal = self.make_desired_goal()
-            self.state = self.make_state()
-        else:
-            self.desired_goal = [0 for _ in range(self.environment_dimension)]
-            self.state = [1 for _ in range(self.environment_dimension)]
+        self.desired_goal = self.make_desired_goal()
+        self.state = self.make_state()
         self.state.extend(self.desired_goal)
         self.achieved_goal = self.state[:self.environment_dimension]
         self.step_count = 0
@@ -75,7 +69,7 @@ class BinaryEnv(gym.Env):
             self.is_solved = True
         else:
             self.reward = self.step_reward_for_not_achieving_goal
-            if self.step_count >= self.environment_dimension + 2:
+            if self.step_count >= self.max_episode_steps: 
                 self.done = True
             else:
                 self.done = False

@@ -16,8 +16,9 @@ class ReverseGymEnv(gym.Env):
     environment_name = "Reverse Bit Game"
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
+            max_episode_steps,
             hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
-            print_results=False):
+            print_results=True):
 
         self.env = ReverseEnv(str_len, reverse_len, reverse_offset,
                 num_obscured, hypothesis_enabled=hypothesis_enabled,
@@ -61,8 +62,8 @@ class ReverseGymEnv(gym.Env):
         # distance)
         obs1, l1 = self.ep.get_obs()
         self.state = obs1
-        print('start stat: {}'.format(obs1[:self.str_len]))
-        print('start goal: {}'.format(obs1[self.str_len:]))
+#        print('start stat: {}'.format(obs1[:self.str_len]))
+#        print('start goal: {}'.format(obs1[self.str_len:]))
         self.desired_goal = obs1[self.str_len:]
         self.achieved_goal = obs1[:self.str_len]
         self.is_solved = False
@@ -82,8 +83,8 @@ class ReverseGymEnv(gym.Env):
         self.state = self.next_state
         self.is_solved = isEnd
 
-        print('after move: {}'.format(obs1[:self.str_len]))
-        print('goal      : {}'.format(self.desired_goal))
+#        print('after move: {}'.format(obs1[:self.str_len]))
+#        print('goal      : {}'.format(self.desired_goal))
         return ({"observation": np.array(obs1[:self.str_len]),
                 "desired_goal": np.array(self.desired_goal),
                 "achieved_goal": np.array(self.achieved_goal)}, reward,

@@ -198,11 +198,12 @@ class Base_Agent(object):
             if save_and_print_results: self.save_and_print_result()
             if self.config.save_every_n_episodes and (self.episode_number %
                     self.config.save_every_n_episodes == 0):
-                print('\n') # so model parameters print statement shows up
-                self.locally_save_policy()
-                self.save_running_results(self.game_full_episode_scores,
-                        self.rolling_results, time.time() - start,
-                        results_to_save, agent_results)
+                print('\n')
+                if self.config.save_results:
+                    self.locally_save_policy()
+                    self.save_running_results(self.game_full_episode_scores,
+                            self.rolling_results, time.time() - start,
+                            results_to_save, agent_results)
 
         time_taken = time.time() - start
         if show_whether_achieved_goal: self.show_whether_achieved_goal()
