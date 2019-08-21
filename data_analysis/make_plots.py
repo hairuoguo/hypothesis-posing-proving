@@ -6,13 +6,18 @@ from matplotlib import pyplot as plt
 import pickle
 import numpy as np
 
-def save_plot(env_name, save_path):
+def save_plot(env_name, path):
+    data_path = path + 'data/' + env_name + '.pkl'
+    plot_path = path + 'plots/' + env_name + '.png'
     print('Plotting {}'.format(env_name))
-    with open('data/' + env_name + '.pkl','rb') as f:
+    with open(data_path, 'rb') as f:
         data = pickle.load(f)
         s = 'DQN_HER'
         if s not in data.keys():
             s = 'DQN-HER'
+        if s not in data.keys():
+            s = 'DQN'
+
         data = data[s] # only one agent 
         data = data[0] # only one run for this agent
         if len(data) == 5:
@@ -39,17 +44,18 @@ def save_plot(env_name, save_path):
         plt.grid(axis='y')
         fig = plt.gcf()
         fig.set_size_inches(10, 10)
-        plt.savefig(save_path, bbox_inches='tight', dpi=100)
+        plt.savefig(plot_path, bbox_inches='tight', dpi=100)
 
-path = 'data/'
-files = [f for f in listdir(path) if isfile(join(path, f))]
+path = '/Users/alfordsimon/Python/hypothesis-posing-proving-data/'
+data_path = path + 'data/'
+plot_path = path + 'plots/'
+files = [f for f in listdir(data_path) if isfile(join(data_path, f))]
 
 plots = []
 for file in files:
-    env_name = file[:-4]
-    plot_file = 'plots/' + env_name + '.png'
-    if not isfile(plot_file):
-        save_plot(env_name, plot_file)
+    env_name = file[:-4] # remove extension
+    if not isfile(plot_path + env_name + '.png'):
+        save_plot(env_name, path)
         plots.append(env_name)
 
 print('Made {} plots.'.format(len(plots)))
