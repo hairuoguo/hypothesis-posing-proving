@@ -19,7 +19,7 @@ from modules.cnn3 import CNN
 from modules.resnet import ResNet
 from modules.resnet import CNNRes
 from modules.all_conv import AllConv
-from modules.all_conv import FC2
+from modules.fc import FC
 from torch.optim import optimizer
 import pickle
 
@@ -365,13 +365,14 @@ class Base_Agent(object):
         if override_seed: seed = override_seed
         else: seed = self.config.seed
 
-        if hyperparameters['net_type'] == 'FC2':
-            return FC2(input_dim, output_dim, 
+        if hyperparameters['net_type'] == 'FC':
+            return FC(input_dim, output_dim, 
                     y_range=hyperparameters['y_range']).to(self.device)
 
         elif hyperparameters['net_type'] == 'RNN':
             return RNN(input_dim, output_dim,
                     y_range=hyperparameters['y_range']).to(self.device)
+
         elif hyperparameters['net_type'] == 'AllConv':
             return AllConv(input_dim, self.config.reverse_len,
                     y_range=hyperparameters['y_range'],
@@ -411,7 +412,7 @@ class Base_Agent(object):
                 model = ABCNN(input_dim, output_dim, hidden_dim=hyperparameters['ABCNN_hidden_units'], y_range=hyperparameters['y_range'], use_lstm=True, device=self.device).to(self.device)
                 return model
 
-        elif self.hyperparameters['net_type'] == 'FC':
+        elif self.hyperparameters['net_type'] == 'FC_old':
             default_hyperparameter_choices = {"final_layer_activation": None,
                     "hidden_activations": "relu",
                     "dropout": 0.0,

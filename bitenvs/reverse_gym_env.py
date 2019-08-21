@@ -16,7 +16,7 @@ class ReverseGymEnv(gym.Env):
     environment_name = "Reverse Bit Game"
 
     def __init__(self, str_len, reverse_len, reverse_offset, num_obscured,
-            max_episode_steps,
+            max_episode_steps=None,
             hypothesis_enabled=False, path_len_mean=5, path_len_std=0.5,
             print_results=True):
 
@@ -40,6 +40,7 @@ class ReverseGymEnv(gym.Env):
         self.trials = 50 # num of trials to avg over
         self.id = f'ReverseEnv: ({str_len}, {reverse_len}, {reverse_offset}, {num_obscured})'
         self.reward_for_achieving_goal = self.env.reward_for_achieving_goal
+        self.max_steps = max_episode_steps
         self.step_reward_for_not_achieving_goal = self.env.step_reward_for_not_achieving_goal
         self.is_solved = False
 
@@ -54,8 +55,11 @@ class ReverseGymEnv(gym.Env):
         and 'achieved_goal'
         """
         self.ep = self.env.start_ep()
-#        self.max_episode_steps = self.ep.path_len + 1
-        self.max_episode_steps = self.str_len
+        if self.max_steps == None:
+            self.max_episode_steps = self.ep.path_len + 2
+        else:
+            self.max_episode_steps = self.max_steps
+#        self.max_episode_steps = self.str_len
 #        self.max_episode_steps = self.ep.path_len*2 + 1
         self.step_count = 0
         # obs1 is concatenation of current and target state. obs2 is l1

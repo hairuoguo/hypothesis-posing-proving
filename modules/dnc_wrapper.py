@@ -13,7 +13,8 @@ class DNCWrapper(nn.Module):
         self.hidden_size = 128
         self.dnc = DNC(
                 input_size=10, # size of each token
-                hidden_size=self.hidden_size, # based on train.py from Hairuo
+                hidden_size=self.hidden_size,
+                output_size=output_dim,
                 rnn_type='lstm',
                 num_layers=1, # number of RNN layers
                 num_hidden_layers=2, # num hidden layers per RNN
@@ -24,7 +25,6 @@ class DNCWrapper(nn.Module):
                 debug=False,
                 batch_first=True, # shape of input tensor is (batch, seq_len, token_dim)
         )
-        self.fc1 = nn.Linear(self.hidden_size, self.output_dim)
 
         self.controller_hidden = None        
         self.memory = None
@@ -43,25 +43,25 @@ class DNCWrapper(nn.Module):
     def forward(self, x):
         # input should be shape (batch_size, sequence_len, input_size) for the
         # dnc. Sequence_len is RNNed upon.
+        x = x.view(-1, self.input_dim, 1)
+
         print('input {}'.format(x.shape))
-        x = x.unsqueeze(0) # (1, batch_size, seq_len)
-        print('input2: {}'.format(x.shape))
 
 
-        x, (self.controller_hidden, self.memory, self.read_vectors) = self.dnc(
+        output, (self.controller_hidden, self.memory, self.read_vectors) = self.dnc(
                 x, (self.controller_hidden, self.memory, self.read_vectors),
                 reset_experience=self.reset_experience)
+
         self.reset_experience = False
         
-        print('output: {}'.format(x.shape))
-        x = self.fc1(x)
-        print('last: {}'.format(x.shape))
+        print('output: {}'.format(output.shape))
+#        print('controller hidden: {}'.format(self.controller_hidden[0][0].shape))
+        output = output[:, -1, :]
 
         if self.y_range:
             x = self.y_range[0] + (self.y_range[1] -
                     self.y_range[0])*nn.Sigmoid()(x)
 
-        print('x {}'.format(x))
         return x
         
 

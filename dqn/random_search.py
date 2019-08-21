@@ -26,47 +26,52 @@ def loguniform(low=-4, high=-1, size=None):
         return math.pow(10, np.random.uniform(low, high, size))
 
 def make_and_run_random_instance(cuda_index, id, net_type):
-    str_len = choice([2, 3, 4, 5, 6, 7, 8, 9, 10])
-    path_len = choice(range(1, str_len+1))
+    str_len = choice([7, 10, 15, 30])
+    reverse_len = choice([3, 6], p=[0.75, 0.25])
+    path_len = choice([1, 3, 5, 10])
     max_episode_steps = choice(range(path_len, 2*path_len+2))
-    learning_rate = loguniform(low=-4, high=-1)
-    batch_size = choice([4, 16, 32, 64, 128, 128])
-    learning_iterations= choice([1, 1, 1, 2, 4, 8])
-    env = choice(['binary','reverse'], p=[0.5, 0.5])
-
-    if env == 'reverse':
-        str_len = choice([7, 8, 9, 10])
-        path_len = choice(range(1, str_len+1))
-        max_episode_steps = choice(range(path_len, 2*path_len+2))
-
-    run_random_instance(net_type, str_len, path_len, max_episode_steps,
-            learning_rate, batch_size, learning_iterations, env, cuda_index, id)
+    learning_rate = 0.01
+    batch_size = 128
+    learning_iterations = 1
+    env = 'reverse'
+    net_type = choice(['FC','CNN','AllConv'], p=[0.2, 0.4, 0.4])
+    num_filters = choice([10, 100])
+    num_blocks = choice([1, 2])
 
 
+    run_random_instance(net_type, str_len, reverse_len, path_len, max_episode_steps,
+            learning_rate, batch_size, learning_iterations, env, num_filters,
+            num_blocks, cuda_index, id)
 
-def run_random_instance(net_type, str_len, path_len, max_episode_steps,
-        learning_rate, batch_size, learning_iterations, env, cuda_index, id):
-    info = ('random rnn search: \nnet_type = ' + str(net_type) 
+
+
+def run_random_instance(net_type, str_len, reverse_len, path_len, max_episode_steps,
+        learning_rate, batch_size, learning_iterations, env, num_filters,
+        num_blocks, cuda_index, id):
+    info = ('random search: \nnet_type = ' + str(net_type) 
+            + ', reverse_len = ' + str(reverse_len)
             + ', str_len = ' + str(str_len)
             + ', path_len = ' + str(path_len)
             + ', max ep steps = ' + str(max_episode_steps)
-            + ', learning_rate = ' + str(learning_rate)
-            + ', batch_size = ' + str(batch_size)
-            + ', learning steps per iteration = ' + str(learning_iterations)
             + ', cuda_index = ' + str(cuda_index)
             + ', env = ' + str(env)
+            + ', num_blocks = ' + str(num_blocks)
+            + ', num_filters = ' + str(num_filters)
             + ', id = ' + str(id))
 
     print('running new search\ninfo=\n' + info)
     run_dqn_her(num_eps=50000, 
             str_len=str_len,
             path_len=path_len,
+            reverse_len=reverse_len,
             save_every=5000,
-            file_name= net_type + '_rand2_c'+ str(cuda_index) + '_i' + str(id),
+            file_name= 'RR_N{}_R{}_L{}_M{}'.format(str_len, reverse_len, path_len, max_episode_steps),
             info=info,
             cuda_index=cuda_index,
             net_type=net_type,
             env=env,
+            num_filters=num_filters,
+            num_blocks=num_blocks,
             max_episode_steps=max_episode_steps,
             learning_rate = learning_rate,
             batch_size = batch_size,
@@ -81,14 +86,14 @@ def run_dqn_her(num_eps=50000,
         file_name='',
         info='', 
         cuda_index=1,
-        num_blocks=1,
-        num_filters=10,
         net_type='RNN',
         load_model='',
         starting_ep=0,
         no_save=False,
         no_flush=False,
         load=False,
+        num_filters=10,
+        num_blocks=1,
         env='binary',
         max_episode_steps=1,
         learning_rate=0.01,
@@ -104,7 +109,7 @@ def run_dqn_her(num_eps=50000,
     num_obscured = 0
     path_len_mean = path_len
     path_len_std = 0
-    max_episode_steps= max_episode_steps
+    max_episode_steps = max_episode_steps
 
     if env == 'reverse':
         env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,

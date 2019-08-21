@@ -62,7 +62,7 @@ reverse_offset = 1
 num_obscured = 0
 path_len_mean = args.path_len
 path_len_std = 0
-max_episode_steps=args.path_len + 3
+max_episode_steps = args.path_len + 2
 
 if args.env == 'reverse':
     env = ReverseGymEnv(str_len, reverse_len, reverse_offset, num_obscured,
@@ -126,7 +126,7 @@ config.hyperparameters = {
         'buffer_size': 100000,
         'ABCNN_hidden_units': 2048,
         'epsilon_decay_rate_denominator': 150,
-        'discount_rate': 0.99,
+        'discount_rate': 1,
         'incremental_td_error': 1e-8,
         'update_every_n_steps': 1,
         'gradient_clipping_norm': 5,
@@ -136,12 +136,10 @@ config.hyperparameters = {
         'net_type': args.net_type, # see create_NN method of Base_Agent.py
         'y_range': (-1, 10),
         'num_conv_layers': 3,
-        # for FC
-        'linear_hidden_units': [64]*2,
         'batch_norm': True,
         # for ResNet
-        'num_blocks':args.num_blocks,
-        'num_filters':args.num_filters,
+        'num_blocks': args.num_blocks,
+        'num_filters': args.num_filters,
         'device': config.device
     }
 }
